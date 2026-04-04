@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Control - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-8">
+    <h1 class="text-yellow-500 text-3xl font-black mb-6">🚀 MASTER CONTROL</h1>
+    
+    <div class="bg-gray-900 p-6 rounded-3xl border border-gray-700 mb-6">
+        <p class="text-gray-400">Current Multiplier</p>
+        <h2 id="live-mult" class="text-6xl font-black">1.00x</h2>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4">
+        <button onclick="startGame()" class="bg-green-600 p-6 rounded-2xl font-bold text-2xl">LAUNCH ROCKET</button>
+        <button onclick="forceCrash()" class="bg-red-600 p-6 rounded-2xl font-bold text-2xl">FORCE CRASH NOW</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+        // YAHAN BHI APNA PURANA CONFIG DALEN
+        const firebaseConfig = {
+            apiKey: "AIzaSyCM_qmcvOXXjJrQHPiracy5SOpTjAJEnYU",
+            authDomain: "trade-for-profit-8b160.firebaseapp.com",
+            databaseURL: "https://trade-for-profit-8b160-default-rtdb.firebaseio.com",
+            projectId: "trade-for-profit-8b160",
+            storageBucket: "trade-for-profit-8b160.firebasestorage.app",
+            messagingSenderId: "1077014018991",
+            appId: "1:1077014018991:web:24f051595ac36857fd4d5a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        let gameInterval;
+        let m = 1.0;
+
+        window.startGame = () => {
+            m = 1.0;
+            update(ref(db, 'gameSystem'), { state: "START", multiplier: 1.0 });
+            gameInterval = setInterval(() => {
+                m += 0.02; // Multiplier speed
+                update(ref(db, 'gameSystem'), { multiplier: m });
+                document.getElementById('live-mult').innerText = m.toFixed(2) + "x";
+            }, 100);
+        };
+
+        window.forceCrash = () => {
+            clearInterval(gameInterval);
+            update(ref(db, 'gameSystem'), { state: "CRASHED", lastCrash: m });
+            alert("Crashed at " + m.toFixed(2));
+        };
+    </script>
+</body>
+ 
+</html>
