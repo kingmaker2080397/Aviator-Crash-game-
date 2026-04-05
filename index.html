@@ -6,98 +6,49 @@
     <title>Aviator Pro - Kingmaker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; user-select: none; }
+        body { background: #050505; color: #fff; font-family: sans-serif; overflow-x: hidden; }
+        #game-area { background: radial-gradient(circle at bottom, #1a1a2e 0%, #050505 100%); position: relative; overflow: hidden; height: 350px; border-radius: 2rem; border: 2px solid #1f2937; }
+        #rocket { font-size: 5rem; position: absolute; bottom: 20px; left: 20px; transition: all 0.1s linear; z-index: 10; }
+        .smoke { position: absolute; width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; animation: smokeOut 0.7s linear forwards; }
+        @keyframes smokeOut { to { transform: translate(-40px, 40px) scale(3); opacity: 0; } }
+        #multiplier { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; font-weight: 900; z-index: 5; }
         .hidden { display: none; }
-        .rocket-fly { animation: fly 0.6s infinite alternate; filter: drop-shadow(0 0 15px #ff4444); }
-        @keyframes fly { from { transform: translateY(0); } to { transform: translateY(-20px); } }
-        .modal-bg { background: rgba(0,0,0,0.95); position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .hist-dot { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; background: #111; border: 1px solid #333; }
     </style>
 </head>
 <body>
-
-    <div id="auth-box" class="p-8 max-w-sm mx-auto mt-20 bg-gray-900 rounded-[2.5rem] border border-gray-800 shadow-2xl">
-        <h2 class="text-3xl font-black text-red-600 mb-6 text-center italic tracking-tighter">AVIATOR PRO</h2>
-        <div class="space-y-3">
-            <input id="email" type="email" placeholder="Email Address" class="w-full bg-black p-4 rounded-xl border border-gray-800 outline-none focus:border-red-600">
-            <input id="pass" type="password" placeholder="Password" class="w-full bg-black p-4 rounded-xl border border-gray-800 outline-none focus:border-red-600">
-            <button onclick="handleAuth('login')" class="w-full bg-red-600 py-4 rounded-xl font-black text-xl shadow-lg active:scale-95 transition">LOGIN</button>
-            <button onclick="handleAuth('signup')" class="w-full bg-gray-800 py-3 rounded-xl font-bold text-xs text-gray-400">CREATE ACCOUNT (Get 30 PKR Bonus)</button>
-        </div>
+    <div class="p-4 flex justify-between items-center bg-gray-900 border-b border-gray-800">
+        <div><p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p><h2 class="text-xl font-black text-yellow-500">PKR <span id="bal">0</span></h2></div>
+        <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded-full text-[10px] font-bold">REFRESH</button>
     </div>
 
-    <div id="game-box" class="hidden">
-        <div class="p-4 bg-gray-900 flex justify-between items-center border-b border-gray-800 sticky top-0 z-50">
-            <div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Your Wallet</p>
-                <h2 class="text-2xl font-black text-yellow-500 italic text-shadow">PKR <span id="bal">0</span></h2>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="shareApp()" class="bg-blue-600 p-2 rounded-lg text-[10px] font-bold uppercase">Share Link</button>
-                <button onclick="openModal('deposit')" class="bg-green-600 px-4 py-2 rounded-lg text-[10px] font-bold uppercase">Deposit</button>
-            </div>
+    <div class="p-4 max-w-lg mx-auto">
+        <div id="game-area" class="mt-4">
+            <div id="multiplier" class="text-white">READY</div>
+            <div id="rocket">🚀</div>
         </div>
 
-        <div id="history-strip" class="p-2 bg-black flex gap-2 overflow-x-auto border-b border-gray-900"></div>
-
-        <div class="p-4 max-w-lg mx-auto">
-            <div class="bg-gray-900 h-72 rounded-[2.5rem] mt-4 flex flex-col items-center justify-center border border-gray-800 relative overflow-hidden">
-                <div id="rocket" class="text-8xl mb-4 transition-all duration-300">🚀</div>
-                <h1 id="multiplier" class="text-7xl font-black text-red-600 font-mono tracking-tighter">1.00x</h1>
-                <div id="status-tag" class="absolute top-4 right-6 text-[10px] font-bold text-blue-500 italic uppercase">Waiting...</div>
-            </div>
-
-            <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800 shadow-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <button onclick="adjBet(-50)" class="bg-black px-4 py-2 rounded-lg border border-gray-700">-</button>
-                    <input id="bet-amt" type="number" value="100" class="bg-black text-yellow-500 font-black text-center w-28 p-2 rounded-xl border border-gray-700 outline-none">
-                    <button onclick="adjBet(50)" class="bg-black px-4 py-2 rounded-lg border border-gray-700">+</button>
-                </div>
-                <button id="bet-btn" onclick="placeBet()" class="w-full bg-green-600 py-5 rounded-2xl font-black text-2xl uppercase shadow-lg active:scale-95 transition">Place Bet</button>
-                <button id="cash-btn" onclick="cashOut()" class="hidden w-full bg-yellow-500 py-5 rounded-2xl font-black text-2xl uppercase text-black shadow-lg animate-pulse">Cash Out</button>
-            </div>
-
-            <button onclick="openModal('withdraw')" class="w-full mt-6 text-gray-500 text-xs font-bold uppercase tracking-widest border border-gray-900 py-3 rounded-xl">Withdraw Funds</button>
+        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800">
+            <input id="bet-amt" type="number" value="100" class="bg-black text-yellow-500 font-black text-center w-full p-4 rounded-xl border border-gray-700 outline-none text-2xl mb-4">
+            <button id="bet-btn" onclick="placeBet()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-2xl uppercase active:scale-95 transition">Bet</button>
+            <button id="cash-btn" onclick="cashOut()" class="hidden w-full bg-yellow-500 py-5 rounded-2xl font-black text-2xl uppercase text-black shadow-lg animate-pulse">Cash Out</button>
         </div>
-    </div>
 
-    <div id="modal-deposit" class="modal-bg hidden">
-        <div class="bg-gray-900 w-full max-w-sm rounded-3xl p-6 border border-gray-800">
-            <h2 class="text-xl font-bold mb-4 text-green-500 uppercase">Add Cash</h2>
-            <div class="bg-black p-4 rounded-xl mb-4 border border-dashed border-gray-700">
-                <p id="dep-method" class="text-[10px] text-gray-500 uppercase">EasyPaisa</p>
-                <div class="flex justify-between items-center mt-1">
-                    <p id="dep-number" class="text-2xl font-black tracking-widest">0300XXXXXXX</p>
-                    <button onclick="copyText('dep-number')" class="bg-gray-800 text-[9px] px-3 py-1 rounded-lg border border-gray-600 font-bold active:bg-green-600">COPY</button>
-                </div>
-            </div>
-            <input id="d-amt" type="number" placeholder="Amount Sent" class="w-full bg-black p-4 rounded-xl mb-3 border border-gray-700 outline-none">
-            <input id="d-tid" type="text" placeholder="Transaction ID (TID)" class="w-full bg-black p-4 rounded-xl mb-4 border border-gray-700 outline-none">
-            <button onclick="submitDeposit()" class="w-full bg-green-600 py-4 rounded-xl font-bold uppercase shadow-lg">Confirm Payment</button>
-            <button onclick="closeModals()" class="w-full mt-2 py-2 text-gray-500 text-xs">CLOSE</button>
-        </div>
-    </div>
-
-    <div id="modal-withdraw" class="modal-bg hidden">
-        <div class="bg-gray-900 w-full max-w-sm rounded-3xl p-6 border border-gray-800">
-            <h2 class="text-xl font-bold mb-4 text-red-500 uppercase">Withdraw</h2>
-            <select id="w-method" class="w-full bg-black p-4 rounded-xl mb-3 border border-gray-700 outline-none text-yellow-500 font-bold">
-                <option value="EasyPaisa">EasyPaisa</option>
-                <option value="JazzCash">JazzCash</option>
-            </select>
-            <input id="w-number" type="number" placeholder="Account Number" class="w-full bg-black p-4 rounded-xl mb-3 border border-gray-700 outline-none">
-            <input id="w-amt" type="number" placeholder="Amount (Min 500)" class="w-full bg-black p-4 rounded-xl mb-4 border border-gray-700 outline-none">
-            <button onclick="submitWithdraw()" class="w-full bg-red-600 py-4 rounded-xl font-bold uppercase shadow-lg">Send Request</button>
-            <button onclick="closeModals()" class="w-full mt-2 py-2 text-gray-500 text-xs text-center">CANCEL</button>
+        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800">
+            <h3 class="text-red-500 font-black mb-4 uppercase">Withdrawal (Min: 300)</h3>
+            <input id="w-name" type="text" placeholder="Full Name (As per CNIC)" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
+            <input id="w-cnic" type="number" placeholder="CNIC Number (13 Digits)" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
+            <input id="w-num" type="text" placeholder="EasyPaisa/JazzCash Number" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
+            <input id="w-amt" type="number" placeholder="Amount" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
+            <input id="w-pin" type="password" maxlength="4" placeholder="4-Digit Secret PIN" class="w-full bg-black p-3 rounded-xl border border-gray-700 text-center font-bold text-red-500 mb-4 outline-none">
+            <button onclick="submitWithdraw()" class="w-full bg-green-700 py-4 rounded-xl font-black uppercase">Request Withdraw</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, get, set, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
-        // --- APNI CONFIG FIT KAR DI HAI ---
         const firebaseConfig = {
             apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
             authDomain: "kingmaker-crash.firebaseapp.com",
@@ -109,70 +60,48 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getDatabase(app);
-        let uID, uBal, myBet = 0, isBetting = false;
+        const auth = getAuth(app);
+        let uID, uBal, isBetting = false, myBet = 0;
 
-        // Auth Functions
-        window.handleAuth = (type) => {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('pass').value;
-            if(!e || !p) return alert("Email & Password likhen!");
-            
-            if(type === 'signup') {
-                createUserWithEmailAndPassword(auth, e, p).then(res => {
-                    set(ref(db, `users/${res.user.uid}`), { balance: 30, email: e });
-                    alert("Welcome! 30 PKR Bonus added.");
-                }).catch(err => alert(err.message));
-            } else {
-                signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-            }
-        };
+        onAuthStateChanged(auth, (user) => { if(user) { uID = user.uid; onValue(ref(db, `users/${uID}/balance`), s => { uBal = s.val() || 0; document.getElementById('bal').innerText = uBal; }); } });
 
-        onAuthStateChanged(auth, (user) => {
-            if(user) {
-                uID = user.uid;
-                document.getElementById('auth-box').classList.add('hidden');
-                document.getElementById('game-box').classList.remove('hidden');
-                onValue(ref(db, `users/${uID}/balance`), s => { uBal = s.val() || 0; document.getElementById('bal').innerText = uBal.toLocaleString(); });
-            }
-        });
-
-        // Game Loop
+        // Game Logic
         onValue(ref(db, 'gameSystem'), (s) => {
-            const d = s.val(); if(!d) return;
-            const multEl = document.getElementById('multiplier');
-            const rockEl = document.getElementById('rocket');
-            
-            if(d.state === "START") {
-                multEl.innerText = d.multiplier.toFixed(2) + "x";
-                multEl.style.color = "#22c55e";
-                rockEl.classList.add('rocket-fly');
-                rockEl.innerText = "🚀";
-                document.getElementById('status-tag').innerText = "Flying...";
-            } else {
-                multEl.innerText = "CRASHED " + (d.lastCrash || 1.0).toFixed(2) + "x";
-                multEl.style.color = "#ef4444";
-                rockEl.classList.remove('rocket-fly');
-                rockEl.innerText = "💥";
-                document.getElementById('status-tag').innerText = "Crashed!";
-                addHistory(d.lastCrash || 1.0);
-                resetUI();
+            const data = s.val(); if(!data) return;
+            const rocket = document.getElementById('rocket');
+            const multText = document.getElementById('multiplier');
+
+            if(data.state === "START") {
+                multText.innerText = data.multiplier.toFixed(2) + "x";
+                multText.style.color = "#22c55e";
+                let pos = Math.min(data.multiplier * 25, 230);
+                rocket.style.bottom = (20 + pos) + "px"; rocket.style.left = (20 + pos) + "px";
+                createSmoke(20 + pos, 20 + pos);
+            } else if(data.state === "CRASHED") {
+                rocket.innerHTML = "💥";
+                multText.innerText = "CRASHED " + (data.lastCrash || 1.0).toFixed(2) + "x";
+                multText.style.color = "#ef4444";
+                setTimeout(() => { rocket.innerHTML = "🚀"; rocket.style.bottom = "20px"; rocket.style.left = "20px"; multText.innerText = "READY"; resetUI(); }, 3000);
             }
         });
-
-        function addHistory(val) {
-            const strip = document.getElementById('history-strip');
-            const dot = `<span class="hist-dot ${val > 2 ? 'text-blue-400' : 'text-red-400'}">${val.toFixed(2)}x</span>`;
-            strip.innerHTML = dot + strip.innerHTML;
-        }
 
         window.placeBet = () => {
             const amt = parseInt(document.getElementById('bet-amt').value);
-            if(amt > uBal || amt < 10) return alert("Check Balance!");
+            if (amt < 10 || amt > 500) return alert("Bet limit: 10 to 500 PKR");
+            if (amt > uBal) return alert("In-sufficient balance!");
+
             myBet = amt; isBetting = true;
             update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            set(ref(db, `bets/${uID}`), { amount: amt, email: auth.currentUser.email });
+            update(ref(db, 'gameSystem'), { state: "START", multiplier: 1.0 });
+
+            let m = 1.0;
+            const loop = setInterval(async () => {
+                const st = await get(ref(db, 'gameSystem/state'));
+                if(st.val() === "CRASHED") { clearInterval(loop); return; }
+                m += 0.04; update(ref(db, 'gameSystem/multiplier'), m);
+            }, 100);
+
             document.getElementById('bet-btn').classList.add('hidden');
             document.getElementById('cash-btn').classList.remove('hidden');
         };
@@ -182,47 +111,42 @@
             const snap = await get(ref(db, 'gameSystem/multiplier'));
             const win = Math.floor(myBet * snap.val());
             update(ref(db, `users/${uID}`), { balance: uBal + win });
-            remove(ref(db, `bets/${uID}`));
-            alert("Success! WIN: PKR " + win);
+            alert("WIN! PKR " + win);
             resetUI();
         };
 
-        window.adjBet = (v) => { let i = document.getElementById('bet-amt'); i.value = Math.max(10, parseInt(i.value) + v); };
-        window.openModal = (type) => document.getElementById('modal-' + type).classList.remove('hidden');
-        window.closeModals = () => document.querySelectorAll('.modal-bg').forEach(m => m.classList.add('hidden'));
-        window.copyText = (id) => { navigator.clipboard.writeText(document.getElementById(id).innerText); alert("Copied!"); };
-        
-        window.shareApp = () => {
-            const text = `🚀 Aviator Pro! Join & Get 30 PKR Bonus. \nLink: ${window.location.href}`;
-            navigator.clipboard.writeText(text); alert("Share link copied!");
-        };
-
-        onValue(ref(db, 'adminSettings/paymentInfo'), (s) => {
-            const info = s.val(); if(info) {
-                document.getElementById('dep-method').innerText = info.method;
-                document.getElementById('dep-number').innerText = info.number;
-            }
-        });
-
-        window.submitDeposit = () => {
-            const amt = document.getElementById('d-amt').value;
-            const tid = document.getElementById('d-tid').value;
-            if(!amt || !tid) return alert("Fill all details!");
-            push(ref(db, 'depositRequests'), { uid: uID, email: auth.currentUser.email, amount: parseInt(amt), tid: tid });
-            alert("Request sent! Admin will verify."); closeModals();
-        };
-
-        window.submitWithdraw = () => {
-            const num = document.getElementById('w-number').value;
+        window.submitWithdraw = async () => {
+            const name = document.getElementById('w-name').value;
+            const cnic = document.getElementById('w-cnic').value;
+            const num = document.getElementById('w-num').value;
             const amt = parseInt(document.getElementById('w-amt').value);
-            if(amt < 500 || amt > uBal) return alert("Min 500 & Check Balance!");
+            const pin = document.getElementById('w-pin').value;
+
+            if (cnic.length !== 13) return alert("CNIC must be 13 digits!");
+            if (amt < 300) return alert("Min Withdraw 300!");
+            if (amt > uBal) return alert("In-sufficient balance!");
+
+            const pinSnap = await get(ref(db, `users/${uID}/withdrawPin`));
+            if (!pinSnap.val()) {
+                if (pin.length !== 4) return alert("Set a 4-digit PIN first!");
+                update(ref(db, `users/${uID}`), { withdrawPin: pin });
+            } else if (pin !== pinSnap.val()) {
+                return alert("Incorrect PIN!");
+            }
+
             update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            push(ref(db, 'withdrawRequests'), { uid: uID, email: auth.currentUser.email, amount: amt, number: num, method: document.getElementById('w-method').value });
-            alert("Withdraw request sent!"); closeModals();
+            push(ref(db, 'withdrawRequests'), { uid: uID, name, cnic, num, amount: amt, time: Date.now() });
+            alert("Withdrawal request sent!");
         };
 
+        function createSmoke(b, l) {
+            const smoke = document.createElement('div');
+            smoke.className = 'smoke'; smoke.style.bottom = b + "px"; smoke.style.left = l + "px";
+            document.getElementById('game-area').appendChild(smoke);
+            setTimeout(() => smoke.remove(), 700);
+        }
         function resetUI() { document.getElementById('bet-btn').classList.remove('hidden'); document.getElementById('cash-btn').classList.add('hidden'); isBetting = false; }
     </script>
 </body>
-                                                                                                                    </html>
-                    
+    </html>
+                
