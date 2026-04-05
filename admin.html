@@ -2,58 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Master Control - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingmaker Crash - Player</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; }
+        .rocket-animate { animation: fly 1s infinite ease-in-out; }
+        @keyframes fly { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .crashed { color: #ef4444; }
+    </style>
 </head>
-<body class="bg-black text-white p-8">
-    <h1 class="text-yellow-500 text-3xl font-black mb-6">🚀 MASTER CONTROL</h1>
-    
-    <div class="bg-gray-900 p-6 rounded-3xl border border-gray-700 mb-6">
-        <p class="text-gray-400">Current Multiplier</p>
-        <h2 id="live-mult" class="text-6xl font-black">1.00x</h2>
+<body>
+    <div class="p-6 bg-gray-900 flex justify-between items-center border-b border-gray-800">
+        <div>
+            <p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p>
+            <h1 class="text-3xl font-black text-yellow-500 text-yellow-500">RS <span id="user-balance">5000</span></h1>
+        </div>
+        <div id="status-tag" class="text-[10px] px-3 py-1 rounded-full border border-blue-500 text-blue-400 font-bold">WAITING...</div>
     </div>
 
-    <div class="grid grid-cols-1 gap-4">
-        <button onclick="startGame()" class="bg-green-600 p-6 rounded-2xl font-bold text-2xl">LAUNCH ROCKET</button>
-        <button onclick="forceCrash()" class="bg-red-600 p-6 rounded-2xl font-bold text-2xl">FORCE CRASH NOW</button>
+    <div class="p-4 max-w-lg mx-auto mt-10">
+        <div class="bg-gray-800 rounded-[2rem] p-10 mb-6 border border-gray-700 h-64 flex flex-col items-center justify-center">
+            <div id="rocket-icon" class="text-7xl mb-2">🚀</div>
+            <h1 id="multiplier" class="text-6xl font-black text-green-500 font-mono">1.00x</h1>
+        </div>
+        <button onclick="placeBet()" id="btn-bet" class="w-full bg-green-600 h-16 rounded-xl font-black text-xl uppercase shadow-lg">Place Bet</button>
+        <button onclick="cashOut()" id="btn-cashout" class="hidden w-full bg-yellow-500 h-16 rounded-xl font-black text-xl uppercase text-black shadow-lg">Cash Out</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, set, update, onValue } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-        // YAHAN BHI APNA PURANA CONFIG DALEN
+        // Yahan apni Firebase Detail dalen
         const firebaseConfig = {
-            apiKey: "AIzaSyCM_qmcvOXXjJrQHPiracy5SOpTjAJEnYU",
-            authDomain: "trade-for-profit-8b160.firebaseapp.com",
-            databaseURL: "https://trade-for-profit-8b160-default-rtdb.firebaseio.com",
-            projectId: "trade-for-profit-8b160",
-            storageBucket: "trade-for-profit-8b160.firebasestorage.app",
-            messagingSenderId: "1077014018991",
-            appId: "1:1077014018991:web:24f051595ac36857fd4d5a"
+            apiKey: "APNI_API_KEY_YAHAN_DALEN",
+            authDomain: "kingmaker-crash.firebaseapp.com",
+            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+            projectId: "kingmaker-crash",
+            appId: "APNI_APP_ID_YAHAN_DALEN"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let gameInterval;
-        let m = 1.0;
+        let isPlaying = false;
 
-        window.startGame = () => {
-            m = 1.0;
-            update(ref(db, 'gameSystem'), { state: "START", multiplier: 1.0 });
-            gameInterval = setInterval(() => {
-                m += 0.02; // Multiplier speed
-                update(ref(db, 'gameSystem'), { multiplier: m });
-                document.getElementById('live-mult').innerText = m.toFixed(2) + "x";
-            }, 100);
+        onValue(ref(db, 'gameSystem'), (snapshot) => {
+            const data = snapshot.val();
+            if(!data) return;
+            if(data.state === "START") {
+                document.getElementById('multiplier').innerText = data.multiplier.toFixed(2) + "x";
+                document.getElementById('multiplier').classList.remove('crashed');
+                document.getElementById('rocket-icon').classList.add('rocket-animate');
+                document.getElementById('status-tag').innerText = "LIVE";
+            } else if(data.state === "CRASHED") {
+                document.getElementById('multiplier').innerText = data.lastCrash.toFixed(2) + "x";
+                document.getElementById('multiplier').classList.add('crashed');
+                document.getElementById('rocket-icon').classList.remove('rocket-animate');
+                document.getElementById('rocket-icon').innerText = "💥";
+                document.getElementById('status-tag').innerText = "CRASHED";
+                resetPlayerState();
+            }
+        });
+
+        window.placeBet = () => {
+            document.getElementById('btn-bet').classList.add('hidden');
+            document.getElementById('btn-cashout').classList.remove('hidden');
         };
 
-        window.forceCrash = () => {
-            clearInterval(gameInterval);
-            update(ref(db, 'gameSystem'), { state: "CRASHED", lastCrash: m });
-            alert("Crashed at " + m.toFixed(2));
-        };
+        window.cashOut = () => { resetPlayerState(); alert("Cashout Success!"); };
+
+        function resetPlayerState() {
+            document.getElementById('btn-bet').classList.remove('hidden');
+            document.getElementById('btn-cashout').classList.add('hidden');
+            setTimeout(() => { document.getElementById('rocket-icon').innerText = "🚀"; }, 2000);
+        }
     </script>
 </body>
- 
 </html>
