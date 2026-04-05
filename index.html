@@ -3,64 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Pro - Kingmaker</title>
+    <title>Aviator Pro - Multiplayer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #050505; color: #fff; font-family: sans-serif; overflow-x: hidden; }
-        #game-area { background: radial-gradient(circle at bottom, #1a1a2e 0%, #050505 100%); position: relative; overflow: hidden; height: 350px; border-radius: 2rem; border: 2px solid #1f2937; }
-        #rocket { font-size: 5rem; position: absolute; bottom: 20px; left: 20px; transition: all 0.1s linear; z-index: 10; transform: rotate(45deg); display: block; }
-        .smoke { position: absolute; width: 10px; height: 10px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: smokeOut 0.8s linear forwards; z-index: 5; }
-        @keyframes smokeOut { to { transform: translate(-50px, 50px) scale(4); opacity: 0; } }
-        #multiplier { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; font-weight: 900; z-index: 1; color: white; }
+        body { background: #000; color: #fff; font-family: sans-serif; overflow-x: hidden; }
+        #game-canvas { background: #050505; position: relative; height: 320px; border-radius: 20px; border: 2px solid #1f2937; overflow: hidden; }
+        
+        /* Rocket & Red Line Animation */
+        #rocket { position: absolute; bottom: 20px; left: 20px; font-size: 3.5rem; transition: all 0.15s linear; z-index: 10; filter: drop-shadow(0 0 10px red); }
+        #path-line { position: absolute; bottom: 35px; left: 35px; background: linear-gradient(to right, transparent, #ff0000); height: 4px; transform-origin: left center; z-index: 5; border-radius: 10px; box-shadow: 0 0 15px red; }
+        
+        .multiplier-text { font-size: 4.5rem; font-weight: 900; position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 1; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
         .hidden { display: none; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Smoke Particles */
+        .smoke { position: absolute; width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; animation: smokeAnim 0.7s linear forwards; z-index: 4; }
+        @keyframes smokeAnim { to { transform: translate(-40px, 40px) scale(3); opacity: 0; } }
     </style>
 </head>
 <body>
-    <div class="p-4 flex justify-between items-center bg-gray-900 border-b border-gray-800">
-        <div><p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p><h2 class="text-xl font-black text-yellow-500">PKR <span id="bal">0</span></h2></div>
-        <button onclick="location.reload()" class="bg-red-600 px-4 py-1 rounded-full text-[10px] font-bold">REFRESH</button>
+    <div class="p-4 flex justify-between items-center bg-gray-900 shadow-xl border-b border-gray-800">
+        <div>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Account Balance</p>
+            <h2 class="text-xl font-black text-yellow-500">PKR <span id="bal">0</span></h2>
+        </div>
+        <div class="flex gap-2">
+            <a id="support-link" href="#" target="_blank" class="bg-blue-600 px-3 py-2 rounded-lg text-[10px] font-bold shadow-lg shadow-blue-900/50">SUPPORT</a>
+            <button onclick="shareApp()" class="bg-green-600 px-3 py-2 rounded-lg text-[10px] font-bold shadow-lg shadow-green-900/50">SHARE</button>
+        </div>
     </div>
 
     <div class="p-4 max-w-lg mx-auto">
-        <div id="game-area" class="mt-4">
-            <div id="multiplier">READY</div>
+        <div id="game-canvas" class="mt-2">
+            <div id="multiplier" class="multiplier-text text-white">READY</div>
+            <div id="status-label" class="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Waiting for round...</div>
             <div id="rocket">🚀</div>
+            <div id="path-line"></div>
         </div>
 
-        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800 shadow-2xl">
-            <p class="text-[10px] text-gray-500 mb-2 font-bold uppercase text-center">Enter Bet Amount (10-500)</p>
-            <input id="bet-amt" type="number" value="100" class="bg-black text-yellow-500 font-black text-center w-full p-4 rounded-xl border border-gray-700 outline-none text-2xl mb-4">
-            <button id="bet-btn" onclick="placeBet()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-2xl uppercase shadow-lg active:scale-95 transition">Place Bet</button>
-            <button id="cash-btn" onclick="cashOut()" class="hidden w-full bg-yellow-500 py-5 rounded-2xl font-black text-2xl uppercase text-black shadow-lg animate-pulse">Cash Out</button>
-        </div>
-
-        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800">
-            <h3 class="text-green-500 font-black mb-4 uppercase">Deposit Funds (Min: 100)</h3>
-            <div class="grid grid-cols-3 gap-2 mb-4">
-                <button onclick="document.getElementById('dep-amt').value=100" class="bg-gray-800 py-2 rounded-lg text-xs font-bold border border-gray-700">100</button>
-                <button onclick="document.getElementById('dep-amt').value=500" class="bg-gray-800 py-2 rounded-lg text-xs font-bold border border-gray-700">500</button>
-                <button onclick="document.getElementById('dep-amt').value=1000" class="bg-gray-800 py-2 rounded-lg text-xs font-bold border border-gray-700">1000</button>
+        <div class="mt-4 bg-gray-900 p-6 rounded-[2.5rem] border border-gray-800 shadow-2xl">
+            <div class="flex items-center justify-between mb-2 px-2">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Bet Amount (10-500)</span>
             </div>
-            <input id="dep-amt" type="number" placeholder="Amount" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none text-yellow-500 font-bold">
-            <input id="dep-tid" type="text" placeholder="Transaction ID (TID)" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-4 outline-none">
-            <button onclick="submitDeposit()" class="w-full bg-green-600 py-4 rounded-xl font-black uppercase">Submit Deposit</button>
+            <input id="bet-amt" type="number" value="100" class="bg-black text-yellow-500 font-black text-center w-full p-4 rounded-2xl border border-gray-700 outline-none text-3xl mb-4 focus:border-red-600 transition-all">
+            
+            <button id="bet-btn" onclick="placeBet()" class="w-full bg-red-600 hover:bg-red-700 py-5 rounded-2xl font-black text-2xl uppercase shadow-lg active:scale-95">Place Bet</button>
+            <button id="cash-btn" onclick="cashOut()" class="hidden w-full bg-yellow-500 hover:bg-yellow-400 py-5 rounded-2xl font-black text-2xl uppercase text-black animate-pulse shadow-lg">Cash Out</button>
+            <div id="waiting-msg" class="hidden text-center text-gray-500 font-bold mt-2 italic text-sm">Bet Placed! Takeoff soon...</div>
         </div>
 
-        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800 mb-10">
-            <h3 class="text-red-500 font-black mb-4 uppercase text-sm">Withdrawal (Min: 300)</h3>
-            <input id="w-name" type="text" placeholder="Full Name (CNIC)" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none text-sm">
-            <input id="w-cnic" type="number" placeholder="CNIC Number (13 Digits)" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none text-sm">
-            <input id="w-num" type="text" placeholder="EasyPaisa/JazzCash Number" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none text-sm">
-            <input id="w-amt" type="number" placeholder="Withdraw Amount" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none text-sm text-red-500 font-bold">
-            <input id="w-pin" type="password" maxlength="4" placeholder="4-Digit PIN" class="w-full bg-black p-3 rounded-xl border border-gray-700 text-center font-bold text-red-500 mb-4 outline-none">
-            <button onclick="submitWithdraw()" class="w-full bg-gray-700 py-4 rounded-xl font-black uppercase text-xs">Request Withdraw</button>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+            <div class="bg-gray-900 p-3 rounded-2xl border border-gray-800">
+                <p class="text-[9px] text-gray-500 font-bold uppercase mb-1">Referral Code</p>
+                <p id="ref-code" class="text-yellow-500 font-black text-sm tracking-widest">LOADING</p>
+            </div>
+            <div class="bg-gray-900 p-3 rounded-2xl border border-gray-800">
+                <p class="text-[9px] text-red-500 font-bold uppercase mb-1">Deposit Info</p>
+                <p id="admin-num" class="text-white font-bold text-xs">03XX-XXXXXXX</p>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, get, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -76,90 +82,123 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
-        let uID, uBal, isBetting = false, myBet = 0, multInterval;
-
+        
+        let uID, uBal = 0, isBetting = false, hasCashedOut = false, myBet = 0;
         const flySound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-jet-plane-flyby-1613.mp3');
-        const crashSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cinematic-explosion-impact-1701.mp3');
 
-        onAuthStateChanged(auth, (user) => { 
-            if(user) { uID = user.uid; onValue(ref(db, `users/${uID}/balance`), s => { uBal = s.val() || 0; document.getElementById('bal').innerText = uBal; }); } 
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                uID = user.uid;
+                document.getElementById('ref-code').innerText = uID.substring(0,6).toUpperCase();
+                onValue(ref(db, `users/${uID}/balance`), s => { uBal = s.val() || 0; document.getElementById('bal').innerText = uBal; });
+                
+                // Admin Settings Sync
+                onValue(ref(db, 'adminSettings'), (s) => {
+                    const data = s.val();
+                    if(data) {
+                        document.getElementById('admin-num').innerText = data.paymentInfo.number;
+                        document.getElementById('support-link').href = data.supportLink || "#";
+                    }
+                });
+            }
         });
 
+        // Live Game Sync
         onValue(ref(db, 'gameSystem'), (s) => {
             const data = s.val(); if(!data) return;
             const rocket = document.getElementById('rocket');
+            const line = document.getElementById('path-line');
             const multText = document.getElementById('multiplier');
+            const statusLabel = document.getElementById('status-label');
 
             if(data.state === "START") {
+                statusLabel.innerText = "Rocket is flying!";
                 multText.innerText = data.multiplier.toFixed(2) + "x";
                 multText.style.color = "#22c55e";
-                let move = Math.min(data.multiplier * 30, 250);
-                rocket.style.bottom = (20 + move) + "px";
-                rocket.style.left = (20 + move) + "px";
-                createSmoke(20 + move, 20 + move);
+                
+                // Animation Logic (Diagonal Movement)
+                let x = Math.min(data.multiplier * 22, 260); 
+                let y = Math.min(data.multiplier * 18, 220);
+                rocket.style.transform = `translate(${x}px, -${y}px) rotate(45deg)`;
+                line.style.width = Math.sqrt(x*x + y*y) + "px";
+                line.style.transform = `rotate(-${Math.atan2(y, x) * (180/Math.PI)}deg)`;
+                
+                createSmoke(x + 20, y + 20); // Particle effect
                 if(flySound.paused) flySound.play();
-            } else if(data.state === "CRASHED") {
-                clearInterval(multInterval);
+
+                if(isBetting && !hasCashedOut) {
+                    document.getElementById('cash-btn').classList.remove('hidden');
+                    document.getElementById('bet-btn').classList.add('hidden');
+                    document.getElementById('waiting-msg').classList.add('hidden');
+                }
+            } 
+            else if(data.state === "CRASHED") {
+                statusLabel.innerText = "Crashed!";
                 rocket.innerHTML = "💥";
-                flySound.pause(); crashSound.play();
-                multText.innerText = "CRASHED " + (data.lastCrash || 1.0).toFixed(2) + "x";
+                multText.innerText = data.multiplier.toFixed(2) + "x";
                 multText.style.color = "#ef4444";
-                setTimeout(() => { rocket.innerHTML = "🚀"; rocket.style.bottom = "20px"; rocket.style.left = "20px"; multText.innerText = "READY"; multText.style.color="white"; resetUI(); }, 3000);
+                flySound.pause(); flySound.currentTime = 0;
+                
+                setTimeout(() => {
+                    rocket.innerHTML = "🚀";
+                    rocket.style.transform = "none";
+                    line.style.width = "0";
+                    multText.innerText = "READY";
+                    multText.style.color = "white";
+                    resetRound();
+                }, 3000);
             }
         });
 
         window.placeBet = async () => {
             const amt = parseInt(document.getElementById('bet-amt').value);
-            if(amt < 10 || amt > 500) return alert("Limit: 10-500 PKR");
-            if(amt > uBal) return alert("Low Balance!");
-            myBet = amt; isBetting = true;
-            flySound.play(); // User click par sound activate
+            if(amt < 10 || amt > 500 || amt > uBal) return alert("Balance kam hai!");
+
+            myBet = amt; isBetting = true; hasCashedOut = false;
             await update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            await update(ref(db, 'gameSystem'), { state: "START", multiplier: 1.0 });
+            
             document.getElementById('bet-btn').classList.add('hidden');
-            document.getElementById('cash-btn').classList.remove('hidden');
-            let m = 1.0;
-            multInterval = setInterval(() => { m += 0.05; update(ref(db, 'gameSystem/multiplier'), m); }, 150);
+            document.getElementById('waiting-msg').classList.remove('hidden');
         };
 
         window.cashOut = async () => {
-            if(!isBetting) return;
+            if(!isBetting || hasCashedOut) return;
             const snap = await get(ref(db, 'gameSystem/multiplier'));
-            const win = Math.floor(myBet * snap.val());
-            await update(ref(db, `users/${uID}`), { balance: uBal + win });
-            alert("Win! PKR " + win);
-            resetUI();
+            const currentMult = snap.val() || 1.0;
+
+            hasCashedOut = true;
+            const winnings = Math.floor(myBet * currentMult);
+            await update(ref(db, `users/${uID}`), { balance: uBal + winnings });
+            
+            alert(`Cashed Out! Win PKR ${winnings}`);
+            document.getElementById('cash-btn').classList.add('hidden');
+            document.getElementById('waiting-msg').innerText = "Winner!";
+            document.getElementById('waiting-msg').classList.remove('hidden');
         };
 
-        window.submitDeposit = () => {
-            const amt = parseInt(document.getElementById('dep-amt').value);
-            const tid = document.getElementById('dep-tid').value;
-            if(amt < 100 || !tid) return alert("Min 100 & valid TID required!");
-            push(ref(db, 'depositRequests'), { uid: uID, email: auth.currentUser.email, amount: amt, tid: tid });
-            alert("Request Sent!");
-        };
-
-        window.submitWithdraw = async () => {
-            const name = document.getElementById('w-name').value;
-            const cnic = document.getElementById('w-cnic').value;
-            const amt = parseInt(document.getElementById('w-amt').value);
-            const pin = document.getElementById('w-pin').value;
-            if (cnic.length !== 13 || amt < 300 || !pin) return alert("Check limits & details!");
-            const pinSnap = await get(ref(db, `users/${uID}/withdrawPin`));
-            if(!pinSnap.val()) { update(ref(db, `users/${uID}`), { withdrawPin: pin }); }
-            else if(pin !== pinSnap.val()) return alert("Wrong PIN!");
-            update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            push(ref(db, 'withdrawRequests'), { uid: uID, name, amount: amt, num: document.getElementById('w-num').value });
-            alert("Withdraw Sent!");
-        };
-
-        function createSmoke(b, l) {
+        function createSmoke(x, y) {
+            const canvas = document.getElementById('game-canvas');
             const smoke = document.createElement('div');
-            smoke.className = 'smoke'; smoke.style.bottom = b + "px"; smoke.style.left = l + "px";
-            document.getElementById('game-area').appendChild(smoke);
-            setTimeout(() => smoke.remove(), 800);
+            smoke.className = 'smoke';
+            smoke.style.left = (x + 15) + "px";
+            smoke.style.bottom = (y + 15) + "px";
+            canvas.appendChild(smoke);
+            setTimeout(() => smoke.remove(), 700);
         }
-        function resetUI() { isBetting = false; document.getElementById('bet-btn').classList.remove('hidden'); document.getElementById('cash-btn').classList.add('hidden'); flySound.pause(); flySound.currentTime = 0; }
+
+        function resetRound() {
+            isBetting = false; hasCashedOut = false;
+            document.getElementById('bet-btn').classList.remove('hidden');
+            document.getElementById('cash-btn').classList.add('hidden');
+            document.getElementById('waiting-msg').classList.add('hidden');
+            document.getElementById('waiting-msg').innerText = "Bet Placed! Takeoff soon...";
+        }
+
+        window.shareApp = () => {
+            const text = `Earn daily with Aviator Pro! My Code: ${document.getElementById('ref-code').innerText}`;
+            if(navigator.share) navigator.share({title: 'Aviator Pro', text: text, url: window.location.href});
+            else alert("Link Copied!");
+        };
     </script>
 </body>
 </html>
