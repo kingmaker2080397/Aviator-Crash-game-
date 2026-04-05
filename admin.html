@@ -2,44 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Control - Admin</title>
+    <title>Admin Control - Aviator Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #050505; color: #fff; font-family: sans-serif; }
-        .card { background: #111; border: 1px solid #222; border-radius: 1.5rem; padding: 1.2rem; margin-bottom: 1rem; }
-        input, select { background: #000; border: 1px solid #333; padding: 0.6rem; border-radius: 0.8rem; outline: none; color: #fff; width: 100%; }
-    </style>
 </head>
-<body class="p-4">
+<body class="bg-black text-white p-4">
     <div class="max-w-md mx-auto">
-        <h1 class="text-xl font-black text-red-600 mb-4 text-center italic">ADMIN CONTROL</h1>
+        <h1 class="text-xl font-bold text-red-600 text-center mb-6 italic uppercase">Admin Control Panel</h1>
 
-        <div class="card text-center">
-            <h2 id="live-mult" class="text-6xl font-black text-green-500 mb-4">1.00x</h2>
-            <input id="crash-limit" type="number" step="0.1" value="2.0" class="text-center text-xl text-yellow-500 mb-4">
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="startFlight()" class="bg-green-600 py-4 rounded-xl font-black uppercase">Start</button>
-                <button onclick="crashNow()" class="bg-red-600 py-4 rounded-xl font-black uppercase">Crash</button>
+        <div class="bg-gray-900 p-6 rounded-3xl border border-gray-800 text-center mb-6">
+            <p class="text-gray-500 text-[10px] uppercase font-bold">Live Multiplier</p>
+            <h2 id="live-mult" class="text-6xl font-black text-green-500 my-4">1.00x</h2>
+            
+            <div class="mb-4 text-left">
+                <label class="text-[10px] text-yellow-500 font-bold uppercase">Set Auto-Crash Limit</label>
+                <input id="auto-limit" type="number" step="0.1" value="2.0" class="w-full bg-black p-3 rounded-xl border border-gray-700 text-center text-xl font-bold text-white outline-none">
             </div>
+
+            <button onclick="crashNow()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition">MANUAL CRASH</button>
         </div>
 
-        <div class="card">
-            <h3 class="text-yellow-500 font-bold mb-3 text-xs uppercase">Deposit Number</h3>
-            <select id="set-method" class="mb-2"><option value="EasyPaisa">EasyPaisa</option><option value="JazzCash">JazzCash</option></select>
-            <input id="set-number" type="text" placeholder="Number" class="mb-2">
-            <button onclick="updatePay()" class="w-full bg-yellow-600 py-2 rounded-xl font-bold text-black text-xs uppercase">Update App</button>
-        </div>
-
-        <div id="requests" class="space-y-3">
-            <h3 class="text-xs font-bold text-gray-500 uppercase ml-2">Pending Tasks</h3>
-            <div id="task-list"></div>
+        <div class="bg-gray-900 p-4 rounded-3xl border border-gray-800">
+            <h3 class="text-gray-400 font-bold mb-3 uppercase text-[10px]">Withdraw Requests</h3>
+            <div id="withdraw-list"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, update, onValue, remove, get } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
@@ -52,39 +42,33 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let m = 1.0, interval, flying = false;
 
-        window.startFlight = () => {
-            if(flying) return; flying = true; m = 1.0;
-            const lim = parseFloat(document.getElementById('crash-limit').value);
-            update(ref(db, 'gameSystem'), { state: "START", multiplier: 1.0 });
-            interval = setInterval(() => {
-                m += (m < 2 ? 0.03 : 0.07);
-                if(m >= lim) crashNow();
-                else { update(ref(db, 'gameSystem'), { multiplier: m }); document.getElementById('live-mult').innerText = m.toFixed(2) + "x"; }
-            }, 100);
+        onValue(ref(db, 'gameSystem'), s => {
+            const data = s.val(); if(!data) return;
+            document.getElementById('live-mult').innerText = data.multiplier.toFixed(2) + "x";
+            const limit = parseFloat(document.getElementById('auto-limit').value);
+            if(data.state === "START" && data.multiplier >= limit) { crashNow(); }
+        });
+
+        window.crashNow = async () => {
+            const snap = await get(ref(db, 'gameSystem/multiplier'));
+            update(ref(db, 'gameSystem'), { state: "CRASHED", lastCrash: snap.val() || 1.0 });
         };
 
-        window.crashNow = () => { clearInterval(interval); flying = false; update(ref(db, 'gameSystem'), { state: "CRASHED", lastCrash: m }); update(ref(db, 'bets'), null); };
-        window.updatePay = () => update(ref(db, 'adminSettings/paymentInfo'), { method: document.getElementById('set-method').value, number: document.getElementById('set-number').value });
-
-        onValue(ref(db, 'depositRequests'), (s) => {
-            const list = document.getElementById('task-list'); list.innerHTML = "";
+        onValue(ref(db, 'withdrawRequests'), s => {
+            const list = document.getElementById('withdraw-list'); list.innerHTML = "";
             const data = s.val(); for(let k in data) {
-                list.innerHTML += `<div class="bg-black p-3 rounded-xl mb-2 text-xs border border-gray-800">
-                    <p class="text-blue-400">${data[k].email}</p>
-                    <p>Deposit: <b>PKR ${data[k].amount}</b> | TID: ${data[k].tid}</p>
-                    <button onclick="approveDep('${k}','${data[k].uid}',${data[k].amount})" class="bg-green-600 px-3 py-1 rounded mt-2">Approve</button>
+                list.innerHTML += `
+                <div class="bg-black p-4 rounded-xl mb-3 border border-gray-800 text-[11px]">
+                    <p class="text-red-500 font-bold uppercase">${data[k].name}</p>
+                    <p>CNIC: ${data[k].cnic}</p>
+                    <p>Number: ${data[k].num}</p>
+                    <p class="text-green-500 font-bold mt-1 text-lg">PKR ${data[k].amount}</p>
+                    <button onclick="removeReq('${k}')" class="bg-gray-800 px-4 py-1 rounded mt-2 text-[10px]">DONE / DELETE</button>
                 </div>`;
             }
         });
-
-        window.approveDep = async (k, u, a) => {
-            const s = await get(ref(db, `users/${u}/balance`));
-            update(ref(db, `users/${u}`), { balance: (s.val() || 0) + a });
-            remove(ref(db, `depositRequests/${k}`));
-        };
+        window.removeReq = (k) => { remove(ref(db, `withdrawRequests/${k}`)); alert("Request Cleared!"); };
     </script>
 </body>
-        </html>
-
+</html>
