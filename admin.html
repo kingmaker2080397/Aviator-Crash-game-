@@ -2,73 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Control - Aviator Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Admin</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-black text-white p-4">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-xl font-bold text-red-600 text-center mb-6 italic uppercase">Admin Control Panel</h1>
-
-        <div class="bg-gray-900 p-6 rounded-3xl border border-gray-800 text-center mb-6">
-            <p class="text-gray-500 text-[10px] uppercase font-bold">Live Multiplier</p>
-            <h2 id="live-mult" class="text-6xl font-black text-green-500 my-4">1.00x</h2>
-            
-            <div class="mb-4 text-left">
-                <label class="text-[10px] text-yellow-500 font-bold uppercase">Set Auto-Crash Limit</label>
-                <input id="auto-limit" type="number" step="0.1" value="2.0" class="w-full bg-black p-3 rounded-xl border border-gray-700 text-center text-xl font-bold text-white outline-none">
+<body>
+    <div class="admin-container">
+        <h1>Aviator Admin Panel</h1>
+        <div class="controls">
+            <button id="start-game">Start Game</button>
+            <button id="crash-game">Crash Game</button>
+            <div>
+                <label for="crash-at">Crash At:</label>
+                <input id="crash-at" type="number" value="10" step="0.1">
             </div>
-
-            <button onclick="crashNow()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition">MANUAL CRASH</button>
         </div>
-
-        <div class="bg-gray-900 p-4 rounded-3xl border border-gray-800">
-            <h3 class="text-gray-400 font-bold mb-3 uppercase text-[10px]">Withdraw Requests</h3>
-            <div id="withdraw-list"></div>
+        <div class="stats">
+            <h2>Game Stats</h2>
+            <p>Total Bets: <span id="total-bets">0</span></p>
+            <p>Total Payout: <span id="total-payout">0</span></p>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-            authDomain: "kingmaker-crash.firebaseapp.com",
-            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-            projectId: "kingmaker-crash",
-            storageBucket: "kingmaker-crash.firebasestorage.app",
-            messagingSenderId: "327400668393",
-            appId: "1:327400668393:web:0d02a340b9f5603f524478"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        onValue(ref(db, 'gameSystem'), s => {
-            const data = s.val(); if(!data) return;
-            document.getElementById('live-mult').innerText = data.multiplier.toFixed(2) + "x";
-            const limit = parseFloat(document.getElementById('auto-limit').value);
-            if(data.state === "START" && data.multiplier >= limit) { crashNow(); }
-        });
-
-        window.crashNow = async () => {
-            const snap = await get(ref(db, 'gameSystem/multiplier'));
-            update(ref(db, 'gameSystem'), { state: "CRASHED", lastCrash: snap.val() || 1.0 });
-        };
-
-        onValue(ref(db, 'withdrawRequests'), s => {
-            const list = document.getElementById('withdraw-list'); list.innerHTML = "";
-            const data = s.val(); for(let k in data) {
-                list.innerHTML += `
-                <div class="bg-black p-4 rounded-xl mb-3 border border-gray-800 text-[11px]">
-                    <p class="text-red-500 font-bold uppercase">${data[k].name}</p>
-                    <p>CNIC: ${data[k].cnic}</p>
-                    <p>Number: ${data[k].num}</p>
-                    <p class="text-green-500 font-bold mt-1 text-lg">PKR ${data[k].amount}</p>
-                    <button onclick="removeReq('${k}')" class="bg-gray-800 px-4 py-1 rounded mt-2 text-[10px]">DONE / DELETE</button>
-                </div>`;
-            }
-        });
-        window.removeReq = (k) => { remove(ref(db, `withdrawRequests/${k}`)); alert("Request Cleared!"); };
-    </script>
+    <script src="admin.js"></script>
 </body>
 </html>
