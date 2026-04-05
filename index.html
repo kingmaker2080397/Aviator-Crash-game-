@@ -8,10 +8,10 @@
     <style>
         body { background: #050505; color: #fff; font-family: sans-serif; overflow-x: hidden; }
         #game-area { background: radial-gradient(circle at bottom, #1a1a2e 0%, #050505 100%); position: relative; overflow: hidden; height: 350px; border-radius: 2rem; border: 2px solid #1f2937; }
-        #rocket { font-size: 5rem; position: absolute; bottom: 20px; left: 20px; transition: all 0.1s linear; z-index: 10; }
-        .smoke { position: absolute; width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; animation: smokeOut 0.7s linear forwards; }
-        @keyframes smokeOut { to { transform: translate(-40px, 40px) scale(3); opacity: 0; } }
-        #multiplier { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; font-weight: 900; z-index: 5; }
+        #rocket { font-size: 5rem; position: absolute; bottom: 20px; left: 20px; transition: all 0.1s linear; z-index: 10; transform: rotate(45deg); }
+        .smoke { position: absolute; width: 10px; height: 10px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: smokeOut 0.8s linear forwards; z-index: 5; }
+        @keyframes smokeOut { to { transform: translate(-50px, 50px) scale(4); opacity: 0; } }
+        #multiplier { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; font-weight: 900; z-index: 1; color: white; }
         .hidden { display: none; }
     </style>
 </head>
@@ -23,30 +23,20 @@
 
     <div class="p-4 max-w-lg mx-auto">
         <div id="game-area" class="mt-4">
-            <div id="multiplier" class="text-white">READY</div>
+            <div id="multiplier">READY</div>
             <div id="rocket">🚀</div>
         </div>
 
-        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800">
+        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800 shadow-2xl text-center">
             <input id="bet-amt" type="number" value="100" class="bg-black text-yellow-500 font-black text-center w-full p-4 rounded-xl border border-gray-700 outline-none text-2xl mb-4">
-            <button id="bet-btn" onclick="placeBet()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-2xl uppercase active:scale-95 transition">Bet</button>
+            <button id="bet-btn" onclick="placeBet()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-2xl uppercase active:scale-95 transition shadow-[0_0_20px_rgba(220,38,38,0.5)]">Place Bet</button>
             <button id="cash-btn" onclick="cashOut()" class="hidden w-full bg-yellow-500 py-5 rounded-2xl font-black text-2xl uppercase text-black shadow-lg animate-pulse">Cash Out</button>
-        </div>
-
-        <div class="mt-6 bg-gray-900 p-6 rounded-[2rem] border border-gray-800">
-            <h3 class="text-red-500 font-black mb-4 uppercase">Withdrawal (Min: 300)</h3>
-            <input id="w-name" type="text" placeholder="Full Name (As per CNIC)" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
-            <input id="w-cnic" type="number" placeholder="CNIC Number (13 Digits)" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
-            <input id="w-num" type="text" placeholder="EasyPaisa/JazzCash Number" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
-            <input id="w-amt" type="number" placeholder="Amount" class="w-full bg-black p-3 rounded-xl border border-gray-700 mb-2 outline-none">
-            <input id="w-pin" type="password" maxlength="4" placeholder="4-Digit Secret PIN" class="w-full bg-black p-3 rounded-xl border border-gray-700 text-center font-bold text-red-500 mb-4 outline-none">
-            <button onclick="submitWithdraw()" class="w-full bg-green-700 py-4 rounded-xl font-black uppercase">Request Withdraw</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, get, set, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -62,11 +52,23 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
-        let uID, uBal, isBetting = false, myBet = 0;
+        let uID, uBal, myBet = 0, isBetting = false, multInterval;
 
-        onAuthStateChanged(auth, (user) => { if(user) { uID = user.uid; onValue(ref(db, `users/${uID}/balance`), s => { uBal = s.val() || 0; document.getElementById('bal').innerText = uBal; }); } });
+        // Sounds
+        const flySound = new Audio('https://shashank7s.github.io/Codepen-Assets/aviator/fly.mp3');
+        const crashSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-cinematic-explosion-impact-1701.mp3');
 
-        // Game Logic
+        onAuthStateChanged(auth, (user) => { 
+            if(user) { 
+                uID = user.uid; 
+                onValue(ref(db, `users/${uID}/balance`), s => { 
+                    uBal = s.val() || 0; 
+                    document.getElementById('bal').innerText = uBal; 
+                }); 
+            } 
+        });
+
+        // Live Game Sync
         onValue(ref(db, 'gameSystem'), (s) => {
             const data = s.val(); if(!data) return;
             const rocket = document.getElementById('rocket');
@@ -75,78 +77,83 @@
             if(data.state === "START") {
                 multText.innerText = data.multiplier.toFixed(2) + "x";
                 multText.style.color = "#22c55e";
-                let pos = Math.min(data.multiplier * 25, 230);
-                rocket.style.bottom = (20 + pos) + "px"; rocket.style.left = (20 + pos) + "px";
-                createSmoke(20 + pos, 20 + pos);
+                
+                // Rocket Movement Calculation
+                let move = Math.min(data.multiplier * 30, 250);
+                rocket.style.bottom = (20 + move) + "px";
+                rocket.style.left = (20 + move) + "px";
+                
+                createSmoke(20 + move, 20 + move);
+                if(flySound.paused) flySound.play();
+
             } else if(data.state === "CRASHED") {
+                clearInterval(multInterval);
                 rocket.innerHTML = "💥";
+                flySound.pause();
+                crashSound.play();
                 multText.innerText = "CRASHED " + (data.lastCrash || 1.0).toFixed(2) + "x";
                 multText.style.color = "#ef4444";
-                setTimeout(() => { rocket.innerHTML = "🚀"; rocket.style.bottom = "20px"; rocket.style.left = "20px"; multText.innerText = "READY"; resetUI(); }, 3000);
+                
+                setTimeout(() => {
+                    rocket.innerHTML = "🚀";
+                    rocket.style.bottom = "20px";
+                    rocket.style.left = "20px";
+                    multText.innerText = "READY";
+                    multText.style.color = "white";
+                    resetUI();
+                }, 3000);
             }
         });
 
-        window.placeBet = () => {
+        window.placeBet = async () => {
             const amt = parseInt(document.getElementById('bet-amt').value);
-            if (amt < 10 || amt > 500) return alert("Bet limit: 10 to 500 PKR");
-            if (amt > uBal) return alert("In-sufficient balance!");
+            if(amt < 10 || amt > 500) return alert("Limit: 10-500 PKR");
+            if(amt > uBal) return alert("Balance kam hai!");
 
             myBet = amt; isBetting = true;
-            update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            update(ref(db, 'gameSystem'), { state: "START", multiplier: 1.0 });
-
-            let m = 1.0;
-            const loop = setInterval(async () => {
-                const st = await get(ref(db, 'gameSystem/state'));
-                if(st.val() === "CRASHED") { clearInterval(loop); return; }
-                m += 0.04; update(ref(db, 'gameSystem/multiplier'), m);
-            }, 100);
+            
+            // 1. Update status to Firebase immediately
+            await update(ref(db, `users/${uID}`), { balance: uBal - amt });
+            await update(ref(db, 'gameSystem'), { state: "START", multiplier: 1.0 });
 
             document.getElementById('bet-btn').classList.add('hidden');
             document.getElementById('cash-btn').classList.remove('hidden');
+
+            // 2. Start local speed loop for Firebase
+            let currentM = 1.0;
+            multInterval = setInterval(() => {
+                currentM += 0.05; // Speed adjustment
+                update(ref(db, 'gameSystem/multiplier'), currentM);
+            }, 150);
         };
 
         window.cashOut = async () => {
             if(!isBetting) return;
             const snap = await get(ref(db, 'gameSystem/multiplier'));
             const win = Math.floor(myBet * snap.val());
-            update(ref(db, `users/${uID}`), { balance: uBal + win });
-            alert("WIN! PKR " + win);
+            
+            await update(ref(db, `users/${uID}`), { balance: uBal + win });
+            alert("Congratulations! You won PKR " + win);
             resetUI();
         };
 
-        window.submitWithdraw = async () => {
-            const name = document.getElementById('w-name').value;
-            const cnic = document.getElementById('w-cnic').value;
-            const num = document.getElementById('w-num').value;
-            const amt = parseInt(document.getElementById('w-amt').value);
-            const pin = document.getElementById('w-pin').value;
-
-            if (cnic.length !== 13) return alert("CNIC must be 13 digits!");
-            if (amt < 300) return alert("Min Withdraw 300!");
-            if (amt > uBal) return alert("In-sufficient balance!");
-
-            const pinSnap = await get(ref(db, `users/${uID}/withdrawPin`));
-            if (!pinSnap.val()) {
-                if (pin.length !== 4) return alert("Set a 4-digit PIN first!");
-                update(ref(db, `users/${uID}`), { withdrawPin: pin });
-            } else if (pin !== pinSnap.val()) {
-                return alert("Incorrect PIN!");
-            }
-
-            update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            push(ref(db, 'withdrawRequests'), { uid: uID, name, cnic, num, amount: amt, time: Date.now() });
-            alert("Withdrawal request sent!");
-        };
-
         function createSmoke(b, l) {
+            const gameArea = document.getElementById('game-area');
             const smoke = document.createElement('div');
-            smoke.className = 'smoke'; smoke.style.bottom = b + "px"; smoke.style.left = l + "px";
-            document.getElementById('game-area').appendChild(smoke);
-            setTimeout(() => smoke.remove(), 700);
+            smoke.className = 'smoke';
+            smoke.style.bottom = b + "px";
+            smoke.style.left = l + "px";
+            gameArea.appendChild(smoke);
+            setTimeout(() => smoke.remove(), 800);
         }
-        function resetUI() { document.getElementById('bet-btn').classList.remove('hidden'); document.getElementById('cash-btn').classList.add('hidden'); isBetting = false; }
+
+        function resetUI() {
+            isBetting = false;
+            document.getElementById('bet-btn').classList.remove('hidden');
+            document.getElementById('cash-btn').classList.add('hidden');
+            flySound.pause();
+            flySound.currentTime = 0;
+        }
     </script>
 </body>
-    </html>
-                
+</html>
