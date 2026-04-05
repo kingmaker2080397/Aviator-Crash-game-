@@ -1,0 +1,89 @@
+/* Base Styles */
+body { 
+    background: #000; 
+    color: #fff; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    overflow: hidden; 
+    margin: 0;
+}
+
+/* Game Canvas (Jahan Rocket urrta hai) */
+#game-canvas { 
+    background: radial-gradient(circle at bottom, #1a1a2e 0%, #050505 100%); 
+    position: relative; 
+    height: 350px; 
+    border-radius: 25px; 
+    border: 2px solid #1f2937; 
+    overflow: hidden; 
+}
+
+/* Rocket Style */
+#rocket { 
+    position: absolute; 
+    bottom: 20px; 
+    left: 20px; 
+    font-size: 3.5rem; 
+    transition: all 0.1s linear; 
+    z-index: 10; 
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8)); 
+}
+
+/* Red Path Line (Peeche wali lakir) */
+#path-line { 
+    position: absolute; 
+    bottom: 35px; 
+    left: 35px; 
+    background: linear-gradient(to right, transparent, #ff0000); 
+    height: 4px; 
+    transform-origin: left center; 
+    z-index: 5; 
+    border-radius: 10px; 
+    box-shadow: 0 0 15px #ff0000; 
+    width: 0; 
+}
+
+/* Multiplier Number Style */
+.multiplier-text { 
+    font-size: 5rem; 
+    font-weight: 900; 
+    position: absolute; 
+    top: 40%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    z-index: 1; 
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Smoke Particles Animation */
+.smoke { 
+    position: absolute; 
+    width: 6px; 
+    height: 6px; 
+    background: rgba(255, 255, 255, 0.2); 
+    border-radius: 50%; 
+    animation: smokeAnim 0.6s linear forwards; 
+}
+
+@keyframes smokeAnim { 
+    to { 
+        transform: translate(-30px, 30px) scale(3); 
+        opacity: 0; 
+    } 
+}
+
+/* Custom Buttons Styling */
+.bet-input {
+    background: #000;
+    color: #eab308; /* Yellow-500 */
+    font-weight: 900;
+    text-align: center;
+    border: 1px solid #374151;
+    border-radius: 1rem;
+    outline: none;
+    transition: border 0.3s;
+}
+
+.bet-input:focus {
+    border-color: #ef4444; /* Red-500 */
+  }
+  
