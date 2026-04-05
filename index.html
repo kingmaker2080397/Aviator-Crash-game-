@@ -1,159 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Pro - Auto Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
-        #game-canvas { background: radial-gradient(circle at bottom, #1a1a2e 0%, #050505 100%); position: relative; height: 320px; border-radius: 20px; border: 2px solid #1f2937; overflow: hidden; }
-        #rocket { position: absolute; bottom: 20px; left: 20px; font-size: 3.5rem; transition: all 0.1s linear; z-index: 10; filter: drop-shadow(0 0 10px red); }
-        #path-line { position: absolute; bottom: 35px; left: 35px; background: linear-gradient(to right, transparent, #ff0000); height: 4px; transform-origin: left center; z-index: 5; border-radius: 10px; box-shadow: 0 0 15px red; width: 0; }
-        .multiplier-text { font-size: 5rem; font-weight: 900; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 1; }
-        .hidden { display: none; }
-        .smoke { position: absolute; width: 6px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 50%; animation: smokeAnim 0.6s linear forwards; }
-        @keyframes smokeAnim { to { transform: translate(-30px, 30px) scale(3); opacity: 0; } }
-    </style>
-</head>
-<body>
-    <div class="p-4 flex justify-between items-center bg-gray-900 border-b border-gray-800">
-        <div><p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p><h2 class="text-xl font-black text-yellow-500">PKR <span id="bal">0</span></h2></div>
-        <div class="flex gap-2">
-            <a id="support-link" href="#" target="_blank" class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-bold">SUPPORT</a>
-            <button onclick="shareApp()" class="bg-green-600 px-3 py-1 rounded-lg text-[10px] font-bold">SHARE</button>
-        </div>
-    </div>
-
-    <div class="p-4 max-w-lg mx-auto">
-        <div id="game-canvas">
-            <div id="multiplier" class="multiplier-text text-white">1.00x</div>
-            <div id="timer-label" class="absolute top-4 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-500 uppercase tracking-widest text-center w-full">Waiting...</div>
-            <div id="rocket">🚀</div>
-            <div id="path-line"></div>
-        </div>
-
-        <div class="mt-4 bg-gray-900 p-6 rounded-[2.5rem] border border-gray-800 shadow-2xl">
-            <div class="flex justify-between mb-2 px-2 italic text-[10px] font-bold text-gray-500 uppercase">
-                <span>Bet Amount</span>
-                <span>Limit: 10 - 500</span>
-            </div>
-            <input id="bet-amt" type="number" value="100" class="bg-black text-yellow-500 font-black text-center w-full p-4 rounded-xl border border-gray-700 outline-none text-2xl mb-4">
-            
-            <button id="bet-btn" onclick="placeBet()" class="w-full bg-red-600 py-5 rounded-2xl font-black text-2xl uppercase shadow-lg active:scale-95 transition-all">Place Bet</button>
-            <button id="cash-btn" onclick="cashOut()" class="hidden w-full bg-yellow-500 py-5 rounded-2xl font-black text-2xl uppercase text-black animate-pulse shadow-lg">Cash Out</button>
-            <div id="status-msg" class="text-center text-gray-500 font-bold mt-2 text-sm uppercase">Next round in 5s...</div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-            authDomain: "kingmaker-crash.firebaseapp.com",
-            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-            projectId: "kingmaker-crash",
-            storageBucket: "kingmaker-crash.firebasestorage.app",
-            messagingSenderId: "327400668393",
-            appId: "1:327400668393:web:0d02a340b9f5603f524478"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
-        
-        let uID, uBal = 0, isBetting = false, hasCashedOut = false, myBet = 0;
-        const flySound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-fast-jet-plane-flyby-1613.mp3');
-
-        onAuthStateChanged(auth, (user) => {
-            if(user) {
-                uID = user.uid;
-                onValue(ref(db, `users/${uID}/balance`), s => { uBal = s.val() || 0; document.getElementById('bal').innerText = uBal; });
-                onValue(ref(db, 'adminSettings/supportLink'), s => { document.getElementById('support-link').href = s.val() || "#"; });
-            }
-        });
-
-        // Main Game Sync (Admin Control + Automatic Loop)
-        onValue(ref(db, 'gameSystem'), (s) => {
-            const data = s.val(); if(!data) return;
-            const rocket = document.getElementById('rocket');
-            const line = document.getElementById('path-line');
-            const multText = document.getElementById('multiplier');
-            const statusLabel = document.getElementById('timer-label');
-            const statusMsg = document.getElementById('status-msg');
-
-            if(data.state === "WAITING") {
-                statusLabel.innerText = "NEXT ROUND IN " + data.timer + "s";
-                statusMsg.innerText = "Next round in " + data.timer + "s...";
-                multText.innerText = "WAIT";
-                multText.style.color = "white";
-                rocket.style.transform = "none";
-                line.style.width = "0";
-                document.getElementById('bet-btn').disabled = false;
-                document.getElementById('bet-btn').style.opacity = "1";
-            } 
-            else if(data.state === "START") {
-                statusLabel.innerText = "FLYING...";
-                statusMsg.innerText = "Rocket is flying!";
-                multText.innerText = data.multiplier.toFixed(2) + "x";
-                multText.style.color = "#22c55e";
-                
-                let x = Math.min(data.multiplier * 20, 260); 
-                let y = Math.min(data.multiplier * 16, 220);
-                rocket.style.transform = `translate(${x}px, -${y}px) rotate(45deg)`;
-                line.style.width = Math.sqrt(x*x + y*y) + "px";
-                line.style.transform = `rotate(-${Math.atan2(y, x) * (180/Math.PI)}deg)`;
-                
-                createSmoke(x + 20, y + 20);
-                if(flySound.paused) flySound.play();
-
-                if(isBetting && !hasCashedOut) {
-                    document.getElementById('cash-btn').classList.remove('hidden');
-                    document.getElementById('bet-btn').classList.add('hidden');
-                }
-            } 
-            else if(data.state === "CRASHED") {
-                rocket.innerHTML = "💥";
-                multText.innerText = data.multiplier.toFixed(2) + "x";
-                multText.style.color = "red";
-                flySound.pause(); flySound.currentTime = 0;
-                statusMsg.innerText = "CRASHED! Better luck next time.";
-                
-                setTimeout(() => {
-                    rocket.innerHTML = "🚀";
-                    resetUI();
-                }, 3000);
-            }
-        });
-
-        window.placeBet = async () => {
-            const amt = parseInt(document.getElementById('bet-amt').value);
-            if(amt < 10 || amt > 500 || amt > uBal) return alert("Check Balance & Limit!");
-
-            myBet = amt; isBetting = true; hasCashedOut = false;
-            await update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            
-            document.getElementById('bet-btn').disabled = true;
-            document.getElementById('bet-btn').style.opacity = "0.5";
-            document.getElementById('status-msg').innerText = "Bet Placed! Waiting...";
-        };
-
-        window.cashOut = async () => {
-            if(!isBetting || hasCashedOut) return;
-            const snap = await get(ref(db, 'gameSystem/multiplier'));
-            const currentMult = snap.val() || 1.0;
-
-            hasCashedOut = true;
-            const winnings = Math.floor(myBet * currentMult);
-            await update(ref(db, `users/${uID}`), { balance: uBal + winnings });
-            
-            alert(`Cashed Out! Win PKR ${winnings}`);
-            document.getElementById('cash-btn').classList.add('hidden');
-            document.getElementById('status-msg').innerText = "Winner! Wait for next round.";
-        };
-
-        function createSmoke(x, y) {
-        
+  <title>Aviator Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1a1a2e;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .game-container {
+      background: #16213e;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .multiplier {
+      font-size: 40px;
+      font-weight: bold;
+      color: #0f3460;
+      margin: 20px 0;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    input {
+      padding: 10px;
+      font-size: 18px;
+      width: 100px;
+      text-align:
+          
