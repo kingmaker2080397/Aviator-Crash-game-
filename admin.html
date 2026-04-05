@@ -1,29 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Admin</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Aviator Admin Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="admin-container">
-        <h1>Aviator Admin Panel</h1>
-        <div class="controls">
-            <button id="start-game">Start Game</button>
-            <button id="crash-game">Crash Game</button>
-            <div>
-                <label for="crash-at">Crash At:</label>
-                <input id="crash-at" type="number" value="10" step="0.1">
-            </div>
-        </div>
-        <div class="stats">
-            <h2>Game Stats</h2>
-            <p>Total Bets: <span id="total-bets">0</span></p>
-            <p>Total Payout: <span id="total-payout">0</span></p>
-        </div>
+<body class="bg-gray-900 text-white p-10">
+    <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-3xl shadow-2xl border border-gray-700">
+        <h1 class="text-2xl font-black mb-6 text-center text-yellow-500">ADMIN ENGINE</h1>
+        
+        <label class="block text-xs font-bold text-gray-500 mb-2">CRASH AT (Example: 2.50)</label>
+        <input id="crash-limit" type="number" step="0.1" value="2.0" class="w-full bg-black p-4 rounded-xl mb-6 text-xl text-center outline-none border border-gray-600">
+        
+        <button id="start-engine" class="w-full bg-green-600 py-4 rounded-xl font-bold uppercase mb-4 shadow-lg hover:bg-green-700">Start Auto Engine</button>
+        <p id="status" class="text-center text-gray-400 italic">Engine Stopped</p>
     </div>
 
-    <script src="admin.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+        const firebaseConfig = { /* SAME CONFIG AS ABOVE */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.getElementById('start-engine').addEventListener('click', () => {
+            document.getElementById('status').innerText = "Engine Running...";
+            runLoop();
+        });
+
+        async function runLoop() {
+            while(true) {
+                // 1. Waiting Phase
+                for(let i=5; i>0; i--) {
+                    await update(ref(db, 'gameSystem'), { state: "WAITING", timer: i });
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                // 2. Flying Phase
+                let m = 1.0;
+                let limit = parseFloat(document.getElementById('crash-limit').value);
+                await update(ref(db, 'gameSystem'), { state: "START", multiplier: m });
+
+                while(m < limit) {
+                    m += 0.05;
+                    await update(ref(db, 'gameSystem/multiplier'), m);
+                    await new Promise(r => setTimeout(r, 100));
+                }
+
+                // 3. Crash Phase
+                await update(ref(db, 'gameSystem'), { state: "CRASHED", multiplier: m });
+                await new Promise(r => setTimeout(r, 4000));
+            }
+        }
+    </script>
 </body>
 </html>
