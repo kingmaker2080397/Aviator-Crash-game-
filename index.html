@@ -1,150 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Aviator Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #1a1a2e;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    .game-container {
-      background: #16213e;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .multiplier {
-      font-size: 40px;
-      font-weight: bold;
-      color: #0f3460;
-      margin: 20px 0;
-    }
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin: 20px 0;
-    }
-    input {
-      padding: 10px;
-      font-size: 18px;
-      width: 100px;
-      text-align: center;
-      background: #0f3460;
-      border: none;
-      color: white;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 18px;
-      background: #e94560;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .result {
-      font-size: 20px;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Game</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="game-container">
-    <h1>Aviator Game</h1>
-    <div class="multiplier">1.00x</div>
-    <div class="controls">
-      <input id="betAmount" type="number" placeholder="Amount" value="10">
-      <button id="betButton">Bet</button>
-      <button id="cashoutButton" disabled>Cashout</button>
+    <div class="game-container">
+        <div class="header">
+            <h1>Aviator</h1>
+            <div class="balance">Balance: <span id="balance">1000</span></div>
+        </div>
+        <div class="game-area">
+            <div class="multiplier" id="multiplier">1.00x</div>
+            <div class="controls">
+                <input id="bet-amount" type="number" placeholder="Bet Amount" value="10">
+                <button id="bet-button">Bet</button>
+                <button id="cashout-button" disabled>Cashout</button>
+            </div>
+            <div class="result" id="result">Waiting...</div>
+        </div>
     </div>
-    <div class="result">Waiting...</div>
-  </div>
 
-  <script>
-    let multiplier = 1.0;
-    let isFlying = false;
-    let betAmount = 0;
-    let currentBet = null;
-    
-    const multiplierElement = document.querySelector('.multiplier');
-    const betButton = document.getElementById('betButton');
-    const cashoutButton = document.getElementById('cashoutButton');
-    const resultElement = document.querySelector('.result');
-    
-    function updateMultiplier() {
-      multiplier += 0.01;
-      multiplierElement.textContent = multiplier.toFixed(2) + 'x';
-      
-      if (currentBet && multiplier >= currentBet.target) {
-        cashout(currentBet.amount, multiplier);
-        currentBet = null;
-      }
-    }
-    
-    function startGame() {
-      isFlying = true;
-      multiplier = 1.0;
-      resultElement.textContent = 'Flying...';
-      cashoutButton.disabled = false;
-      betButton.disabled = true;
-      
-      const interval = setInterval(() => {
-        if (!isFlying) {
-          clearInterval(interval);
-          return;
-        }
-        
-        updateMultiplier();
-        
-        // Crash logic (random)
-        if (Math.random() > 0.999) {
-          gameCrash();
-          clearInterval(interval);
-        }
-      }, 50);
-    }
-    
-    function gameCrash() {
-      isFlying = false;
-      resultElement.textContent = 'Crashed! (' + multiplier.toFixed(2) + 'x)';
-      cashoutButton.disabled = true;
-      betButton.disabled = false;
-      
-      if (currentBet) {
-        resultElement.textContent += ' - You lost ' + currentBet.amount;
-        currentBet = null;
-      }
-    }
-    
-    function cashout(amount, multiplierValue) {
-      isFlying = false;
-      const winnings = amount * multiplierValue;
-      resultElement.textContent = 'You won ' + winnings.toFixed(2);
-      cashoutButton.disabled = true;
-      betButton.disabled = false;
-    }
-    
-    betButton.addEventListener('click', () => {
-      const amount = parseFloat(document.getElementById('betAmount').value);
-      if (amount > 0 && !isFlying) {
-        currentBet = { amount, target: multiplier * 2 }; // Example target
-        startGame();
-      }
-    });
-    
-    cashoutButton.addEventListener('click', () => {
-      if (isFlying && currentBet) {
-        cashout(currentBet.amount, multiplier);
-        currentBet = null;
-      }
-    });
-  </script>
+    <script src="script.js"></script>
 </body>
-    </html>
-    
+</html>
