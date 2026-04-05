@@ -3,81 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker Crash - Player</title>
+    <title>Aviator Pro - Real Earning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; }
-        .rocket-animate { animation: fly 1s infinite ease-in-out; }
-        @keyframes fly { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .crashed { color: #ef4444; }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .hidden { display: none; }
+        /* Rocket Animation */
+        .rocket-fly { animation: shake 0.2s infinite alternate; filter: drop-shadow(0 0 15px #ff4444); }
+        @keyframes shake { from { transform: translateY(0) rotate(2deg); } to { transform: translateY(-10px) rotate(-2deg); } }
+        /* History Dots */
+        .hist-dot { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; background: #1f2937; color: #9ca3af; }
+        .modal-bg { background: rgba(0,0,0,0.9); position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body>
-    <div class="p-6 bg-gray-900 flex justify-between items-center border-b border-gray-800">
-        <div>
-            <p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p>
-            <h1 class="text-3xl font-black text-yellow-500 text-yellow-500">RS <span id="user-balance">5000</span></h1>
-        </div>
-        <div id="status-tag" class="text-[10px] px-3 py-1 rounded-full border border-blue-500 text-blue-400 font-bold">WAITING...</div>
-    </div>
 
-    <div class="p-4 max-w-lg mx-auto mt-10">
-        <div class="bg-gray-800 rounded-[2rem] p-10 mb-6 border border-gray-700 h-64 flex flex-col items-center justify-center">
-            <div id="rocket-icon" class="text-7xl mb-2">🚀</div>
-            <h1 id="multiplier" class="text-6xl font-black text-green-500 font-mono">1.00x</h1>
-        </div>
-        <button onclick="placeBet()" id="btn-bet" class="w-full bg-green-600 h-16 rounded-xl font-black text-xl uppercase shadow-lg">Place Bet</button>
-        <button onclick="cashOut()" id="btn-cashout" class="hidden w-full bg-yellow-500 h-16 rounded-xl font-black text-xl uppercase text-black shadow-lg">Cash Out</button>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
-
-        // Yahan apni Firebase Detail dalen
-        const firebaseConfig = {
-            apiKey: "APNI_API_KEY_YAHAN_DALEN",
-            authDomain: "kingmaker-crash.firebaseapp.com",
-            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-            projectId: "kingmaker-crash",
-            appId: "APNI_APP_ID_YAHAN_DALEN"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        let isPlaying = false;
-
-        onValue(ref(db, 'gameSystem'), (snapshot) => {
-            const data = snapshot.val();
-            if(!data) return;
-            if(data.state === "START") {
-                document.getElementById('multiplier').innerText = data.multiplier.toFixed(2) + "x";
-                document.getElementById('multiplier').classList.remove('crashed');
-                document.getElementById('rocket-icon').classList.add('rocket-animate');
-                document.getElementById('status-tag').innerText = "LIVE";
-            } else if(data.state === "CRASHED") {
-                document.getElementById('multiplier').innerText = data.lastCrash.toFixed(2) + "x";
-                document.getElementById('multiplier').classList.add('crashed');
-                document.getElementById('rocket-icon').classList.remove('rocket-animate');
-                document.getElementById('rocket-icon').innerText = "💥";
-                document.getElementById('status-tag').innerText = "CRASHED";
-                resetPlayerState();
-            }
-        });
-
-        window.placeBet = () => {
-            document.getElementById('btn-bet').classList.add('hidden');
-            document.getElementById('btn-cashout').classList.remove('hidden');
-        };
-
-        window.cashOut = () => { resetPlayerState(); alert("Cashout Success!"); };
-
-        function resetPlayerState() {
-            document.getElementById('btn-bet').classList.remove('hidden');
-            document.getElementById('btn-cashout').classList.add('hidden');
-            setTimeout(() => { document.getElementById('rocket-icon').innerText = "🚀"; }, 2000);
-        }
-    </script>
-</body>
-</html>
-
+    <div id="auth-box" class="p-8 max-w-sm mx-auto mt-20 bg-gray-900 rounded-[2rem] border border-gray-800">
+        <h2 class="text-3xl font-black text-red-
+            
