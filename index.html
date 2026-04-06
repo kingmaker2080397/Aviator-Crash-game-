@@ -3,134 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Pro - Online</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
-        #game-canvas { background: radial-gradient(circle at bottom, #1a1a2e 0%, #050505 100%); position: relative; height: 350px; border-radius: 25px; border: 2px solid #1f2937; overflow: hidden; }
-        #rocket { position: absolute; bottom: 20px; left: 20px; font-size: 3.5rem; transition: all 0.1s linear; z-index: 10; filter: drop-shadow(0 0 10px red); }
-        #path-line { position: absolute; bottom: 35px; left: 35px; background: linear-gradient(to right, transparent, #ff0000); height: 4px; transform-origin: left center; z-index: 5; border-radius: 10px; box-shadow: 0 0 15px red; width: 0; }
-        .multiplier-text { font-size: 5rem; font-weight: 900; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); z-index: 1; }
-        .smoke { position: absolute; width: 6px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 50%; animation: smokeAnim 0.6s linear forwards; }
-        @keyframes smokeAnim { to { transform: translate(-30px, 30px) scale(3); opacity: 0; } }
-    </style>
+    <title>Aviator Game</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="p-4 flex justify-between items-center bg-gray-900 border-b border-gray-800">
-        <div><p class="text-[10px] text-gray-500 font-bold uppercase">Balance</p><h2 class="text-xl font-black text-yellow-500 font-black">PKR <span id="bal">0</span></h2></div>
-        <div class="flex gap-2"><a id="support-link" href="#" target="_blank" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-bold shadow-lg shadow-blue-900/40">SUPPORT</a></div>
-    </div>
-
-    <div class="p-4 max-w-lg mx-auto">
-        <div id="game-canvas">
-            <div id="multiplier" class="multiplier-text text-white">READY</div>
-            <div id="timer-label" class="absolute top-4 left-1/2 -translate-x-1/2 text-xs font-bold text-gray-500 uppercase tracking-widest text-center w-full">Waiting...</div>
-            <div id="rocket">🚀</div>
-            <div id="path-line"></div>
+    <div class="game-container">
+        <div class="header">
+            <h1>Aviator</h1>
+            <div class="balance">Balance: ₹<span id="balance">1000</span></div>
         </div>
-
-        <div class="mt-6 bg-gray-900 p-6 rounded-[2.5rem] border border-gray-800 shadow-2xl">
-            <input id="bet-amt" type="number" value="100" class="bg-black text-yellow-500 font-black text-center w-full p-4 rounded-2xl border border-gray-700 outline-none text-3xl mb-4 focus:border-red-600 transition-all">
-            <button id="bet-btn" onclick="placeBet()" class="w-full bg-red-600 hover:bg-red-700 py-6 rounded-2xl font-black text-2xl uppercase shadow-lg active:scale-95 transition-all">Place Bet</button>
-            <button id="cash-btn" onclick="cashOut()" class="hidden w-full bg-yellow-500 hover:bg-yellow-400 py-6 rounded-2xl font-black text-2xl uppercase text-black animate-pulse shadow-lg">Cash Out</button>
-            <p id="msg" class="text-center text-gray-500 font-bold mt-2 text-sm uppercase">Next round in 5s...</p>
+        <div class="game-area">
+            <div class="multiplier" id="multiplier">1.00x</div>
+            <div class="controls">
+                <input id="bet-amount" type="number" value="10" min="1">
+                <button id="bet-button">BET</button>
+                <button id="cashout-button" disabled>CASHOUT</button>
+            </div>
+            <div class="result" id="result">Ready to fly?</div>
         </div>
     </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-            authDomain: "kingmaker-crash.firebaseapp.com",
-            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-            projectId: "kingmaker-crash",
-            storageBucket: "kingmaker-crash.firebasestorage.app",
-            messagingSenderId: "327400668393",
-            appId: "1:327400668393:web:0d02a340b9f5603f524478"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
-        
-        let uID, uBal = 0, isBetting = false, hasCashedOut = false, myBet = 0;
-
-        onAuthStateChanged(auth, (user) => {
-            if(user) {
-                uID = user.uid;
-                onValue(ref(db, `users/${uID}/balance`), s => { uBal = s.val() || 0; document.getElementById('bal').innerText = uBal; });
-            }
-        });
-
-        // Game Loop Sync (Admin Control)
-        onValue(ref(db, 'gameSystem'), (s) => {
-            const data = s.val(); if(!data) return;
-            const rocket = document.getElementById('rocket');
-            const line = document.getElementById('path-line');
-            const multText = document.getElementById('multiplier');
-            const timerLabel = document.getElementById('timer-label');
-
-            if(data.state === "WAITING") {
-                timerLabel.innerText = "NEXT ROUND IN " + data.timer + "s";
-                multText.innerText = "WAIT";
-                rocket.style.transform = "none";
-                line.style.width = "0";
-                resetUI();
-            } 
-            else if(data.state === "START") {
-                timerLabel.innerText = "ROCKET FLYING";
-                multText.innerText = data.multiplier.toFixed(2) + "x";
-                multText.style.color = "#22c55e";
-                
-                let x = Math.min(data.multiplier * 22, 260); 
-                let y = Math.min(data.multiplier * 18, 220);
-                rocket.style.transform = `translate(${x}px, -${y}px) rotate(45deg)`;
-                line.style.width = Math.sqrt(x*x + y*y) + "px";
-                line.style.transform = `rotate(-${Math.atan2(y, x) * (180/Math.PI)}deg)`;
-                
-                if(isBetting && !hasCashedOut) {
-                    document.getElementById('cash-btn').classList.remove('hidden');
-                    document.getElementById('bet-btn').classList.add('hidden');
-                }
-            } 
-            else if(data.state === "CRASHED") {
-                rocket.innerHTML = "💥";
-                multText.style.color = "red";
-                setTimeout(() => { rocket.innerHTML = "🚀"; }, 3000);
-            }
-        });
-
-        window.placeBet = async () => {
-            const amt = parseInt(document.getElementById('bet-amt').value);
-            if(amt < 10 || amt > 500 || amt > uBal) return alert("Limit 10-500 PKR!");
-            myBet = amt; isBetting = true; hasCashedOut = false;
-            await update(ref(db, `users/${uID}`), { balance: uBal - amt });
-            document.getElementById('bet-btn').innerText = "BET PLACED";
-            document.getElementById('bet-btn').disabled = true;
-        };
-
-        window.cashOut = async () => {
-            if(!isBetting || hasCashedOut) return;
-            const snap = await get(ref(db, 'gameSystem/multiplier'));
-            const currentMult = snap.val() || 1.0;
-            hasCashedOut = true;
-            const winnings = Math.floor(myBet * currentMult);
-            await update(ref(db, `users/${uID}`), { balance: uBal + winnings });
-            alert("Win: PKR " + winnings);
-            document.getElementById('cash-btn').classList.add('hidden');
-        };
-
-        function resetUI() {
-            isBetting = false; hasCashedOut = false;
-            document.getElementById('bet-btn').classList.remove('hidden');
-            document.getElementById('bet-btn').disabled = false;
-            document.getElementById('bet-btn').innerText = "Place Bet";
-            document.getElementById('cash-btn').classList.add('hidden');
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
-    </html>
-    
+</html>
