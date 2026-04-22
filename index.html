@@ -3,25 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Kingmaker - Spin & Win</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* [Purana CSS yahan aayega jo main ne pehle diya tha] */
+        body { font-family: 'Jost', sans-serif; text-align: center; background: #f5f6fa; }
+        .hidden { display: none; }
+        .auth-box { margin: 50px auto; padding: 20px; background: white; width: 300px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
+        button { cursor: pointer; padding: 10px 20px; border-radius: 10px; border: none; background: #12cbc4; color: white; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="header">
-            <h1>Aviator</h1>
-            <div class="balance">Balance: ₹<span id="balance">1000</span></div>
-        </div>
-        <div class="game-area">
-            <div class="multiplier" id="multiplier">1.00x</div>
-            <div class="controls">
-                <input id="bet-amount" type="number" value="10" min="1">
-                <button id="bet-button">BET</button>
-                <button id="cashout-button" disabled>CASHOUT</button>
-            </div>
-            <div class="result" id="result">Ready to fly?</div>
-        </div>
+
+    <div id="authSection" class="auth-box">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Login / Signup</button>
     </div>
-    <script src="script.js"></script>
+
+    <div id="gameSection" class="hidden">
+        <div style="display: flex; justify-content: space-between; padding: 20px; align-items: center;">
+            <p>Wallet: <b>Rs. <span id="userBalance">0</span></b></p>
+            <button onclick="location.href='wallet.html'" style="background: #54a0ff;">Wallet</button>
+            <button id="logoutBtn" style="background: #ff7675;">Logout</button>
+        </div>
+        
+        <h1>Spin The Wheel</h1>
+        <button id="spinBtn" style="padding: 20px 50px; font-size: 20px; margin-top: 20px;">SPIN NOW</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+            authDomain: "kingmaker-crash.firebaseapp.com",
+            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+            projectId: "kingmaker-crash",
+            storageBucket: "kingmaker-crash.firebasestorage.app",
+            messagingSenderId: "327400668393",
+            appId: "1:327400668393:web:0d02a340b9f5603f524478"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Login Logic
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, pass)
+                .catch(() => createUserWithEmailAndPassword(auth, email, pass))
+                .catch(err => alert(err.message));
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+        // State Change
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('gameSection').classList.remove('hidden');
+                // Balance fetch
+                onValue(ref(db, 'users/' + user.uid + '/balance'), (snap) => {
+                    document.getElementById('userBalance').innerText = snap.val() || 0;
+                });
+            } else {
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('gameSection').classList.add('hidden');
+            }
+        });
+    </script>
 </body>
-</html>
+                </html>
+    
