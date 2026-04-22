@@ -1,65 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Wallet - Kingmaker</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; background: #f0faff; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input { width: 80%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-        .btn-dep { background: #12cbc4; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
-        .btn-with { background: #ff7675; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h2>Wallet Control</h2>
-        <p>Current Balance: <b>Rs. <span id="bal">0</span></b></p>
-        <hr>
-        <input type="number" id="amount" placeholder="Enter Amount (Rs.)">
-        <br><br>
-        <button class="btn-dep" id="depBtn">Deposit Request</button>
-        <button class="btn-with" id="withBtn">Withdraw Request</button>
-        <br><br>
-        <button onclick="location.href='index.html'">Back to Game</button>
+<html>
+<head><title>Wallet</title></head>
+<body style="text-align:center; padding:50px; font-family:sans-serif;">
+    <div style="background:white; padding:30px; border-radius:20px; box-shadow:0 0 20px #ccc; display:inline-block;">
+        <h2>Wallet Request</h2>
+        <input type="number" id="amt" placeholder="Amount" style="padding:10px; margin:10px;"><br>
+        <button id="depBtn" style="background:green; color:white; padding:10px;">Deposit</button>
+        <button id="withBtn" style="background:red; color:white; padding:10px;">Withdraw</button>
+        <p><a href="index.html">Go Back</a></p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = { /* Aapki Config Yahan Paste Karein */ };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+    const firebaseConfig = { /* Same as index.html */ };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-        const sendRequest = (type) => {
-            const user = auth.currentUser;
-            const amt = document.getElementById('amount').value;
-            if(!amt || amt <= 0) return alert("Sahi amount likhein");
+    const makeRequest = (type) => {
+        const u = auth.currentUser;
+        const val = document.getElementById('amt').value;
+        if(!u || !val) return alert("Login/Amount missing");
 
-            push(ref(db, 'requests'), {
-                uid: user.uid,
-                email: user.email,
-                amount: parseFloat(amt),
-                type: type,
-                status: 'pending',
-                time: Date.now()
-            }).then(() => alert("Request Admin ko bhej di gayi hai!"));
-        };
+        push(ref(db, 'requests'), {
+            uid: u.uid,
+            email: u.email,
+            amount: parseFloat(val),
+            type: type,
+            status: 'pending'
+        }).then(() => alert("Request Sent!"));
+    };
 
-        document.getElementById('depBtn').onclick = () => sendRequest('deposit');
-        document.getElementById('withBtn').onclick = () => sendRequest('withdraw');
-
-        // Show balance
-        auth.onAuthStateChanged(user => {
-            if(user) {
-                onValue(ref(db, 'users/' + user.uid + '/balance'), snap => {
-                    document.getElementById('bal').innerText = snap.val() || 0;
-                });
-            }
-        });
-    </script>
+    document.getElementById('depBtn').onclick = () => makeRequest('deposit');
+    document.getElementById('withBtn').onclick = () => makeRequest('withdraw');
+</script>
 </body>
 </html>
