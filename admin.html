@@ -1,43 +1,44 @@
 <!DOCTYPE html>
 <html>
-<head><title>Admin Control</title></head>
+<head><title>Admin Panel</title></head>
 <body style="background:#111; color:white; font-family:sans-serif; padding:20px;">
-    <h2>Admin Control Panel</h2>
-    <div id="reqList">Loading requests...</div>
+    <h1>Admin Dashboard</h1>
+    <div id="list">Loading...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Same Config */ };
+    const firebaseConfig = { /* Paste same config as above */ };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
     onValue(ref(db, 'requests'), (snap) => {
-        const div = document.getElementById("reqList");
-        div.innerHTML = "";
+        const listDiv = document.getElementById('list');
+        listDiv.innerHTML = "";
         snap.forEach(child => {
             const d = child.val();
             if(d.status === 'pending') {
-                div.innerHTML += `
+                listDiv.innerHTML += `
                 <div style="background:#222; padding:15px; margin-bottom:10px; border-radius:10px;">
-                    User: ${d.email} | Amount: <b>Rs.${d.amount}</b>
-                    <button onclick="updateBal('${child.key}', '${d.uid}', ${d.amount}, 'plus')" style="background:green; color:white;">Approve (+)</button>
-                    <button onclick="updateBal('${child.key}', '${d.uid}', ${d.amount}, 'minus')" style="background:red; color:white;">Reject/Minus (-)</button>
+                    User: ${d.email} | Jeeta: <b>Rs.${d.amount}</b>
+                    <br><br>
+                    <button onclick="controlBal('${child.key}', '${d.uid}', ${d.amount}, 'plus')" style="background:green; color:white; padding:10px;">Approve (+)</button>
+                    <button onclick="controlBal('${child.key}', '${d.uid}', ${d.amount}, 'minus')" style="background:red; color:white; padding:10px;">Reject/Deduct (-)</button>
                 </div>`;
             }
         });
     });
 
-    window.updateBal = async (key, uid, amt, action) => {
+    window.controlBal = async (reqKey, uid, amt, type) => {
         const balRef = ref(db, `users/${uid}/balance`);
-        const snapshot = await get(balRef);
-        let currentBal = snapshot.val() || 0;
+        const snap = await get(balRef);
+        let current = snap.val() || 0;
 
-        let newBal = (action === 'plus') ? (currentBal + parseFloat(amt)) : (currentBal - parseFloat(amt));
+        let finalBal = (type === 'plus') ? (current + parseFloat(amt)) : (current - parseFloat(amt));
         
-        await update(ref(db, `users/${uid}`), { balance: newBal });
-        await update(ref(db, `requests/${key}`), { status: 'completed' });
+        await update(ref(db, `users/${uid}`), { balance: finalBal });
+        await update(ref(db, `requests/${reqKey}`), { status: 'completed' });
         alert("Balance Updated!");
     };
 </script>
