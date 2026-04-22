@@ -3,62 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker Spin - Premium</title>
+    <title>Kingmaker - 3D Glass Spin</title>
     <style>
-        :root { --primary: #00d2d3; --glass: rgba(255, 255, 255, 0.1); }
-        body { 
-            background: radial-gradient(circle, #2c3e50, #000000); 
-            color: white; font-family: 'Segoe UI', sans-serif; 
-            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
+        body {
+            background: radial-gradient(circle at center, #1e3743, #000);
+            height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center;
+            font-family: 'Poppins', sans-serif; color: white;
         }
-        .app-card {
-            background: var(--glass); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 30px;
-            width: 350px; padding: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px;
+            width: 360px; padding: 30px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
-        .header { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; }
-        .balance { color: var(--primary); font-weight: bold; font-size: 18px; }
-        
-        /* 3D Wheel */
-        .wheel-box { position: relative; width: 280px; height: 280px; margin: auto; }
+        .bal-box { background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 20px; display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .wheel-area { position: relative; width: 300px; height: 300px; margin: auto; }
         #wheel {
-            width: 100%; height: 100%; border-radius: 50%; border: 8px solid #222;
+            width: 100%; height: 100%; border-radius: 50%; border: 10px solid #111;
             transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1);
             background: conic-gradient(
                 #ff7675 0 45deg, #74b9ff 45deg 90deg, #55efc4 90deg 135deg, 
                 #ffeaa7 135deg 180deg, #a29bfe 180deg 225deg, #fd79a8 225deg 270deg, 
                 #81ecec 270deg 315deg, #fab1a0 315deg 360deg
             );
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
-        .pointer { 
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%); 
-            z-index: 10; width: 35px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-        }
-
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); z-index: 100; width: 45px; }
         .spin-btn {
-            background: linear-gradient(45deg, var(--primary), #00a8ff);
-            border: none; width: 100%; padding: 15px; border-radius: 15px;
-            color: white; font-weight: bold; margin-top: 25px; cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,210,211,0.3);
+            background: linear-gradient(45deg, #00d2d3, #00a8ff); border: none;
+            padding: 15px 60px; border-radius: 50px; color: white; font-size: 20px;
+            font-weight: bold; cursor: pointer; margin-top: 30px; box-shadow: 0 10px 20px rgba(0,210,211,0.4);
         }
+        .spin-btn:disabled { background: #555; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<div class="app-card">
-    <div class="header">
-        <div>Bal: <span class="balance">Rs. <span id="userBal">0</span></span></div>
-        <button onclick="location.href='wallet.html'" style="background:none; border:1px solid #555; color:white; border-radius:5px;">Wallet</button>
+<div class="glass-card">
+    <div class="bal-box">
+        <span>Balance: <b style="color:#00d2d3;">Rs. <span id="balDisplay">0</span></b></span>
+        <button onclick="location.href='wallet.html'" style="background:none; border:1px solid #00d2d3; color:white; border-radius:10px; cursor:pointer;">Wallet</button>
     </div>
-    
-    <div class="wheel-box">
+    <div class="wheel-area">
         <img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
         <div id="wheel"></div>
     </div>
-
     <button class="spin-btn" id="spinBtn">SPIN NOW</button>
-    <p id="status" style="font-size: 12px; margin-top: 10px; color: #aaa;"></p>
 </div>
 
 <script type="module">
@@ -80,43 +69,40 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Wheel Values (Screenshot ke mutabiq)
-    const values = ["Rs.5", "Rs.1000", "Rs.5000", "Rs.20", "Rs.1000", "Rs.2", "Rs.100", "Rs.5"];
+    const values = [5, 1000, 5000, 20, 1000, 2, 100, 5]; // Wheel values
     let currentRotation = 0;
 
     onAuthStateChanged(auth, user => {
         if(user) {
             onValue(ref(db, `users/${user.uid}/balance`), s => {
-                document.getElementById('userBal').innerText = s.val() || 0;
+                document.getElementById('balDisplay').innerText = s.val() || 0;
             });
         } else { location.href = 'login.html'; }
     });
 
-    document.getElementById('spinBtn').onclick = () => {
-        const spinBtn = document.getElementById('spinBtn');
-        spinBtn.disabled = true;
-        
-        const randomDeg = Math.floor(Math.random() * 360);
-        currentRotation += (3600 + randomDeg); // 10 rounds + random
+    document.getElementById('spinBtn').onclick = function() {
+        this.disabled = true;
+        let randomDeg = Math.floor(Math.random() * 360);
+        currentRotation += (3600 + randomDeg);
         document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`;
 
         setTimeout(() => {
-            const actualDeg = currentRotation % 360;
-            const index = Math.floor(((360 - actualDeg) % 360) / 45);
-            const winValue = values[index];
+            let actualDeg = currentRotation % 360;
+            let index = Math.floor(((360 - actualDeg) % 360) / 45);
+            let winAmount = values[index];
+
+            alert("You Won: Rs. " + winAmount);
             
-            alert("You Won: " + winValue);
-            
-            // Record to Firebase for Admin Approval
+            // Send Win Request to Admin
             push(ref(db, 'requests'), {
                 uid: auth.currentUser.uid,
                 email: auth.currentUser.email,
-                amount: winValue.replace('Rs.', ''),
-                type: 'Win Reward',
-                status: 'pending'
+                amount: winAmount,
+                type: 'Game Win',
+                status: 'pending',
+                time: Date.now()
             });
-            
-            spinBtn.disabled = false;
+            this.disabled = false;
         }, 5000);
     };
 </script>
