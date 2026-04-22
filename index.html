@@ -3,83 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker - Spin & Win</title>
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap" rel="stylesheet">
+    <title>Kingmaker Game</title>
     <style>
-        /* [Purana CSS yahan aayega jo main ne pehle diya tha] */
-        body { font-family: 'Jost', sans-serif; text-align: center; background: #f5f6fa; }
+        body { font-family: 'Jost', sans-serif; background: #f0faff; text-align: center; }
         .hidden { display: none; }
-        .auth-box { margin: 50px auto; padding: 20px; background: white; width: 300px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
-        button { cursor: pointer; padding: 10px 20px; border-radius: 10px; border: none; background: #12cbc4; color: white; font-weight: bold; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 320px; margin: 50px auto; }
+        input { width: 80%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
+        button { background: #12cbc4; color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .header { display: flex; justify-content: space-around; background: #fff; padding: 10px; border-bottom: 2px solid #12cbc4; }
     </style>
 </head>
 <body>
 
-    <div id="authSection" class="auth-box">
-        <h2>Login</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
-        <button id="loginBtn">Login / Signup</button>
+<div id="authBox" class="card">
+    <h2>Kingmaker Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="pass" placeholder="Password">
+    <button id="loginBtn">Login / Signup</button>
+</div>
+
+<div id="gameBox" class="hidden">
+    <div class="header">
+        <div>Balance: <b>Rs. <span id="balDisplay">0</span></b></div>
+        <button onclick="location.href='wallet.html'" style="background:#54a0ff">Wallet</button>
+        <button id="logoutBtn" style="background:#ff7675">Logout</button>
     </div>
+    <h1>Spin & Win</h1>
+    <p>Game UI yahan aayega...</p>
+</div>
 
-    <div id="gameSection" class="hidden">
-        <div style="display: flex; justify-content: space-between; padding: 20px; align-items: center;">
-            <p>Wallet: <b>Rs. <span id="userBalance">0</span></b></p>
-            <button onclick="location.href='wallet.html'" style="background: #54a0ff;">Wallet</button>
-            <button id="logoutBtn" style="background: #ff7675;">Logout</button>
-        </div>
-        
-        <h1>Spin The Wheel</h1>
-        <button id="spinBtn" style="padding: 20px 50px; font-size: 20px; margin-top: 20px;">SPIN NOW</button>
-    </div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+        authDomain: "kingmaker-crash.firebaseapp.com",
+        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+        projectId: "kingmaker-crash",
+        storageBucket: "kingmaker-crash.firebasestorage.app",
+        messagingSenderId: "327400668393",
+        appId: "1:327400668393:web:0d02a340b9f5603f524478"
+    };
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-            authDomain: "kingmaker-crash.firebaseapp.com",
-            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-            projectId: "kingmaker-crash",
-            storageBucket: "kingmaker-crash.firebasestorage.app",
-            messagingSenderId: "327400668393",
-            appId: "1:327400668393:web:0d02a340b9f5603f524478"
-        };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+    document.getElementById('loginBtn').onclick = () => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
+    };
 
-        // Login Logic
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, email, pass)
-                .catch(() => createUserWithEmailAndPassword(auth, email, pass))
-                .catch(err => alert(err.message));
-        });
+    document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-
-        // State Change
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('authSection').classList.add('hidden');
-                document.getElementById('gameSection').classList.remove('hidden');
-                // Balance fetch
-                onValue(ref(db, 'users/' + user.uid + '/balance'), (snap) => {
-                    document.getElementById('userBalance').innerText = snap.val() || 0;
-                });
-            } else {
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('gameSection').classList.add('hidden');
-            }
-        });
-    </script>
+    onAuthStateChanged(auth, user => {
+        if(user) {
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('gameBox').classList.remove('hidden');
+            onValue(ref(db, `users/${user.uid}/balance`), s => {
+                document.getElementById('balDisplay').innerText = s.val() || 0;
+            });
+        } else {
+            document.getElementById('authBox').classList.remove('hidden');
+            document.getElementById('gameBox').classList.add('hidden');
+        }
+    });
+</script>
 </body>
-                </html>
-    
+</html>
