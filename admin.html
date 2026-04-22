@@ -1,51 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Dashboard - Kingmaker</title>
-</head>
-<body style="font-family: sans-serif; padding: 20px;">
-    <h1>Admin Panel - Pending Requests</h1>
-    <div id="list">Loading...</div>
+<html>
+<head><title>Admin Panel</title></head>
+<body style="padding:20px; font-family:sans-serif;">
+    <h1>Admin: Approve Requests</h1>
+    <div id="reqList">Loading...</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = { /* Aapki Config Yahan Paste Karein */ };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const firebaseConfig = { /* Same as index.html */ };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        onValue(ref(db, 'requests'), (snapshot) => {
-            const listDiv = document.getElementById('list');
-            listDiv.innerHTML = "";
-            snapshot.forEach((child) => {
-                const data = child.val();
-                if(data.status === 'pending') {
-                    const item = document.createElement('div');
-                    item.style = "border:1px solid #ccc; padding:15px; margin:10px; border-radius:10px;";
-                    item.innerHTML = `
-                        <p><b>User:</b> ${data.email}</p>
-                        <p><b>Action:</b> ${data.type.toUpperCase()}</p>
-                        <p><b>Amount:</b> Rs. ${data.amount}</p>
-                        <button onclick="approveRequest('${child.key}', '${data.uid}', ${data.amount}, '${data.type}')" style="background:green; color:white;">Approve</button>
-                    `;
-                    listDiv.appendChild(item);
-                }
-            });
+    onValue(ref(db, 'requests'), (snap) => {
+        const div = document.getElementById('reqList');
+        div.innerHTML = "";
+        snap.forEach(child => {
+            const data = child.val();
+            if(data.status === 'pending') {
+                div.innerHTML += `
+                <div style="border:1px solid #000; padding:10px; margin:10px;">
+                    User: ${data.email} | ${data.type} | Rs.${data.amount}
+                    <button onclick="process('${child.key}', '${data.uid}', ${data.amount}, '${data.type}')">Approve</button>
+                </div>`;
+            }
         });
+    });
 
-        window.approveRequest = (reqId, uid, amt, type) => {
-            const balRef = ref(db, 'users/' + uid + '/balance');
-            runTransaction(balRef, (current) => {
-                const amount = parseFloat(amt);
-                if (type === 'deposit') return (current || 0) + amount;
-                else return (current || 0) - amount;
-            }).then(() => {
-                update(ref(db, 'requests/' + reqId), { status: 'approved' });
-                alert("Approved Successfully!");
-            });
-        };
-    </script>
+    window.process = (id, uid, amt, type) => {
+        const userBalRef = ref(db, `users/${uid}/balance`);
+        runTransaction(userBalRef, (curr) => {
+            return type === 'deposit' ? (curr || 0) + amt : (curr || 0) - amt;
+        }).then(() => {
+            update(ref(db, `requests/${id}`), { status: 'approved' });
+        });
+    };
+</script>
 </body>
 </html>
