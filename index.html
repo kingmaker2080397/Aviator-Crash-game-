@@ -3,74 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker Game</title>
+    <title>Kingmaker - Final</title>
     <style>
-        body { font-family: 'Jost', sans-serif; background: #f0faff; text-align: center; }
+        body { font-family: sans-serif; text-align: center; background: #f4f7f6; margin: 0; }
         .hidden { display: none; }
-        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 320px; margin: 50px auto; }
-        input { width: 80%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
-        button { background: #12cbc4; color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .header { display: flex; justify-content: space-around; background: #fff; padding: 10px; border-bottom: 2px solid #12cbc4; }
+        .header { display: flex; justify-content: space-between; padding: 15px; background: #fff; border-bottom: 2px solid #12cbc4; }
+        #wheel { width: 300px; height: 300px; border-radius: 50%; border: 10px solid #333; margin: 20px auto; transition: transform 5s cubic-bezier(0.1, 0.8, 0.1, 1); background: conic-gradient(#eaeff2 0 45deg, #dff9fb 45deg 90deg, #c8d6e5 90deg 135deg, #ffeaa7 135deg 180deg, #ff7675 180deg 225deg, #dfe6e9 225deg 270deg, #81ecec 270deg 315deg, #fab1a0 315deg 360deg); }
+        .spin-btn { padding: 15px 40px; font-size: 20px; background: #12cbc4; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        .auth-box { padding: 40px; background: white; width: 320px; margin: 100px auto; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        input { width: 85%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
-<div id="authBox" class="card">
-    <h2>Kingmaker Login</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="pass" placeholder="Password">
-    <button id="loginBtn">Login / Signup</button>
-</div>
-
-<div id="gameBox" class="hidden">
-    <div class="header">
-        <div>Balance: <b>Rs. <span id="balDisplay">0</span></b></div>
-        <button onclick="location.href='wallet.html'" style="background:#54a0ff">Wallet</button>
-        <button id="logoutBtn" style="background:#ff7675">Logout</button>
+    <div id="authSection" class="auth-box">
+        <h2>Kingmaker Login</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="handleAuth()" style="width: 100%; padding: 10px; background: #12cbc4; border: none; color: white; border-radius: 8px;">Login / Sign Up</button>
     </div>
-    <h1>Spin & Win</h1>
-    <p>Game UI yahan aayega...</p>
-</div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <div id="gameSection" class="hidden">
+        <div class="header">
+            <div>Balance: <b>Rs. <span id="bal">0</span></b></div>
+            <div>
+                <button onclick="location.href='wallet.html'">Wallet</button>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-        authDomain: "kingmaker-crash.firebaseapp.com",
-        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-        projectId: "kingmaker-crash",
-        storageBucket: "kingmaker-crash.firebasestorage.app",
-        messagingSenderId: "327400668393",
-        appId: "1:327400668393:web:0d02a340b9f5603f524478"
-    };
+        <h1>Spin & Win</h1>
+        <div id="wheel"></div>
+        <button class="spin-btn" id="spinBtn">SPIN NOW</button>
+    </div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    document.getElementById('loginBtn').onclick = () => {
-        const e = document.getElementById('email').value;
-        const p = document.getElementById('pass').value;
-        signInWithEmailAndPassword(auth, e, p).catch(() => createUserWithEmailAndPassword(auth, e, p));
-    };
+        // Tumhara exact config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+            authDomain: "kingmaker-crash.firebaseapp.com",
+            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+            projectId: "kingmaker-crash",
+            storageBucket: "kingmaker-crash.firebasestorage.app",
+            messagingSenderId: "327400668393",
+            appId: "1:327400668393:web:0d02a340b9f5603f524478"
+        };
 
-    document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-    onAuthStateChanged(auth, user => {
-        if(user) {
-            document.getElementById('authBox').classList.add('hidden');
-            document.getElementById('gameBox').classList.remove('hidden');
-            onValue(ref(db, `users/${user.uid}/balance`), s => {
-                document.getElementById('balDisplay').innerText = s.val() || 0;
-            });
-        } else {
-            document.getElementById('authBox').classList.remove('hidden');
-            document.getElementById('gameBox').classList.add('hidden');
-        }
-    });
-</script>
+        // Global function for button click
+        window.handleAuth = () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            signInWithEmailAndPassword(auth, email, pass)
+                .catch(() => createUserWithEmailAndPassword(auth, email, pass))
+                .catch(err => alert("Error: " + err.message));
+        };
+
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+        // Check Login State
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('gameSection').classList.remove('hidden');
+                
+                // Realtime Balance Link
+                onValue(ref(db, 'users/' + user.uid + '/balance'), (snapshot) => {
+                    document.getElementById('bal').innerText = snapshot.val() || 0;
+                });
+            } else {
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('gameSection').classList.add('hidden');
+            }
+        });
+
+        // Wheel Logic
+        let rotation = 0;
+        document.getElementById('spinBtn').onclick = () => {
+            rotation += Math.floor(Math.random() * 360) + 2000;
+            document.getElementById('wheel').style.transform = `rotate(${rotation}deg)`;
+        };
+    </script>
 </body>
 </html>
