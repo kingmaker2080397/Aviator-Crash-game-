@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Kingmaker</title>
+</head>
+<body style="font-family: sans-serif; padding: 20px;">
+    <h1>Admin Panel - Pending Requests</h1>
+    <div id="list">Loading...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { /* Aapki Config Yahan Paste Karein */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        onValue(ref(db, 'requests'), (snapshot) => {
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = "";
+            snapshot.forEach((child) => {
+                const data = child.val();
+                if(data.status === 'pending') {
+                    const item = document.createElement('div');
+                    item.style = "border:1px solid #ccc; padding:15px; margin:10px; border-radius:10px;";
+                    item.innerHTML = `
+                        <p><b>User:</b> ${data.email}</p>
+                        <p><b>Action:</b> ${data.type.toUpperCase()}</p>
+                        <p><b>Amount:</b> Rs. ${data.amount}</p>
+                        <button onclick="approveRequest('${child.key}', '${data.uid}', ${data.amount}, '${data.type}')" style="background:green; color:white;">Approve</button>
+                    `;
+                    listDiv.appendChild(item);
+                }
+            });
+        });
+
+        window.approveRequest = (reqId, uid, amt, type) => {
+            const balRef = ref(db, 'users/' + uid + '/balance');
+            runTransaction(balRef, (current) => {
+                const amount = parseFloat(amt);
+                if (type === 'deposit') return (current || 0) + amount;
+                else return (current || 0) - amount;
+            }).then(() => {
+                update(ref(db, 'requests/' + reqId), { status: 'approved' });
+                alert("Approved Successfully!");
+            });
+        };
+    </script>
+</body>
+</html>
