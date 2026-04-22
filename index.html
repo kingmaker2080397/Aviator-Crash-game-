@@ -3,57 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker - 3D Glass Spin</title>
+    <title>Kingmaker - Pro Spin</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body {
-            background: radial-gradient(circle at center, #1e3743, #000);
-            height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center;
-            font-family: 'Poppins', sans-serif; color: white;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px;
-            width: 360px; padding: 30px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-        }
-        .bal-box { background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 20px; display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .wheel-area { position: relative; width: 300px; height: 300px; margin: auto; }
-        #wheel {
-            width: 100%; height: 100%; border-radius: 50%; border: 10px solid #111;
-            transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1);
-            background: conic-gradient(
-                #ff7675 0 45deg, #74b9ff 45deg 90deg, #55efc4 90deg 135deg, 
-                #ffeaa7 135deg 180deg, #a29bfe 180deg 225deg, #fd79a8 225deg 270deg, 
-                #81ecec 270deg 315deg, #fab1a0 315deg 360deg
-            );
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
-        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); z-index: 100; width: 45px; }
-        .spin-btn {
-            background: linear-gradient(45deg, #00d2d3, #00a8ff); border: none;
-            padding: 15px 60px; border-radius: 50px; color: white; font-size: 20px;
-            font-weight: bold; cursor: pointer; margin-top: 30px; box-shadow: 0 10px 20px rgba(0,210,211,0.4);
-        }
-        .spin-btn:disabled { background: #555; cursor: not-allowed; }
+        body { background: #0f172a; color: white; font-family: 'Poppins', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .game-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 30px; padding: 25px; width: 350px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .bal-tag { background: #1e293b; padding: 8px 15px; border-radius: 12px; border: 1px solid #334155; }
+        .logout-btn { background: #ef4444; border: none; color: white; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
+
+        .wheel-container { position: relative; width: 300px; height: 300px; margin: 20px auto; }
+        canvas { width: 100%; height: 100%; border-radius: 50%; border: 10px solid #334155; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; z-index: 10; }
+
+        .spin-btn { background: linear-gradient(45deg, #06b6d4, #3b82f6); border: none; width: 100%; padding: 15px; border-radius: 15px; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(6, 182, 212, 0.3); }
+        .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-<div class="glass-card">
-    <div class="bal-box">
-        <span>Balance: <b style="color:#00d2d3;">Rs. <span id="balDisplay">0</span></b></span>
-        <button onclick="location.href='wallet.html'" style="background:none; border:1px solid #00d2d3; color:white; border-radius:10px; cursor:pointer;">Wallet</button>
+<div class="game-card">
+    <div class="top-bar">
+        <div class="bal-tag">Balance: <span id="balance" style="color:#22d3ee; font-weight:bold;">0</span></div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
     </div>
-    <div class="wheel-area">
+
+    <div class="wheel-container">
         <img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
-        <div id="wheel"></div>
+        <canvas id="wheelCanvas" width="300" height="300"></canvas>
     </div>
+
     <button class="spin-btn" id="spinBtn">SPIN NOW</button>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
@@ -69,42 +56,74 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const values = [5, 1000, 5000, 20, 1000, 2, 100, 5]; // Wheel values
-    let currentRotation = 0;
+    const canvas = document.getElementById("wheelCanvas");
+    const ctx = canvas.getContext("2d");
+    const segments = ["5", "1000", "5000", "20", "1000", "2", "100", "5"];
+    const colors = ["#ff7675", "#74b9ff", "#55efc4", "#ffeaa7", "#a29bfe", "#fd79a8", "#81ecec", "#fab1a0"];
 
+    // 1. Draw Wheel with Numbers
+    function drawWheel() {
+        const angle = (2 * Math.PI) / segments.length;
+        segments.forEach((text, i) => {
+            ctx.beginPath();
+            ctx.fillStyle = colors[i];
+            ctx.moveTo(150, 150);
+            ctx.arc(150, 150, 150, i * angle, (i + 1) * angle);
+            ctx.fill();
+            ctx.save();
+            ctx.translate(150, 150);
+            ctx.rotate(i * angle + angle / 2);
+            ctx.fillStyle = "black";
+            ctx.font = "bold 16px Arial";
+            ctx.fillText("Rs." + text, 70, 5);
+            ctx.restore();
+        });
+    }
+    drawWheel();
+
+    let currentRotation = 0;
     onAuthStateChanged(auth, user => {
-        if(user) {
-            onValue(ref(db, `users/${user.uid}/balance`), s => {
-                document.getElementById('balDisplay').innerText = s.val() || 0;
-            });
-        } else { location.href = 'login.html'; }
+        if (!user) window.location.href = "login.html";
+        onValue(ref(db, `users/${user.uid}/balance`), s => {
+            document.getElementById("balance").innerText = s.val() || 0;
+        });
     });
 
-    document.getElementById('spinBtn').onclick = function() {
+    // 2. Spin Logic
+    document.getElementById("spinBtn").onclick = function() {
         this.disabled = true;
-        let randomDeg = Math.floor(Math.random() * 360);
-        currentRotation += (3600 + randomDeg);
-        document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`;
+        const deg = Math.floor(Math.random() * 360) + 3600;
+        currentRotation += deg;
+        canvas.style.transition = "transform 5s cubic-bezier(0.1, 0, 0.1, 1)";
+        canvas.style.transform = `rotate(${currentRotation}deg)`;
 
         setTimeout(() => {
-            let actualDeg = currentRotation % 360;
-            let index = Math.floor(((360 - actualDeg) % 360) / 45);
-            let winAmount = values[index];
+            const actualDeg = currentRotation % 360;
+            const index = Math.floor(((360 - actualDeg) % 360) / 45);
+            const win = segments[index];
 
-            alert("You Won: Rs. " + winAmount);
-            
-            // Send Win Request to Admin
-            push(ref(db, 'requests'), {
-                uid: auth.currentUser.uid,
-                email: auth.currentUser.email,
-                amount: winAmount,
-                type: 'Game Win',
-                status: 'pending',
-                time: Date.now()
+            // 3. Professional Popup
+            Swal.fire({
+                title: 'Jackpot!',
+                text: `Aapne Rs.${win} Jeete Hain!`,
+                icon: 'success',
+                confirmButtonText: 'Claim Reward'
+            }).then(() => {
+                // Send to Admin for Approval
+                push(ref(db, 'requests'), {
+                    uid: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    amount: win,
+                    type: 'Win',
+                    status: 'pending'
+                });
             });
             this.disabled = false;
         }, 5000);
     };
+
+    // 4. Logout Logic
+    document.getElementById("logoutBtn").onclick = () => signOut(auth);
 </script>
 </body>
 </html>
