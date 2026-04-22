@@ -3,92 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker - Final</title>
+    <title>Kingmaker - 3D Spin</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f4f7f6; margin: 0; }
-        .hidden { display: none; }
-        .header { display: flex; justify-content: space-between; padding: 15px; background: #fff; border-bottom: 2px solid #12cbc4; }
-        #wheel { width: 300px; height: 300px; border-radius: 50%; border: 10px solid #333; margin: 20px auto; transition: transform 5s cubic-bezier(0.1, 0.8, 0.1, 1); background: conic-gradient(#eaeff2 0 45deg, #dff9fb 45deg 90deg, #c8d6e5 90deg 135deg, #ffeaa7 135deg 180deg, #ff7675 180deg 225deg, #dfe6e9 225deg 270deg, #81ecec 270deg 315deg, #fab1a0 315deg 360deg); }
-        .spin-btn { padding: 15px 40px; font-size: 20px; background: #12cbc4; color: white; border: none; border-radius: 10px; cursor: pointer; }
-        .auth-box { padding: 40px; background: white; width: 320px; margin: 100px auto; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        input { width: 85%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
+        :root {
+            --glass: rgba(255, 255, 255, 0.2);
+            --border: rgba(255, 255, 255, 0.3);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: 'Poppins', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; color: white;
+        }
+        .container {
+            background: var(--glass); backdrop-filter: blur(15px);
+            border-radius: 30px; border: 1px solid var(--border);
+            box-shadow: var(--shadow); width: 90%; max-width: 400px;
+            padding: 20px; text-align: center; position: relative;
+        }
+        .balance-bar {
+            background: rgba(0, 0, 0, 0.3); border-radius: 15px;
+            padding: 10px 20px; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 30px;
+        }
+        .balance-bar span { font-weight: bold; color: #00d2d3; }
+        
+        /* 3D Wheel Design */
+        .wheel-container { position: relative; margin: 20px auto; width: 300px; height: 300px; }
+        .pointer {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            z-index: 10; width: 40px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        }
+        #wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            border: 8px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.5);
+            transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1);
+            background: conic-gradient(
+                #ff7675 0 45deg, #74b9ff 45deg 90deg, #55efc4 90deg 135deg, 
+                #ffeaa7 135deg 180deg, #a29bfe 180deg 225deg, #fd79a8 225deg 270deg, 
+                #81ecec 270deg 315deg, #fab1a0 315deg 360deg
+            );
+        }
+        .center-nut {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 50px; height: 50px; background: white; border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5); z-index: 5;
+        }
+        .spin-btn {
+            background: linear-gradient(45deg, #00d2d3, #00a8ff);
+            border: none; padding: 15px 50px; border-radius: 50px;
+            color: white; font-size: 1.2rem; font-weight: bold;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(0, 210, 211, 0.4);
+            margin-top: 30px; transition: 0.3s;
+        }
+        .spin-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
-
-    <div id="authSection" class="auth-box">
-        <h2>Kingmaker Login</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Password">
-        <button onclick="handleAuth()" style="width: 100%; padding: 10px; background: #12cbc4; border: none; color: white; border-radius: 8px;">Login / Sign Up</button>
-    </div>
-
-    <div id="gameSection" class="hidden">
-        <div class="header">
-            <div>Balance: <b>Rs. <span id="bal">0</span></b></div>
-            <div>
-                <button onclick="location.href='wallet.html'">Wallet</button>
-                <button id="logoutBtn">Logout</button>
-            </div>
+    <div class="container">
+        <div class="balance-bar">
+            <div>Balance: Rs. <span id="userBalance">0</span></div>
+            <button onclick="location.href='wallet.html'" style="background:none; border:1px solid #00d2d3; color:white; border-radius:10px; cursor:pointer;">Wallet</button>
         </div>
-
-        <h1>Spin & Win</h1>
-        <div id="wheel"></div>
-        <button class="spin-btn" id="spinBtn">SPIN NOW</button>
+        
+        <h2>Spin & Win</h2>
+        <div class="wheel-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
+            <div id="wheel"></div>
+            <div class="center-nut"></div>
+        </div>
+        
+        <button class="spin-btn" onclick="spinNow()">SPIN NOW</button>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        // Tumhara exact config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-            authDomain: "kingmaker-crash.firebaseapp.com",
-            databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-            projectId: "kingmaker-crash",
-            storageBucket: "kingmaker-crash.firebasestorage.app",
-            messagingSenderId: "327400668393",
-            appId: "1:327400668393:web:0d02a340b9f5603f524478"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-
-        // Global function for button click
-        window.handleAuth = () => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            signInWithEmailAndPassword(auth, email, pass)
-                .catch(() => createUserWithEmailAndPassword(auth, email, pass))
-                .catch(err => alert("Error: " + err.message));
-        };
-
-        document.getElementById('logoutBtn').onclick = () => signOut(auth);
-
-        // Check Login State
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('authSection').classList.add('hidden');
-                document.getElementById('gameSection').classList.remove('hidden');
-                
-                // Realtime Balance Link
-                onValue(ref(db, 'users/' + user.uid + '/balance'), (snapshot) => {
-                    document.getElementById('bal').innerText = snapshot.val() || 0;
-                });
-            } else {
-                document.getElementById('authSection').classList.remove('hidden');
-                document.getElementById('gameSection').classList.add('hidden');
-            }
-        });
-
-        // Wheel Logic
-        let rotation = 0;
-        document.getElementById('spinBtn').onclick = () => {
-            rotation += Math.floor(Math.random() * 360) + 2000;
-            document.getElementById('wheel').style.transform = `rotate(${rotation}deg)`;
+        // [Aapki Firebase Config Yahan Aayegi]
+        // Spin Logic
+        let currentRotation = 0;
+        window.spinNow = () => {
+            currentRotation += Math.floor(Math.random() * 360) + 3600;
+            document.getElementById('wheel').style.transform = `rotate(${currentRotation}deg)`;
         };
     </script>
 </body>
