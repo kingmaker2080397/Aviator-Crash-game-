@@ -1,41 +1,69 @@
 <!DOCTYPE html>
 <html>
-<body style="background:#0b0f1a; color:white; font-family:sans-serif; padding:20px;">
-    <h2 style="color:#ffd700;">Admin Dashboard</h2>
-    <div id="list">Checking Requests...</div>
+<head>
+    <title>Kingmaker Admin Control</title>
+    <style>
+        body { background: #05070a; color: white; font-family: sans-serif; padding: 20px; }
+        .card { background: #1a1f2e; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #333; }
+        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
+        .approve { background: #ffd700; color: black; }
+    </style>
+</head>
+<body>
+    <h2 style="color: #ffd700;">Pending Win Requests</h2>
+    <div id="adminList">Loading data from Firebase...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Same as above */ };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+        authDomain: "kingmaker-crash.firebaseapp.com",
+        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+        projectId: "kingmaker-crash",
+        storageBucket: "kingmaker-crash.firebasestorage.app",
+        messagingSenderId: "327400668393",
+        appId: "1:327400668393:web:0d02a340b9f5603f524478"
+    };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    onValue(ref(db, 'requests'), (snap) => {
-        const div = document.getElementById("list");
-        div.innerHTML = "";
-        if(!snap.exists()) { div.innerHTML = "No requests found."; return; }
-        
-        snap.forEach(child => {
-            const d = child.val();
-            if(d.status === 'pending') {
-                div.innerHTML += `
-                <div style="background:#1a1f2e; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #333;">
-                    ${d.email} won <b>Rs.${d.amount}</b>
-                    <br><br>
-                    <button onclick="updateBal('${child.key}','${d.uid}',${d.amount})" style="background:#ffd700; border:none; padding:10px; border-radius:5px; cursor:pointer;">Approve & Add Balance</button>
+    // Fetch Requests
+    onValue(ref(db, 'requests'), (snapshot) => {
+        const list = document.getElementById("adminList");
+        list.innerHTML = "";
+        if(!snapshot.exists()) { list.innerHTML = "No pending requests found."; return; }
+
+        snapshot.forEach(child => {
+            const val = child.val();
+            if(val.status === 'pending') {
+                list.innerHTML += `
+                <div class="card">
+                    <p><b>User:</b> ${val.email}</p>
+                    <p><b>Amount:</b> Rs. ${val.amount}</p>
+                    <button class="approve" onclick="manage('${child.key}', '${val.uid}', ${val.amount})">APPROVE & ADD CASH</button>
                 </div>`;
             }
         });
     });
 
-    window.updateBal = async (key, uid, amt) => {
-        const s = await get(ref(db, `users/${uid}/balance`));
-        const newBal = (s.val() || 0) + parseFloat(amt);
-        await update(ref(db, `users/${uid}`), { balance: newBal });
-        await update(ref(db, `requests/${key}`), { status: 'approved' });
-        alert("Balance Updated!");
+    window.manage = async (id, uid, amt) => {
+        try {
+            const userBalRef = ref(db, `users/${uid}/balance`);
+            const snapshot = await get(userBalRef);
+            let currentBal = snapshot.val() || 0;
+            
+            // Update Balance
+            await update(ref(db, `users/${uid}`), { balance: currentBal + parseFloat(amt) });
+            // Mark Request as Completed
+            await update(ref(db, `requests/${id}`), { status: 'approved' });
+            
+            alert("Balance added successfully!");
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
     };
 </script>
 </body>
