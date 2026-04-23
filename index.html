@@ -3,279 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker Gold - Spin</title>
+    <title>Kingmaker Gold - Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --gold: #ffd700; 
-            --gold-glow: #ffcc00;
-            --dark: #05070a; 
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
-        }
-
-        body { 
-            background: radial-gradient(circle at top, #1a1f2e 0%, #05070a 100%);
-            color: white; 
-            font-family: 'Outfit', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            overflow: hidden; 
-        }
-
-        .app-container { 
-            width: 92%; 
-            max-width: 420px; 
-            text-align: center; 
-            position: relative;
-        }
-
-        /* Glass Header */
-        .header { 
-            background: var(--glass); 
-            backdrop-filter: blur(15px); 
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 24px; 
-            padding: 12px 20px; 
-            border: 1px solid var(--glass-border); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-
-        .bal { 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            background: linear-gradient(to right, #fff, var(--gold));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Wheel Styling */
-        .wheel-outer {
-            position: relative;
-            padding: 15px;
-            background: var(--glass);
-            border-radius: 50%;
-            border: 1px solid var(--glass-border);
-            display: inline-block;
-            margin-bottom: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-        }
-
-        .wheel-box { 
-            position: relative; 
-            width: 320px; 
-            height: 320px; 
-            border-radius: 50%; 
-            border: 5px solid #111;
-            overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-        }
-
-        #wheelCanvas { 
-            width: 100%; 
-            height: 100%; 
-            transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); 
-        }
-
-        .pointer { 
-            position: absolute; 
-            top: -15px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: 40px; 
-            z-index: 100;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-        }
-
-        /* Luxury Spin Button */
-        .spin-btn { 
-            background: linear-gradient(145deg, #ffd700, #b8860b); 
-            color: #000; 
-            width: 100%; 
-            padding: 18px; 
-            border-radius: 20px; 
-            font-size: 22px; 
-            font-weight: 800; 
-            border: none; 
-            margin: 20px 0; 
-            cursor: pointer; 
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            box-shadow: 0 10px 20px rgba(218, 165, 32, 0.3);
-            transition: 0.3s;
-        }
-
-        .spin-btn:active { transform: scale(0.96); }
-        .spin-btn:disabled { opacity: 0.6; filter: grayscale(1); }
-
-        /* Icon Grid */
-        .grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-        }
-
-        .btn-small { 
-            background: var(--glass); 
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border); 
-            color: #efefef; 
-            padding: 15px; 
-            border-radius: 18px; 
-            cursor: pointer; 
-            font-size: 14px; 
-            font-weight: 500;
-            transition: 0.2s;
-        }
-
-        .btn-small:hover { background: rgba(255,255,255,0.15); }
-        
-        .logout-btn {
-            background: rgba(255, 77, 77, 0.15);
-            border: 1px solid rgba(255, 77, 77, 0.3);
-            color: #ff4d4d;
-            padding: 8px 15px;
-            border-radius: 12px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-        }
+        :root { --gold: #ffd700; --dark: #05070a; --glass: rgba(255, 255, 255, 0.08); }
+        body { background: #05070a; color: white; font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        .app { width: 100%; max-width: 420px; padding: 20px; text-align: center; }
+        .card { background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .bal { font-size: 24px; font-weight: 700; color: var(--gold); }
+        .wheel-box { position: relative; width: 300px; height: 300px; margin: auto; }
+        #wheelCanvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); border: 5px solid #222; }
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; z-index: 10; }
+        .btn-main { background: linear-gradient(135deg, var(--gold), #b8860b); color: #000; width: 100%; padding: 15px; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; margin: 10px 0; font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-sub { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="header">
-        <div class="bal">✨ Rs. <span id="userBal">0</span></div>
-        <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-
-    <div class="wheel-outer">
-        <img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
-        <div class="wheel-box">
-            <canvas id="wheelCanvas" width="500" height="500"></canvas>
+<div class="app">
+    <div class="card">
+        <div style="display:flex; justify-content:space-between;">
+            <span>Welcome, User</span>
+            <button onclick="logout()" style="background:red; color:white; border:none; border-radius:5px;">Logout</button>
         </div>
+        <div class="bal">Rs. <span id="userBal">0</span></div>
     </div>
 
-    <button class="spin-btn" id="spinBtn">SPIN TO WIN</button>
+    <div class="wheel-box">
+        <img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
+        <canvas id="wheelCanvas" width="500" height="500"></canvas>
+    </div>
+
+    <button class="btn-main" id="spinBtn">SPIN NOW</button>
 
     <div class="grid">
-        <button class="btn-small" onclick="share()">🤝 Invite</button>
-        <button class="btn-small" onclick="share()">📢 Share App</button>
-        <button class="btn-small" onclick="location.href='wallet.html'">💳 Wallet</button>
-        <button class="btn-small">⚙️ Profile</button>
+        <button class="btn-sub" onclick="openModal('deposit')">💰 Deposit</button>
+        <button class="btn-sub" onclick="openModal('withdraw')">💸 Withdraw</button>
+        <button class="btn-sub" onclick="openModal('kyc')">🆔 KYC Upload</button>
+        <button class="btn-sub" onclick="shareApp()">📢 Invite</button>
     </div>
 </div>
 
 <script type="module">
-    // Firebase Config (Keep original)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue, push, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-        authDomain: "kingmaker-crash.firebaseapp.com",
-        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-        projectId: "kingmaker-crash",
-        storageBucket: "kingmaker-crash.firebasestorage.app",
-        messagingSenderId: "327400668393",
-        appId: "1:327400668393:web:0d02a340b9f5603f524478"
-    };
-
+    const firebaseConfig = { /* Aapki Firebase Config */ };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    const segments = ["5", "1000", "5000", "20", "1000", "2", "100", "5"];
+    const colors = ["#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700"];
     const canvas = document.getElementById("wheelCanvas");
     const ctx = canvas.getContext("2d");
-    const segments = ["5", "1000", "5000", "20", "1000", "2", "100", "5"];
-    
-    // UI Colors: Deep Navy and Vibrant Gold
-    const colors = ["#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700"];
 
     function draw() {
         const ang = (Math.PI * 2) / segments.length;
         segments.forEach((val, i) => {
-            ctx.beginPath(); 
-            ctx.fillStyle = colors[i]; 
-            ctx.moveTo(250,250);
-            ctx.arc(250,250,250, i*ang, (i+1)*ang); 
-            ctx.fill();
-            
-            // Add border to segments
-            ctx.strokeStyle = "rgba(255,255,255,0.1)";
-            ctx.stroke();
-
-            ctx.save(); 
-            ctx.translate(250,250); 
-            ctx.rotate(i*ang + ang/2);
-            ctx.fillStyle = colors[i]=="#ffd700" ? "#000" : "#fff"; 
-            ctx.font="bold 32px Outfit";
-            ctx.textAlign = "right";
-            ctx.fillText(val, 210, 10); 
-            ctx.restore();
+            ctx.beginPath(); ctx.fillStyle = colors[i]; ctx.moveTo(250,250);
+            ctx.arc(250,250,250, i*ang, (i+1)*ang); ctx.fill();
+            ctx.save(); ctx.translate(250,250); ctx.rotate(i*ang + ang/2);
+            ctx.fillStyle = colors[i]=="#ffd700"?"#000":"#fff"; ctx.font="bold 30px Outfit";
+            ctx.fillText(val, 130, 10); ctx.restore();
         });
-        
-        // Center Circle
-        ctx.beginPath();
-        ctx.arc(250, 250, 40, 0, 2 * Math.PI);
-        ctx.fillStyle = "#fff";
-        ctx.fill();
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "gold";
     }
     draw();
 
-    let rot = 0;
+    let currentRot = 0;
     onAuthStateChanged(auth, user => {
-        if(user) {
-            onValue(ref(db, `users/${user.uid}/balance`), s => {
-                document.getElementById("userBal").innerText = s.val() || 0;
-            });
-        }
+        if(user) onValue(ref(db, `users/${user.uid}/balance`), s => document.getElementById("userBal").innerText = s.val() || 0);
     });
 
-    document.getElementById("spinBtn").onclick = function() {
+    document.getElementById("spinBtn").onclick = async function() {
         this.disabled = true;
-        const move = Math.floor(Math.random() * 360) + 3600;
-        rot += move;
-        canvas.style.transform = `rotate(${rot}deg)`;
         
-        setTimeout(() => {
-            const index = Math.floor(((360 - (rot % 360) + 270) % 360) / 45);
-            const win = segments[index];
-            
-            Swal.fire({ 
-                title: 'CONGRATULATIONS!', 
-                text: `Rs. ${win} has been added to your requests.`, 
-                icon: 'success', 
-                background: '#1a1f2e',
-                color: '#fff',
-                confirmButtonColor: '#ffd700',
-                confirmButtonText: 'AWESOME'
-            });
+        // ADMIN CONTROL: Fetch "Next Result" from Firebase
+        const nextResultSnap = await get(ref(db, 'admin/next_result'));
+        let targetIndex;
+        
+        if(nextResultSnap.exists()) {
+            const targetValue = nextResultSnap.val().toString();
+            targetIndex = segments.indexOf(targetValue);
+            // Clear result after use so next spin is random unless admin sets it again
+            set(ref(db, 'admin/next_result'), null); 
+        } else {
+            targetIndex = Math.floor(Math.random() * segments.length);
+        }
 
-            push(ref(db, 'requests'), { 
-                uid: auth.currentUser.uid, 
-                email: auth.currentUser.email, 
-                amount: win, 
-                status: 'pending',
-                timestamp: Date.now()
-            });
+        // Calculate rotation to hit targetIndex at 12 o'clock
+        const extraDeg = (360 - (targetIndex * 45) - 270 + 360) % 360;
+        const totalSpin = 3600 + extraDeg;
+        currentRot += totalSpin;
+        
+        canvas.style.transform = `rotate(${currentRot}deg)`;
+
+        setTimeout(() => {
+            Swal.fire('Winner!', `You won Rs.${segments[targetIndex]}`, 'success');
+            push(ref(db, 'requests'), { uid: auth.currentUser.uid, email: auth.currentUser.email, amount: segments[targetIndex], status: 'pending', type: 'Win' });
             this.disabled = false;
         }, 5000);
     };
 
-    window.share = () => navigator.share({ title: 'Kingmaker Gold', text: 'Spin & Win Real Cash!', url: window.location.href });
+    window.openModal = (type) => Swal.fire({ title: type.toUpperCase(), input: 'text', showCancelButton: true });
     window.logout = () => signOut(auth).then(() => location.reload());
 </script>
 </body>
