@@ -1,48 +1,52 @@
 <!DOCTYPE html>
 <html>
-<head><title>Admin Dashboard</title></head>
-<body style="background:#000; color:#fff; font-family:sans-serif; padding:20px;">
-    <h2>Admin Dashboard - Control Panel</h2>
-    <div id="list">Checking for new requests...</div>
+<head><title>Kingmaker Admin</title></head>
+<body style="background:#0b0f1a; color:white; font-family:sans-serif; padding:20px;">
+    <h2 style="color:#ffd700;">Admin Control Panel</h2>
+    <div id="requestContainer">Waiting for data...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Paste your Config here */ };
+    const firebaseConfig = { /* Same Config */ };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    onValue(ref(db, 'requests'), (snap) => {
-        const listDiv = document.getElementById('list');
-        listDiv.innerHTML = "";
-        if (!snap.exists()) { listDiv.innerHTML = "No pending requests."; return; }
+    onValue(ref(db, 'requests'), (snapshot) => {
+        const container = document.getElementById("requestContainer");
+        container.innerHTML = "";
+        if(!snapshot.exists()) { container.innerHTML = "No pending requests."; return; }
 
-        snap.forEach(child => {
-            const d = child.val();
-            if(d.status === 'pending') {
-                listDiv.innerHTML += `
-                <div style="background:#222; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #444;">
-                    <b>User:</b> ${d.email} | <b>Won:</b> Rs.${d.amount}
-                    <div style="margin-top:10px;">
-                        <button onclick="manageBal('${child.key}', '${d.uid}', ${d.amount}, 'plus')" style="background:green; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px;">Approve (+)</button>
-                        <button onclick="manageBal('${child.key}', '${d.uid}', ${d.amount}, 'minus')" style="background:red; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px; margin-left:10px;">Reject (-)</button>
-                    </div>
+        snapshot.forEach(child => {
+            const data = child.val();
+            if(data.status === 'pending') {
+                container.innerHTML += `
+                <div style="background:#1a1f2e; padding:20px; border-radius:15px; margin-bottom:15px; border:1px solid #333;">
+                    <p><b>User:</b> ${data.email}</p>
+                    <p><b>Won:</b> Rs. ${data.amount} (${data.type})</p>
+                    <button onclick="approve('${child.key}', '${data.uid}', ${data.amount})" style="background:#ffd700; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">APPROVE (+)</button>
+                    <button onclick="reject('${child.key}')" style="background:#ff4d4d; color:white; border:none; padding:10px 20px; border-radius:5px; margin-left:10px; cursor:pointer;">REJECT</button>
                 </div>`;
             }
         });
     });
 
-    window.manageBal = async (key, uid, amt, action) => {
-        const balRef = ref(db, `users/${uid}/balance`);
-        const snap = await get(balRef);
-        let oldBal = snap.val() || 0;
-        let newBal = (action === 'plus') ? (oldBal + parseFloat(amt)) : (oldBal - parseFloat(amt));
+    window.approve = async (id, uid, amt) => {
+        const userRef = ref(db, `users/${uid}/balance`);
+        const currentSnap = await get(userRef);
+        const currentBal = currentSnap.val() || 0;
+        
+        await update(ref(db, `users/${uid}`), { balance: currentBal + parseFloat(amt) });
+        await update(ref(db, `requests/${id}`), { status: 'approved' });
+        alert("Balance Added Successfully!");
+    };
 
-        await update(ref(db, `users/${uid}`), { balance: newBal });
-        await update(ref(db, `requests/${key}`), { status: 'completed' });
-        alert("Balance Updated Successfully!");
+    window.reject = (id) => {
+        update(ref(db, `requests/${id}`), { status: 'rejected' });
+        alert("Request Rejected");
     };
 </script>
 </body>
 </html>
+
