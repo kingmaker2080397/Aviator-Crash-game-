@@ -1,52 +1,42 @@
 <!DOCTYPE html>
 <html>
-<head><title>Kingmaker Admin</title></head>
 <body style="background:#0b0f1a; color:white; font-family:sans-serif; padding:20px;">
-    <h2 style="color:#ffd700;">Admin Control Panel</h2>
-    <div id="requestContainer">Waiting for data...</div>
+    <h2 style="color:#ffd700;">Admin Dashboard</h2>
+    <div id="list">Checking Requests...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Same Config */ };
+    const firebaseConfig = { /* Same as above */ };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    onValue(ref(db, 'requests'), (snapshot) => {
-        const container = document.getElementById("requestContainer");
-        container.innerHTML = "";
-        if(!snapshot.exists()) { container.innerHTML = "No pending requests."; return; }
-
-        snapshot.forEach(child => {
-            const data = child.val();
-            if(data.status === 'pending') {
-                container.innerHTML += `
-                <div style="background:#1a1f2e; padding:20px; border-radius:15px; margin-bottom:15px; border:1px solid #333;">
-                    <p><b>User:</b> ${data.email}</p>
-                    <p><b>Won:</b> Rs. ${data.amount} (${data.type})</p>
-                    <button onclick="approve('${child.key}', '${data.uid}', ${data.amount})" style="background:#ffd700; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">APPROVE (+)</button>
-                    <button onclick="reject('${child.key}')" style="background:#ff4d4d; color:white; border:none; padding:10px 20px; border-radius:5px; margin-left:10px; cursor:pointer;">REJECT</button>
+    onValue(ref(db, 'requests'), (snap) => {
+        const div = document.getElementById("list");
+        div.innerHTML = "";
+        if(!snap.exists()) { div.innerHTML = "No requests found."; return; }
+        
+        snap.forEach(child => {
+            const d = child.val();
+            if(d.status === 'pending') {
+                div.innerHTML += `
+                <div style="background:#1a1f2e; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #333;">
+                    ${d.email} won <b>Rs.${d.amount}</b>
+                    <br><br>
+                    <button onclick="updateBal('${child.key}','${d.uid}',${d.amount})" style="background:#ffd700; border:none; padding:10px; border-radius:5px; cursor:pointer;">Approve & Add Balance</button>
                 </div>`;
             }
         });
     });
 
-    window.approve = async (id, uid, amt) => {
-        const userRef = ref(db, `users/${uid}/balance`);
-        const currentSnap = await get(userRef);
-        const currentBal = currentSnap.val() || 0;
-        
-        await update(ref(db, `users/${uid}`), { balance: currentBal + parseFloat(amt) });
-        await update(ref(db, `requests/${id}`), { status: 'approved' });
-        alert("Balance Added Successfully!");
-    };
-
-    window.reject = (id) => {
-        update(ref(db, `requests/${id}`), { status: 'rejected' });
-        alert("Request Rejected");
+    window.updateBal = async (key, uid, amt) => {
+        const s = await get(ref(db, `users/${uid}/balance`));
+        const newBal = (s.val() || 0) + parseFloat(amt);
+        await update(ref(db, `users/${uid}`), { balance: newBal });
+        await update(ref(db, `requests/${key}`), { status: 'approved' });
+        alert("Balance Updated!");
     };
 </script>
 </body>
 </html>
-
