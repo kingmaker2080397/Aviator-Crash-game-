@@ -3,31 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker Gold - Pro</title>
+    <title>Kingmaker Gold - Professional</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #ffd700; --dark: #05070a; --glass: rgba(255, 255, 255, 0.08); }
-        body { background: #05070a; color: white; font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        body { background: var(--dark); color: white; font-family: 'Outfit', sans-serif; margin: 0; display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
         .app { width: 100%; max-width: 420px; padding: 20px; text-align: center; }
-        .card { background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .bal { font-size: 24px; font-weight: 700; color: var(--gold); }
-        .wheel-box { position: relative; width: 300px; height: 300px; margin: auto; }
-        #wheelCanvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1); border: 5px solid #222; }
-        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; z-index: 10; }
-        .btn-main { background: linear-gradient(135deg, var(--gold), #b8860b); color: #000; width: 100%; padding: 15px; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; margin: 10px 0; font-size: 18px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-sub { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 10px; cursor: pointer; }
+        .header { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .bal { font-size: 22px; font-weight: 800; color: var(--gold); }
+        .wheel-box { position: relative; width: 320px; height: 320px; margin: auto; }
+        #wheelCanvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.15, 1); border: 8px solid #1a1f2e; }
+        .pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 45px; z-index: 100; }
+        .spin-btn { background: linear-gradient(135deg, var(--gold), #b8860b); color: #000; width: 100%; padding: 18px; border-radius: 15px; font-size: 20px; font-weight: 800; border: none; cursor: pointer; margin-top: 25px; box-shadow: 0 10px 20px rgba(218,165,32,0.3); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn-s { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 15px; cursor: pointer; font-size: 14px; }
     </style>
 </head>
 <body>
 <div class="app">
-    <div class="card">
-        <div style="display:flex; justify-content:space-between;">
-            <span>Welcome, User</span>
-            <button onclick="logout()" style="background:red; color:white; border:none; border-radius:5px;">Logout</button>
-        </div>
-        <div class="bal">Rs. <span id="userBal">0</span></div>
+    <div class="header">
+        <div class="bal">💰 Rs. <span id="userBal">0</span></div>
+        <button onclick="logout()" style="background:none; border:none; color:#ff4d4d; font-weight:bold;">Logout</button>
     </div>
 
     <div class="wheel-box">
@@ -35,30 +32,39 @@
         <canvas id="wheelCanvas" width="500" height="500"></canvas>
     </div>
 
-    <button class="btn-main" id="spinBtn">SPIN NOW</button>
+    <button class="spin-btn" id="spinBtn">SPIN TO WIN</button>
 
     <div class="grid">
-        <button class="btn-sub" onclick="openModal('deposit')">💰 Deposit</button>
-        <button class="btn-sub" onclick="openModal('withdraw')">💸 Withdraw</button>
-        <button class="btn-sub" onclick="openModal('kyc')">🆔 KYC Upload</button>
-        <button class="btn-sub" onclick="shareApp()">📢 Invite</button>
+        <button class="btn-s" onclick="location.href='deposit.html'">💰 Deposit</button>
+        <button class="btn-s" onclick="location.href='withdraw.html'">💸 Withdraw</button>
+        <button class="btn-s" onclick="uploadKYC()">🆔 KYC</button>
+        <button class="btn-s" onclick="invite()">📩 Invite</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, onValue, push, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Aapki Firebase Config */ };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+        authDomain: "kingmaker-crash.firebaseapp.com",
+        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+        projectId: "kingmaker-crash",
+        storageBucket: "kingmaker-crash.firebasestorage.app",
+        messagingSenderId: "327400668393",
+        appId: "1:327400668393:web:0d02a340b9f5603f524478"
+    };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const segments = ["5", "1000", "5000", "20", "1000", "2", "100", "5"];
-    const colors = ["#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700"];
     const canvas = document.getElementById("wheelCanvas");
     const ctx = canvas.getContext("2d");
+    const segments = ["5", "1000", "5000", "20", "1000", "2", "100", "5"];
+    const colors = ["#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700", "#0f172a", "#ffd700"];
 
     function draw() {
         const ang = (Math.PI * 2) / segments.length;
@@ -66,48 +72,49 @@
             ctx.beginPath(); ctx.fillStyle = colors[i]; ctx.moveTo(250,250);
             ctx.arc(250,250,250, i*ang, (i+1)*ang); ctx.fill();
             ctx.save(); ctx.translate(250,250); ctx.rotate(i*ang + ang/2);
-            ctx.fillStyle = colors[i]=="#ffd700"?"#000":"#fff"; ctx.font="bold 30px Outfit";
+            ctx.fillStyle = colors[i]=="#ffd700"?"#000":"#fff"; ctx.font="bold 32px Outfit";
             ctx.fillText(val, 130, 10); ctx.restore();
         });
     }
     draw();
 
-    let currentRot = 0;
+    let rot = 0;
     onAuthStateChanged(auth, user => {
-        if(user) onValue(ref(db, `users/${user.uid}/balance`), s => document.getElementById("userBal").innerText = s.val() || 0);
+        if(!user) { /* Login handle */ }
+        else {
+            onValue(ref(db, `users/${user.uid}/balance`), s => document.getElementById("userBal").innerText = s.val() || 0);
+        }
     });
 
     document.getElementById("spinBtn").onclick = async function() {
         this.disabled = true;
         
-        // ADMIN CONTROL: Fetch "Next Result" from Firebase
-        const nextResultSnap = await get(ref(db, 'admin/next_result'));
-        let targetIndex;
+        // --- RIGGED LOGIC START ---
+        const nextResSnap = await get(ref(db, 'admin/next_result'));
+        let targetVal;
         
-        if(nextResultSnap.exists()) {
-            const targetValue = nextResultSnap.val().toString();
-            targetIndex = segments.indexOf(targetValue);
-            // Clear result after use so next spin is random unless admin sets it again
-            set(ref(db, 'admin/next_result'), null); 
+        if(nextResSnap.exists() && nextResSnap.val()) {
+            targetVal = nextResSnap.val().toString();
+            set(ref(db, 'admin/next_result'), null); // Reset after use
         } else {
-            targetIndex = Math.floor(Math.random() * segments.length);
+            // Anti-Loss: 80% chance to get small amounts if no admin input
+            const safe = ["2", "5", "20"];
+            targetVal = Math.random() < 0.8 ? safe[Math.floor(Math.random()*safe.length)] : segments[Math.floor(Math.random()*segments.length)];
         }
-
-        // Calculate rotation to hit targetIndex at 12 o'clock
-        const extraDeg = (360 - (targetIndex * 45) - 270 + 360) % 360;
-        const totalSpin = 3600 + extraDeg;
-        currentRot += totalSpin;
         
-        canvas.style.transform = `rotate(${currentRot}deg)`;
+        const targetIdx = segments.indexOf(targetVal);
+        const extraDeg = (360 - (targetIdx * 45) - 270 + 360) % 360;
+        rot += (3600 + extraDeg);
+        canvas.style.transform = `rotate(${rot}deg)`;
 
         setTimeout(() => {
-            Swal.fire('Winner!', `You won Rs.${segments[targetIndex]}`, 'success');
-            push(ref(db, 'requests'), { uid: auth.currentUser.uid, email: auth.currentUser.email, amount: segments[targetIndex], status: 'pending', type: 'Win' });
+            Swal.fire({ title: 'Mubarak!', text: `Aap Rs.${targetVal} Jeet Gaye!`, icon: 'success', confirmButtonColor: '#ffd700' });
+            push(ref(db, 'requests'), { uid: auth.currentUser.uid, email: auth.currentUser.email, amount: targetVal, status: 'pending', type: 'Spin Win' });
             this.disabled = false;
         }, 5000);
     };
 
-    window.openModal = (type) => Swal.fire({ title: type.toUpperCase(), input: 'text', showCancelButton: true });
+    window.invite = () => navigator.share({ title: 'Kingmaker', text: 'Join and Win!', url: window.location.href });
     window.logout = () => signOut(auth).then(() => location.reload());
 </script>
 </body>
