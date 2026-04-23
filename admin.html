@@ -1,83 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ultimate Admin Control</title>
+    <title>Owner Dashboard</title>
     <style>
-        body { background: #0b0f1a; color: white; font-family: sans-serif; padding: 20px; }
+        body { background: #05070a; color: white; font-family: sans-serif; padding: 20px; }
         .box { background: #1a1f2e; padding: 20px; border-radius: 15px; border: 1px solid #ffd700; margin-bottom: 20px; }
-        select, input, button { padding: 10px; margin: 10px 0; width: 100%; border-radius: 5px; }
+        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; }
         button { background: #ffd700; font-weight: bold; cursor: pointer; }
+        .req { border-bottom: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
-    <h1>KINGMAKER ADMIN CONTROL</h1>
+    <h1>👑 ADMIN CONTROL PANEL</h1>
 
     <div class="box">
-        <h3>🎯 Control Next Spin Result</h3>
-        <p>Choose what the next player will win:</p>
-        <select id="nextNum">
-            <option value="2">Rs. 2 (Safe)</option>
-            <option value="5">Rs. 5 (Safe)</option>
-            <option value="20">Rs. 20 (Safe)</option>
+        <h3>🎯 Rig Next Spin (Select Result)</h3>
+        <select id="res">
+            <option value="2">Rs. 2</option>
+            <option value="5">Rs. 5</option>
+            <option value="20">Rs. 20</option>
             <option value="100">Rs. 100</option>
-            <option value="1000">Rs. 1000 (Big Win)</option>
-            <option value="5000">Rs. 5000 (Jackpot)</option>
+            <option value="1000">Rs. 1000</option>
+            <option value="5000">Rs. 5000</option>
         </select>
-        <button onclick="setNextResult()">Set Next Result</button>
+        <button onclick="setRes()">Lock Result</button>
     </div>
 
     <div class="box">
-        <h3>💳 Payment Methods</h3>
-        <input type="text" id="payMethod" placeholder="Enter EasyPaisa/JazzCash Number">
-        <button onclick="updatePayment()">Update Deposit Number</button>
+        <h3>💳 Update Deposit Number</h3>
+        <input id="num" placeholder="EasyPaisa Number">
+        <button onclick="setNum()">Save Number</button>
     </div>
 
     <div class="box">
-        <h3>👥 Pending Requests (Wins/Withdraws)</h3>
-        <div id="reqList">Loading...</div>
+        <h3>📩 Pending Approvals</h3>
+        <div id="list">Loading...</div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Aapki Firebase Config */ };
+    const firebaseConfig = { /* Same Config */ };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Set Next Number
-    window.setNextResult = () => {
-        const val = document.getElementById("nextNum").value;
-        set(ref(db, 'admin/next_result'), val);
-        alert("Next spin result set to Rs." + val);
-    };
+    window.setRes = () => { set(ref(db, 'admin/next_result'), document.getElementById('res').value); alert("Locked!"); };
+    window.setNum = () => { set(ref(db, 'admin/payment_info'), document.getElementById('num').value); alert("Updated!"); };
 
-    // Update Payment
-    window.updatePayment = () => {
-        const val = document.getElementById("payMethod").value;
-        set(ref(db, 'admin/payment_info'), val);
-        alert("Payment method updated!");
-    };
-
-    // Requests List
     onValue(ref(db, 'requests'), snap => {
-        const list = document.getElementById("reqList");
-        list.innerHTML = "";
-        snap.forEach(child => {
-            const d = child.val();
+        const div = document.getElementById("list"); div.innerHTML = "";
+        snap.forEach(c => {
+            const d = c.val();
             if(d.status === 'pending') {
-                list.innerHTML += `<div style="border-bottom:1px solid #444; padding:10px;">
-                    ${d.email} - <b>Rs.${d.amount}</b> (${d.type})
-                    <button onclick="approve('${child.key}','${d.uid}',${d.amount})">Approve & Add Bal</button>
-                </div>`;
+                div.innerHTML += `<div class="req">${d.email} - Rs.${d.amount} <button onclick="appr('${c.key}','${d.uid}',${d.amount})" style="width:auto;">OK</button></div>`;
             }
         });
     });
 
-    window.approve = async (id, uid, amt) => {
+    window.appr = async (key, uid, amt) => {
         const s = await get(ref(db, `users/${uid}/balance`));
         await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
-        await update(ref(db, `requests/${id}`), { status: 'approved' });
+        await update(ref(db, `requests/${key}`), { status: 'approved' });
         alert("Done!");
     };
 </script>
