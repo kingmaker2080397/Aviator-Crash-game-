@@ -1,45 +1,47 @@
 <!DOCTYPE html>
 <html>
-<head><title>Admin Panel</title></head>
-<body style="background:#111; color:white; font-family:sans-serif; padding:20px;">
-    <h1>Admin Dashboard</h1>
-    <div id="list">Loading...</div>
+<head><title>Admin Dashboard</title></head>
+<body style="background:#000; color:#fff; font-family:sans-serif; padding:20px;">
+    <h2>Admin Dashboard - Control Panel</h2>
+    <div id="list">Checking for new requests...</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Paste same config as above */ };
+    const firebaseConfig = { /* Paste your Config here */ };
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
     onValue(ref(db, 'requests'), (snap) => {
         const listDiv = document.getElementById('list');
         listDiv.innerHTML = "";
+        if (!snap.exists()) { listDiv.innerHTML = "No pending requests."; return; }
+
         snap.forEach(child => {
             const d = child.val();
             if(d.status === 'pending') {
                 listDiv.innerHTML += `
-                <div style="background:#222; padding:15px; margin-bottom:10px; border-radius:10px;">
-                    User: ${d.email} | Jeeta: <b>Rs.${d.amount}</b>
-                    <br><br>
-                    <button onclick="controlBal('${child.key}', '${d.uid}', ${d.amount}, 'plus')" style="background:green; color:white; padding:10px;">Approve (+)</button>
-                    <button onclick="controlBal('${child.key}', '${d.uid}', ${d.amount}, 'minus')" style="background:red; color:white; padding:10px;">Reject/Deduct (-)</button>
+                <div style="background:#222; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #444;">
+                    <b>User:</b> ${d.email} | <b>Won:</b> Rs.${d.amount}
+                    <div style="margin-top:10px;">
+                        <button onclick="manageBal('${child.key}', '${d.uid}', ${d.amount}, 'plus')" style="background:green; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px;">Approve (+)</button>
+                        <button onclick="manageBal('${child.key}', '${d.uid}', ${d.amount}, 'minus')" style="background:red; color:white; border:none; padding:8px 15px; cursor:pointer; border-radius:5px; margin-left:10px;">Reject (-)</button>
+                    </div>
                 </div>`;
             }
         });
     });
 
-    window.controlBal = async (reqKey, uid, amt, type) => {
+    window.manageBal = async (key, uid, amt, action) => {
         const balRef = ref(db, `users/${uid}/balance`);
         const snap = await get(balRef);
-        let current = snap.val() || 0;
+        let oldBal = snap.val() || 0;
+        let newBal = (action === 'plus') ? (oldBal + parseFloat(amt)) : (oldBal - parseFloat(amt));
 
-        let finalBal = (type === 'plus') ? (current + parseFloat(amt)) : (current - parseFloat(amt));
-        
-        await update(ref(db, `users/${uid}`), { balance: finalBal });
-        await update(ref(db, `requests/${reqKey}`), { status: 'completed' });
-        alert("Balance Updated!");
+        await update(ref(db, `users/${uid}`), { balance: newBal });
+        await update(ref(db, `requests/${key}`), { status: 'completed' });
+        alert("Balance Updated Successfully!");
     };
 </script>
 </body>
