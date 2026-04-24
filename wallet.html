@@ -1,41 +1,179 @@
 <!DOCTYPE html>
-<html>
-<head><title>Wallet</title></head>
-<body style="text-align:center; padding:50px; font-family:sans-serif;">
-    <div style="background:white; padding:30px; border-radius:20px; box-shadow:0 0 20px #ccc; display:inline-block;">
-        <h2>Wallet Request</h2>
-        <input type="number" id="amt" placeholder="Amount" style="padding:10px; margin:10px;"><br>
-        <button id="depBtn" style="background:green; color:white; padding:10px;">Deposit</button>
-        <button id="withBtn" style="background:red; color:white; padding:10px;">Withdraw</button>
-        <p><a href="index.html">Go Back</a></p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet - Kingmaker Gold</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --gold: #ffd700; 
+            --gold-dark: #b8860b;
+            --dark: #05070a; 
+            --dark-2: #0b1018;
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 215, 0, 0.15);
+            --green: #10b981;
+            --red: #ef4444;
+        }
+        * { box-sizing: border-box; }
+        body { 
+            background: radial-gradient(circle at 50% 0%, #1a1f2e 0%, var(--dark) 40%);
+            color: white; 
+            font-family: 'Outfit', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            min-height: 100vh; 
+            padding: 20px;
+        }
+        .wallet-card {
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(145deg, var(--glass), rgba(255,255,255,0.02));
+            backdrop-filter: blur(10px);
+            padding: 30px 24px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .title {
+            font-size: 26px;
+            font-weight: 900;
+            margin: 0 0 8px 0;
+            background: linear-gradient(180deg, var(--gold) 0%, #ffed4e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { color: #9ca3af; font-size: 13px; margin-bottom: 24px; }
+        
+        .bal-card {
+            background: var(--dark-2);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .bal-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; font-weight: 600; }
+        .bal-val { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 4px; }
+
+        .input-group { margin: 20px 0; }
+        .amount-input { 
+            background: var(--dark-2); 
+            border: 1px solid var(--gold-dark); 
+            color: white; 
+            padding: 14px; 
+            border-radius: 12px; 
+            width: 100%;
+            text-align: center; 
+            font-weight: 800; 
+            font-size: 20px;
+            outline: none;
+        }
+        .amount-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
+        
+        .chip-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .chip-btn {
+            background: rgba(255,215,0,0.08);
+            border: 1px solid var(--gold-dark);
+            color: var(--gold);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chip-btn:active { transform: scale(0.95); background: rgba(255,215,0,0.15); }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+        .action-btn {
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .action-btn:active { transform: scale(0.97); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .dep-btn { background: linear-gradient(135deg, var(--green), #059669); color: white; }
+        .with-btn { background: linear-gradient(135deg, var(--red), #dc2626); color: white; }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 24px;
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .back-link:hover { color: var(--gold); }
+
+        .swal2-popup {
+            background: var(--dark-2) !important;
+            color: white !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 20px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="wallet-card">
+        <h2 class="title">WALLET REQUEST</h2>
+        <p class="subtitle">Deposit or withdraw funds securely</p>
+
+        <div class="bal-card">
+            <div class="bal-label">CURRENT BALANCE</div>
+            <div class="bal-val">Rs. <span id="userBal">0</span></div>
+        </div>
+
+        <div class="input-group">
+            <input type="number" id="amt" class="amount-input" placeholder="Enter Amount" min="1">
+            <div class="chip-grid">
+                <button class="chip-btn" onclick="setAmount(100)">100</button>
+                <button class="chip-btn" onclick="setAmount(500)">500</button>
+                <button class="chip-btn" onclick="setAmount(1000)">1K</button>
+                <button class="chip-btn" onclick="setAmount(5000)">5K</button>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button id="depBtn" class="action-btn dep-btn">💰 DEPOSIT</button>
+            <button id="withBtn" class="action-btn with-btn">💸 WITHDRAW</button>
+        </div>
+
+        <a href="index.html" class="back-link">← Back to Game</a>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = { /* Same as index.html */ };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+        authDomain: "kingmaker-crash.firebaseapp.com",
+        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+        projectId: "kingmaker-crash",
+        storageBucket: "kingmaker-crash.firebasestorage.app",
+        messagingSenderId: "327400668393",
+        appId: "1:327400668393:web:0d02a340b9f5603f524478"
+    };
+    
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const makeRequest = (type) => {
-        const u = auth.currentUser;
-        const val = document.getElementById('amt').value;
-        if(!u || !val) return alert("Login/Amount missing");
-
-        push(ref(db, 'requests'), {
-            uid: u.uid,
-            email: u.email,
-            amount: parseFloat(val),
-            type: type,
-            status: 'pending'
-        }).then(() => alert("Request Sent!"));
-    };
-
-    document.getElementById('depBtn').onclick = () => makeRequest('deposit');
-    document.getElementById('withBtn').onclick = () => makeRequest('withdraw');
-</script>
-</body>
-</html>
+    let userBalance = 0;
+    let currentUser
