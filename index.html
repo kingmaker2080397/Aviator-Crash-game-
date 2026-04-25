@@ -11,15 +11,18 @@ body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;
 #winTicker{background:#000;border-bottom:2px solid #ffd700;padding:8px 0;overflow:hidden;white-space:nowrap;margin:-16px -16px 16px -16px}
 #tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px}
 @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-.hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:20px;align-items:center}
+.hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:16px;align-items:center}
 .bal{font-size:24px;font-weight:900;color:#ffd700}
-.leaderBox{background:#0b1018;border:2px solid #ffd700;border-radius:12px;margin-bottom:20px;padding:12px}
+.leaderBox{background:#0b1018;border:2px solid #ffd700;border-radius:12px;margin-bottom:16px;padding:12px;display:none}
+.leaderBox.show{display:block;animation:slideDown 0.3s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 .leaderTitle{text-align:center;color:#ffd700;font-size:16px;font-weight:900;margin-bottom:10px}
 .top1{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#000;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;font-weight:900}
 .top1.date{font-size:11px;color:#333;margin-top:4px}
 .leaderItem{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #222;font-size:13px}
 .leaderItem:last-child{border-bottom:none}
 .flag{font-size:16px;margin-right:6px}
+.leaderBtn{width:100%;background:#0b1018;border:2px solid #ffd700;color:#ffd700;padding:14px;border-radius:12px;font-weight:900;margin-bottom:16px;cursor:pointer}
 .bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
 .bet input{width:100px;padding:10px;border:1px solid #b8860b;background:#000;color:#fff;text-align:center;border-radius:8px;font-size:18px;font-weight:700}
 .wheel{position:relative;width:300px;height:300px;margin:20px auto}
@@ -34,7 +37,6 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 .btn{background:#0b1018;border:1px solid #b8860b;color:#fff;padding:16px;border-radius:12px;cursor:pointer;font-weight:700}
 .box{background:#0b1018;border:1px solid #b8860b;padding:15px;border-radius:12px;margin:15px 0}
 .num-display{background:#000;border:2px solid #10b981;padding:12px;border-radius:8px;color:#10b981;font-weight:900;font-size:18px;margin:10px 0;box-shadow:0 0 15px rgba(16,185,129,0.3)}
-.depositInfoBox{background:#0b1018;border:1px solid #10b981;padding:15px;border-radius:12px;margin:15px 0}
 </style>
 </head>
 <body>
@@ -52,7 +54,11 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700">LOGOUT</button>
 </div>
 
-<div class="leaderBox">
+<!-- LEADERBOARD BUTTON -->
+<button class="leaderBtn" onclick="toggleLeaderboard()">🏆 LEADERBOARD - TOP WINNERS</button>
+
+<!-- LEADERBOARD BOX - AB CHHUPA HUA HAI -->
+<div class="leaderBox" id="leaderBox">
   <div class="leaderTitle">🏆 TODAY'S TOP WINNERS 🏆</div>
   <div class="top1">
     <div style="font-size:18px">👑 #1 WINNER 👑</div>
@@ -60,12 +66,6 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
     <div class="date" id="todayDate"></div>
   </div>
   <div id="top10List"></div>
-</div>
-
-<div class="depositInfoBox">
-<h3>💰 Deposit Info</h3>
-<div class="num-display" id="adminDepositInfo">Loading...</div>
-<button onclick="copyDeposit()" style="background:#10b981;margin-top:10px;width:100%;padding:10px;border:none;border-radius:8px;color:#000;font-weight:900">📋 COPY NUMBER</button>
 </div>
 
 <div class="box">
@@ -107,7 +107,7 @@ const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDo
 const auth=getAuth(app),db=getDatabase(app);
 const segs=["2","100","5","5","1000","5000","20","1000"];
 const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
-let rot=0,ub=0,safe=false,adminPaymentData=null,adminNumberForCopy="";
+let rot=0,ub=0,safe=false;
 
 const TELEGRAM_SUPPORT_LINK = "https://t.me/+Tn9bUflQQtVlNGZk";
 
@@ -141,25 +141,6 @@ document.getElementById("myNum").value=n==="Not Set"?"":n;
 onValue(ref(db,'admin/safe_mode'),s=>safe=s.val()===true);
 });
 
-onValue(ref(db,'admin/payment_info'),s=>{
-  adminPaymentData=s.val();
-  let displayText = 'Not Set by Admin';
-  if(adminPaymentData){
-    if(typeof adminPaymentData === 'object' && adminPaymentData.type){
-      displayText = `${adminPaymentData.type}: <b>${adminPaymentData.number}</b><br>Name: <b>${adminPaymentData.name}</b>`;
-      adminNumberForCopy = adminPaymentData.number;
-    }else if(typeof adminPaymentData === 'string'){
-      displayText = adminPaymentData;
-      let match = adminPaymentData.match(/\d{10,11}/);
-      adminNumberForCopy = match? match[0] : adminPaymentData;
-    }else{
-      displayText = adminPaymentData;
-      adminNumberForCopy = adminPaymentData;
-    }
-  }
-  document.getElementById('adminDepositInfo').innerHTML = displayText;
-});
-
 const fakeWins=["🔥 Ali 🇵🇰 ne 15,000 PKR jeete!","💰 Fatima 🇸🇦 ne 8,500 PKR withdraw kiye!","🚀 John 🇺🇸 ne 50,000 PKR ka Cash Out!","💎 Ayesha 🇦🇪 ne 22,300 PKR jeete!","⚡ Usman 🇵🇰 ne 1,20,000 PKR withdraw kiye!","👑 Sarah 🇬🇧 ne 45,000 PKR ka Jackpot!"];
 document.getElementById('tickerContent').innerHTML=fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ")+" &nbsp;&nbsp;●&nbsp;&nbsp; "+fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ");
 
@@ -184,6 +165,10 @@ function updateLeaderboard(){
 updateLeaderboard();
 setInterval(updateLeaderboard,8000);
 
+window.toggleLeaderboard=()=>{
+  document.getElementById('leaderBox').classList.toggle('show');
+};
+
 window.addBet=a=>{let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
 window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
 window.saveMyNum=async()=>{
@@ -203,15 +188,6 @@ window.shareApp=()=>{
   }else{
     navigator.clipboard.writeText(window.location.href);
     Swal.fire("Copied!","Link copy ho gaya. Doston ko bhejo","success");
-  }
-};
-
-window.copyDeposit=()=>{
-  if(adminNumberForCopy){
-    navigator.clipboard.writeText(adminNumberForCopy);
-    Swal.fire("Copied!",`Number ${adminNumberForCopy} copy ho gaya`,"success");
-  }else{
-    Swal.fire("Error","Admin ne number set nahi kiya","error");
   }
 };
 
@@ -273,4 +249,4 @@ this.disabled=false;this.innerText="SPIN NOW";
 };
 </script>
 </body>
-</html>
+                                                          </html>
