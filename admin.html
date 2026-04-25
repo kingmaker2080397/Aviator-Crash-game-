@@ -6,144 +6,61 @@
 <title>Admin Panel</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
-body{background:#05070a;color:#fff;font-family:sans-serif;padding:16px}
-.box{background:#0b1018;border:1px solid #b8860b;padding:20px;border-radius:12px;margin:15px 0}
-h1,h2{color:#ffd700}
-input,select,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff;font-size:16px}
-button{background:#ffd700;color:#000;font-weight:900;cursor:pointer}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #b8860b;padding:10px;text-align:left;font-size:14px}
-th{background:#000;color:#ffd700}
-.switch{position:relative;display:inline-block;width:60px;height:34px}
-.switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#333;transition:.4s;border-radius:34px}
-.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background:#fff;transition:.4s;border-radius:50%}
-input:checked+.slider{background:#10b981}
-input:checked+.slider:before{transform:translateX(26px)}
-#mainContent{display:none}
+body{background:#05070a;color:#fff;font-family:sans-serif;padding:20px;text-align:center}
+.box{background:#0b1018;border:1px solid #b8860b;padding:20px;border-radius:12px;margin:10px 0}
+input,button,select{width:100%;padding:14px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff;font-size:16px}
+button{background:#ffd700;color:#000;font-weight:900}
 </style>
 </head>
 <body>
-<div id="loading" style="text-align:center;padding:50px;font-size:24px;color:#ffd700">Loading Admin Panel...</div>
-
-<div id="mainContent">
-<h1>👑 ADMIN PANEL</h1>
-
 <div class="box">
-<h2>💳 Deposit Payment Info</h2>
-<p style="color:#999;font-size:14px">Ye number/account user ko Deposit page pe dikhega</p>
+<h1>⚙️ ADMIN PANEL</h1>
+<h3>Deposit Info Set Karo</h3>
 <select id="payType">
   <option value="JazzCash">JazzCash</option>
-  <option value="Easypaisa">Easypaisa</option>
-  <option value="Bank">Bank Account</option>
-  <option value="USDT">USDT Wallet</option>
+  <option value="EasyPaisa">EasyPaisa</option>
+  <option value="Bank">Bank Transfer</option>
 </select>
-<input id="payNumber" placeholder="Number ya Wallet Address" type="text">
-<input id="payName" placeholder="Account Name" type="text">
-<button onclick="savePaymentInfo()">SAVE PAYMENT INFO</button>
-<div style="margin-top:15px;padding:12px;background:#000;border-radius:8px">
-  <b>Current:</b> <span id="currentPay" style="color:#10b981">Loading...</span>
-</div>
-</div>
-
-<div class="box">
-<h2>🎯 Rig Next Result</h2>
-<input id="rigAmt" placeholder="Amount likho: 2, 5, 100, 1000, 5000" type="number">
-<button onclick="setRig()">SET NEXT RESULT</button>
-<div style="margin-top:15px;padding:12px;background:#000;border-radius:8px">
-  <b>Next:</b> <span id="nextRig" style="color:#ffd700">Random</span>
-</div>
-</div>
-
-<div class="box">
-<h2>🛡️ Safe Mode</h2>
-<label class="switch">
-  <input type="checkbox" id="safeToggle" onchange="toggleSafe()">
-  <span class="slider"></span>
-</label>
-<span id="safeStatus" style="margin-left:15px;font-weight:900">OFF</span>
-<p style="color:#999;font-size:14px;margin-top:10px">ON = Bet se kam paisa milega. 100 pe 10-90, 5000 pe 1000-4000</p>
-</div>
-
-<div class="box">
-<h2>📋 Requests</h2>
-<table>
-<thead><tr><th>Type</th><th>User</th><th>Amount</th><th>Details</th><th>Action</th></tr></thead>
-<tbody id="reqBody"></tbody>
-</table>
-</div>
+<input id="payNumber" placeholder="Account Number: 03442585087" type="tel">
+<input id="payName" placeholder="Account Name: Abubakar">
+<button onclick="savePaymentInfo()">SAVE DEPOSIT INFO</button>
+<button onclick="location.href='./index.html'" style="background:#555">BACK TO GAME</button>
 </div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,onValue,set,update,remove,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// TUMHARA KINGMAKER-CRASH CONFIG
-const firebaseConfig = {
-  apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-  authDomain: "kingmaker-crash.firebaseapp.com",
-  databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-  projectId: "kingmaker-crash",
-  storageBucket: "kingmaker-crash.firebasestorage.app",
-  messagingSenderId: "327400668393",
-  appId: "1:327400668393:web:0d02a340b9f5603f524478",
-  measurementId: "G-LVVD55RDQV"
-};
-
-const app=initializeApp(firebaseConfig);
+const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
 const auth=getAuth(app),db=getDatabase(app);
 
-// TUMHARI UID YAHAN SET KAR DI - AB KUCH NAHI KARNA
-const ADMIN_UID="dSSoZIfxvNc8EJTXLJvJBfyJehR2"; 
-
-onAuthStateChanged(auth,async(u)=>{
-if(!u){
-  document.getElementById('loading').innerHTML='<h1 style="color:red">Please Login First</h1><p>Game mein login karo, phir admin panel kholo</p><button onclick="location.href=`./login.html`" style="background:#ffd700;color:#000;padding:12px 24px;border:none;border-radius:8px;font-weight:900;margin-top:20px">GO TO LOGIN</button>';
-  return;
-}
-if(u.uid!==ADMIN_UID){
-  document.getElementById('loading').innerHTML='<h1 style="color:red">Access Denied</h1><p style="color:#999">Your UID: '+u.uid+'</p><p style="color:#999">Admin UID: '+ADMIN_UID+'</p>';
-  return;
-}
-document.getElementById('loading').style.display='none';
-document.getElementById('mainContent').style.display='block';
-loadData();
+onAuthStateChanged(auth,async u=>{
+  if(!u)return location.replace("./login.html");
+  // Purana data load karo
+  const snap = await get(ref(db,'admin/payment_info'));
+  if(snap.exists() && typeof snap.val() === 'object'){
+    document.getElementById('payType').value = snap.val().type || 'JazzCash';
+    document.getElementById('payNumber').value = snap.val().number || '';
+    document.getElementById('payName').value = snap.val().name || '';
+  }
 });
-
-function loadData(){
-onValue(ref(db,'admin/payment_info'),s=>{
-let d=s.val()||{};
-document.getElementById('currentPay').innerText=d.type?`${d.type}: ${d.number} (${d.name})`:'Not Set';
-});
-onValue(ref(db,'admin/next_result'),s=>{document.getElementById('nextRig').innerText=s.val()||'Random'});
-onValue(ref(db,'admin/safe_mode'),s=>{
-let on=s.val()===true;
-document.getElementById('safeToggle').checked=on;
-document.getElementById('safeStatus').innerText=on?'ON':'OFF';
-document.getElementById('safeStatus').style.color=on?'#10b981':'#ef4444';
-});
-onValue(ref(db,'requests'),s=>{
-let html='';
-s.forEach(c=>{
-let r=c.val(),id=c.key;
-html+=`<tr><td>${r.type}</td><td>${r.email}</td><td>${r.amount}</td><td>${r.type==='deposit'?'TRX: '+r.trx:'To: '+r.user_number}</td><td><button onclick="approveReq('${id}')" style="background:#10b981;padding:6px 12px;font-size:12px">APPROVE</button> <button onclick="rejectReq('${id}')" style="background:#ef4444;padding:6px 12px;font-size:12px">REJECT</button></td></tr>`;
-});
-document.getElementById('reqBody').innerHTML=html||'<tr><td colspan="5" style="text-align:center">No Requests</td></tr>';
-});
-}
 
 window.savePaymentInfo=async()=>{
-let t=document.getElementById('payType').value,n=document.getElementById('payNumber').value.trim(),name=document.getElementById('payName').value.trim();
-if(!n||!name)return Swal.fire("Error","Sab fields bharo","error");
-await set(ref(db,'admin/payment_info'),{type:t,number:n,name:name});
-Swal.fire("Saved!","Payment info update ho gaya","success");
-document.getElementById('payNumber').value='';document.getElementById('payName').value='';
+  let type = document.getElementById('payType').value;
+  let number = document.getElementById('payNumber').value.trim();
+  let name = document.getElementById('payName').value.trim();
+
+  if(!number ||!name) return Swal.fire("Error","Number aur Name dono daalo","error");
+
+  await set(ref(db,'admin/payment_info'),{
+    type: type,
+    number: number,
+    name: name
+  });
+
+  Swal.fire("Saved!","Deposit info sab mobiles pe update ho gaya","success");
 };
-window.setRig=async()=>{let a=document.getElementById('rigAmt').value;if(!a)return Swal.fire("Error","Amount daalo","error");await set(ref(db,'admin/next_result'),parseFloat(a));Swal.fire("Set!","Next result: "+a,"success");document.getElementById('rigAmt').value='';};
-window.toggleSafe=async()=>{await set(ref(db,'admin/safe_mode'),document.getElementById('safeToggle').checked)};
-window.approveReq=async(id)=>{let s=await get(ref(db,`requests/${id}`)),r=s.val();if(r.type==='deposit'){let ub=(await get(ref(db,`users/${r.uid}/balance`))).val()||0;await update(ref(db,`users/${r.uid}`),{balance:ub+r.amount})}await remove(ref(db,`requests/${id}`));Swal.fire("Approved!","Done","success")};
-window.rejectReq=async(id)=>{await remove(ref(db,`requests/${id}`));Swal.fire("Rejected!","Done","success")};
 </script>
 </body>
 </html>
