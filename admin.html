@@ -6,87 +6,159 @@
 <title>Admin Panel</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
-body{background:#05070a;color:#fff;font-family:sans-serif;padding:20px;margin:0}
-.box{background:#0b1018;border:1px solid #b8860b;padding:20px;border-radius:12px;margin:10px 0}
-h1{color:#ffd700;text-align:center}
+body{background:#05070a;color:#fff;font-family:sans-serif;padding:16px}
+.box{background:#0b1018;border:1px solid #b8860b;padding:20px;border-radius:12px;margin:15px 0}
+h1,h2{color:#ffd700}
 input,select,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff;font-size:16px}
 button{background:#ffd700;color:#000;font-weight:900;cursor:pointer}
-.req{background:#000;padding:10px;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
-.btn{padding:8px 12px;border:none;border-radius:6px;font-weight:700;cursor:pointer}
-.ok{background:#10b981;color:#fff}
-.no{background:#ef4444;color:#fff}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #b8860b;padding:10px;text-align:left;font-size:14px}
+th{background:#000;color:#ffd700}
+.switch{position:relative;display:inline-block;width:60px;height:34px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#333;transition:.4s;border-radius:34px}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background:#fff;transition:.4s;border-radius:50%}
+input:checked+.slider{background:#10b981}
+input:checked+.slider:before{transform:translateX(26px)}
 </style>
 </head>
 <body>
-<div class="box">
 <h1>👑 ADMIN PANEL</h1>
-<p id="email" style="text-align:center;color:#999"></p>
-<button onclick="logout()" style="background:#ef4444">LOGOUT</button>
-</div>
 
 <div class="box">
-<h3>🎯 Rig Next Spin</h3>
-<select id="rigVal">
-<option value="">Random</option>
-<option value="2">2</option><option value="5">5</option>
-<option value="20">20</option><option value="100">100</option>
-<option value="1000">1000</option><option value="5000">5000</option>
+<h2>💳 Deposit Payment Info</h2>
+<p style="color:#999;font-size:14px">Ye number/account user ko Deposit page pe dikhega</p>
+<select id="payType">
+  <option value="JazzCash">JazzCash</option>
+  <option value="Easypaisa">Easypaisa</option>
+  <option value="Bank">Bank Account</option>
+  <option value="USDT">USDT Wallet</option>
 </select>
-<button onclick="setRig()">LOCK</button>
+<input id="payNumber" placeholder="Number ya Wallet Address" type="text">
+<input id="payName" placeholder="Account Name" type="text">
+<button onclick="savePaymentInfo()">SAVE PAYMENT INFO</button>
+<div style="margin-top:15px;padding:12px;background:#000;border-radius:8px">
+  <b>Current:</b> <span id="currentPay" style="color:#10b981">Loading...</span>
+</div>
 </div>
 
 <div class="box">
-<h3>🛡️ Safe Mode: <span id="safe">OFF</span></h3>
-<button onclick="toggleSafe()">TOGGLE SAFE MODE</button>
+<h2>🎯 Rig Next Result</h2>
+<input id="rigAmt" placeholder="Amount likho: 2, 5, 100, 1000, 5000" type="number">
+<button onclick="setRig()">SET NEXT RESULT</button>
+<div style="margin-top:15px;padding:12px;background:#000;border-radius:8px">
+  <b>Next:</b> <span id="nextRig" style="color:#ffd700">Random</span>
+</div>
 </div>
 
 <div class="box">
-<h3>📥 Requests</h3>
-<div id="reqList">Loading...</div>
+<h2>🛡️ Safe Mode</h2>
+<label class="switch">
+  <input type="checkbox" id="safeToggle" onchange="toggleSafe()">
+  <span class="slider"></span>
+</label>
+<span id="safeStatus" style="margin-left:15px;font-weight:900">OFF</span>
+<p style="color:#999;font-size:14px;margin-top:10px">ON = Bet se kam paisa milega. 100 pe 10-90, 5000 pe 1000-4000</p>
+</div>
+
+<div class="box">
+<h2>📋 Requests</h2>
+<table>
+<thead><tr><th>Type</th><th>User</th><th>Amount</th><th>Details</th><th>Action</th></tr></thead>
+<tbody id="reqBody"></tbody>
+</table>
 </div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,set,onValue,update,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,onValue,set,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
 const auth=getAuth(app),db=getDatabase(app);
-const ADMINS=["abu143un@gmail.com"];
-let safeMode=false;
+const ADMIN_UID="4ZEwGlG4lbPQvMYl5XfowPejXcF3"; // Apna UID daalo
 
 onAuthStateChanged(auth,u=>{
-if(!u)return location.replace("./login.html");
-if(!ADMINS.includes(u.email.toLowerCase()))return Swal.fire("Access Denied","Your: "+u.email,"error").then(()=>signOut(auth).then(()=>location.replace("./login.html")));
-document.getElementById('email').innerText=u.email;
-loadReq();loadSafe();
+if(!u||u.uid!==ADMIN_UID)return document.body.innerHTML='<h1 style="color:red;text-align:center">Access Denied</h1>';
+loadData();
 });
 
-function loadSafe(){onValue(ref(db,'admin/safe_mode'),s=>{safeMode=s.val()===true;document.getElementById('safe').innerText=safeMode?'ON':'OFF';document.getElementById('safe').style.color=safeMode?'#10b981':'#ef4444';});}
+function loadData(){
+// Payment Info Load
+onValue(ref(db,'admin/payment_info'),s=>{
+let d=s.val()||{};
+document.getElementById('currentPay').innerText=d.type?`${d.type}: ${d.number} (${d.name})`:'Not Set';
+});
 
-window.setRig=async()=>{await set(ref(db,'admin/next_result'),document.getElementById('rigVal').value||null);Swal.fire("Locked!","Next spin rigged","success")};
-window.toggleSafe=async()=>{await set(ref(db,'admin/safe_mode'),!safeMode);Swal.fire("Safe Mode",!safeMode?"ON":"OFF","success")};
-window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
+// Rig Load
+onValue(ref(db,'admin/next_result'),s=>{
+document.getElementById('nextRig').innerText=s.val()||'Random';
+});
 
-function loadReq(){
+// Safe Mode Load
+onValue(ref(db,'admin/safe_mode'),s=>{
+let on=s.val()===true;
+document.getElementById('safeToggle').checked=on;
+document.getElementById('safeStatus').innerText=on?'ON':'OFF';
+document.getElementById('safeStatus').style.color=on?'#10b981':'#ef4444';
+});
+
+// Requests Load
 onValue(ref(db,'requests'),s=>{
-let h='';if(!s.exists()){document.getElementById('reqList').innerHTML='No requests';return}
-s.forEach(c=>{let d=c.val();if(d.status==='pending')h+=`<div class="req"><div><b>${d.type}</b> - Rs.${d.amount}<br><small>${d.email}</small></div><div><button class="btn ok" onclick="appReq('${c.key}','${d.uid}',${d.amount},'${d.type}')">✓</button> <button class="btn no" onclick="rejReq('${c.key}','${d.uid}',${d.amount},'${d.type}')">✕</button></div></div>`});
-document.getElementById('reqList').innerHTML=h||'No pending';
+let html='';
+s.forEach(c=>{
+let r=c.val(),id=c.key;
+html+=`<tr>
+<td>${r.type}</td>
+<td>${r.email}</td>
+<td>${r.amount}</td>
+<td>${r.type==='deposit'?'TRX: '+r.trx:'To: '+r.user_number}</td>
+<td><button onclick="approveReq('${id}')" style="background:#10b981;padding:6px 12px;font-size:12px">APPROVE</button>
+<button onclick="rejectReq('${id}')" style="background:#ef4444;padding:6px 12px;font-size:12px">REJECT</button></td>
+</tr>`;
+});
+document.getElementById('reqBody').innerHTML=html||'<tr><td colspan="5" style="text-align:center">No Requests</td></tr>';
 });
 }
 
-window.appReq=async(id,uid,amt,type)=>{
-if(type==='Win'||type==='deposit'){let s=await get(ref(db,`users/${uid}/balance`));await update(ref(db,`users/${uid}`),{balance:(s.val()||0)+amt})}
-await update(ref(db,`requests/${id}`),{status:'approved'});
-Swal.fire("Approved!","","success");
+window.savePaymentInfo=async()=>{
+let t=document.getElementById('payType').value;
+let n=document.getElementById('payNumber').value.trim();
+let name=document.getElementById('payName').value.trim();
+if(!n||!name)return Swal.fire("Error","Sab fields bharo","error");
+await set(ref(db,'admin/payment_info'),{type:t,number:n,name:name});
+Swal.fire("Saved!","Payment info update ho gaya","success");
+document.getElementById('payNumber').value='';
+document.getElementById('payName').value='';
 };
 
-window.rejReq=async(id,uid,amt,type)=>{
-if(type==='withdraw'){let s=await get(ref(db,`users/${uid}/balance`));await update(ref(db,`users/${uid}`),{balance:(s.val()||0)+amt})}
-await update(ref(db,`requests/${id}`),{status:'rejected'});
-Swal.fire("Rejected!","","success");
+window.setRig=async()=>{
+let a=document.getElementById('rigAmt').value;
+if(!a)return Swal.fire("Error","Amount daalo","error");
+await set(ref(db,'admin/next_result'),parseFloat(a));
+Swal.fire("Set!","Next result: "+a,"success");
+document.getElementById('rigAmt').value='';
+};
+
+window.toggleSafe=async()=>{
+let on=document.getElementById('safeToggle').checked;
+await set(ref(db,'admin/safe_mode'),on);
+};
+
+window.approveReq=async(id)=>{
+let s=await get(ref(db,`requests/${id}`)),r=s.val();
+if(r.type==='deposit'){
+let ub=(await get(ref(db,`users/${r.uid}/balance`))).val()||0;
+await update(ref(db,`users/${r.uid}`),{balance:ub+r.amount});
+}
+await remove(ref(db,`requests/${id}`));
+Swal.fire("Approved!","Done","success");
+};
+
+window.rejectReq=async(id)=>{
+await remove(ref(db,`requests/${id}`));
+Swal.fire("Rejected!","Done","success");
 };
 </script>
 </body>
-                                  </html>
+  </html>
