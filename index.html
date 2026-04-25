@@ -8,16 +8,11 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
 body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;text-align:center}
-
-/* 1. FAKE TICKER PATTI */
 #winTicker{background:#000;border-bottom:2px solid #ffd700;padding:8px 0;overflow:hidden;white-space:nowrap;margin:-16px -16px 16px -16px}
 #tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px}
 @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-
 .hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:20px;align-items:center}
 .bal{font-size:24px;font-weight:900;color:#ffd700}
-
-/* 2. LEADERBOARD TOP 10 */
 .leaderBox{background:#0b1018;border:2px solid #ffd700;border-radius:12px;margin-bottom:20px;padding:12px}
 .leaderTitle{text-align:center;color:#ffd700;font-size:16px;font-weight:900;margin-bottom:10px}
 .top1{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#000;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;font-weight:900}
@@ -25,7 +20,6 @@ body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;
 .leaderItem{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #222;font-size:13px}
 .leaderItem:last-child{border-bottom:none}
 .flag{font-size:16px;margin-right:6px}
-
 .bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
 .bet input{width:100px;padding:10px;border:1px solid #b8860b;background:#000;color:#fff;text-align:center;border-radius:8px;font-size:18px;font-weight:700}
 .wheel{position:relative;width:300px;height:300px;margin:20px auto}
@@ -45,7 +39,6 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 </head>
 <body>
 
-<!-- 1. FAKE WITHDRAWAL TICKER -->
 <div id="winTicker">
   <div id="tickerContent"></div>
 </div>
@@ -59,7 +52,6 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700">LOGOUT</button>
 </div>
 
-<!-- 2. LEADERBOARD TOP 10 -->
 <div class="leaderBox">
   <div class="leaderTitle">🏆 TODAY'S TOP WINNERS 🏆</div>
   <div class="top1">
@@ -70,7 +62,6 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
   <div id="top10List"></div>
 </div>
 
-<!-- 3. DEPOSIT INFO - FIXED -->
 <div class="depositInfoBox">
 <h3>💰 Deposit Info</h3>
 <div class="num-display" id="adminDepositInfo">Loading...</div>
@@ -100,11 +91,9 @@ BET: <input type="number" id="bet" value="10" min="1">
 
 <div class="grid">
 <button class="btn" onclick="location.href='./wallet.html'">💰 WALLET</button>
-<!-- SHARE BUTTON WAPAS AA GAYA -->
 <button class="btn" onclick="shareApp()">📤 SHARE</button>
 </div>
 
-<!-- CUSTOMER SUPPORT BUTTON - TELEGRAM LINK YAHAN DALNA -->
 <div style="margin-top:20px">
 <button onclick="openTelegram()" style="width:100%;background:#0088cc;color:#fff;padding:16px;border:none;border-radius:12px;font-weight:900;font-size:16px">💬 CUSTOMER SUPPORT</button>
 </div>
@@ -120,9 +109,8 @@ const segs=["2","100","5","5","1000","5000","20","1000"];
 const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
 let rot=0,ub=0,safe=false,adminPaymentData=null;
 
-// YAHAN APNA TELEGRAM LINK DALNA JAANU
-const TELEGRAM_SUPPORT_LINK = "https://t.me/YourUsername"; // ← YE BADAL DENA
-const TELEGRAM_GROUP_LINK = "https://t.me/YourGroupLink"; // ← YE BHI BADAL DENA
+// YE WALA LINK AB 100% CHALEGA JAANU
+const TELEGRAM_SUPPORT_LINK = "https://t.me/+Tn9bUflQQtVlNGZk";
 
 function drawWheel(showNumbers=true){
 ctx.clearRect(0,0,500,500);
@@ -154,7 +142,6 @@ document.getElementById("myNum").value=n==="Not Set"?"":n;
 onValue(ref(db,'admin/safe_mode'),s=>safe=s.val()===true);
 });
 
-// DEPOSIT INFO FIX - OBJECT OBJECT KHATAM
 onValue(ref(db,'admin/payment_info'),s=>{
   adminPaymentData=s.val();
   if(adminPaymentData&&adminPaymentData.type){
@@ -164,11 +151,9 @@ onValue(ref(db,'admin/payment_info'),s=>{
   }
 });
 
-// FAKE TICKER
 const fakeWins=["🔥 Ali 🇵🇰 ne 15,000 PKR jeete!","💰 Fatima 🇸🇦 ne 8,500 PKR withdraw kiye!","🚀 John 🇺🇸 ne 50,000 PKR ka Cash Out!","💎 Ayesha 🇦🇪 ne 22,300 PKR jeete!","⚡ Usman 🇵🇰 ne 1,20,000 PKR withdraw kiye!","👑 Sarah 🇬🇧 ne 45,000 PKR ka Jackpot!"];
 document.getElementById('tickerContent').innerHTML=fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ")+" &nbsp;&nbsp;●&nbsp;&nbsp; "+fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ");
 
-// LEADERBOARD
 const fakeNames=["Ali Khan","Sara Ahmed","Usman Ali","Fatima Noor","Ahmed Raza","Ayesha Malik","Bilal Shah","Zara Sheikh","Hassan Jan","John Smith"];
 const flags=["🇵🇰","🇸🇦","🇦🇪","🇺🇸","🇬🇧","🇹🇷","🇶🇦","🇮🇳","🇧🇩","🇨🇳"];
 const amounts=[150000,120000,98000,85000,67000,50000,45000,32000,25000,18000];
@@ -199,7 +184,6 @@ await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
 Swal.fire("Saved!","Number save ho gaya","success");
 };
 
-// SHARE BUTTON WAPAS AA GAYA
 window.shareApp=()=>{
   if(navigator.share){
     navigator.share({
@@ -213,7 +197,6 @@ window.shareApp=()=>{
   }
 };
 
-// COPY DEPOSIT NUMBER
 window.copyDeposit=()=>{
   if(adminPaymentData&&adminPaymentData.number){
     navigator.clipboard.writeText(adminPaymentData.number);
@@ -221,9 +204,8 @@ window.copyDeposit=()=>{
   }
 };
 
-// TELEGRAM SUPPORT
 window.openTelegram=()=>{
-  window.open(TELEGRAM_SUPPORT_LINK,'_blank');
+  window.location.href = TELEGRAM_SUPPORT_LINK;
 };
 
 document.getElementById("spinBtn").onclick=async function(){
