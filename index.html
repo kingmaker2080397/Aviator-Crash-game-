@@ -3,169 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Kingmaker Gold</title>
+<title>KingMaker Crash</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;text-align:center}
-.hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:20px;align-items:center}
-.bal{font-size:24px;font-weight:900;color:#ffd700}
-.bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
-.bet input{width:100px;padding:10px;border:1px solid #b8860b;background:#000;color:#fff;text-align:center;border-radius:8px;font-size:18px;font-weight:700}
-.wheel{position:relative;width:300px;height:300px;margin:20px auto}
-canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s}
-.canvas-blur{filter:blur(10px) brightness(0.4)}
-.pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%) rotate(180deg);width:50px;z-index:10;opacity:0.2}
-.result-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#00d4ff;text-shadow:0 0 20px #00d4ff,0 0 40px #00d4ff,0 0 60px #0099ff;z-index:20;display:none;animation:zoomIn 0.6s cubic-bezier(0.34,1.56,0.64,1)}
-@keyframes zoomIn{from{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:0}to{transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:1}}
-.spin{width:100%;padding:18px;background:linear-gradient(45deg,#ffd700,#ffed4e);color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 5px 20px rgba(255,215,0,0.4)}
-.spin:disabled{opacity:0.5}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-.btn{background:#0b1018;border:1px solid #b8860b;color:#fff;padding:16px;border-radius:12px;cursor:pointer;font-weight:700}
-.box{background:#0b1018;border:1px solid #b8860b;padding:15px;border-radius:12px;margin:15px 0}
-.num-display{background:#000;border:2px solid #10b981;padding:12px;border-radius:8px;color:#10b981;font-weight:900;font-size:18px;margin:10px 0;box-shadow:0 0 15px rgba(16,185,129,0.3)}
+body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:0}
+.header{background:#0b1018;padding:12px;border-bottom:2px solid #b8860b;text-align:center}
+.balance{color:#ffd700;font-size:20px;font-weight:900}
+.gameBox{padding:16px}
+
+/* FAKE TICKER PATTI */
+#winTicker{background:#000;border-bottom:2px solid #ffd700;padding:6px 0;overflow:hidden;white-space:nowrap}
+#tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px}
+@keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+/* LEADERBOARD */
+.leaderBox{background:#0b1018;border:2px solid #ffd700;border-radius:12px;margin:16px;padding:12px}
+.leaderTitle{text-align:center;color:#ffd700;font-size:18px;font-weight:900;margin-bottom:8px}
+.top1{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#000;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;font-weight:900}
+.top1.date{font-size:12px;color:#333}
+.leaderItem{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #333;font-size:14px}
+.leaderItem:last-child{border-bottom:none}
+.flag{font-size:18px;margin-right:6px}
+
+button{width:100%;padding:14px;margin:8px 0;border-radius:8px;border:none;background:#ffd700;color:#000;font-weight:900;font-size:16px}
+input{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff}
 </style>
 </head>
 <body>
-<div class="hdr">
-<div>
-<small>BALANCE</small>
-<div class="bal">Rs. <span id="bal">0</span></div>
-<small id="userEmail" style="color:#999;font-size:10px"></small>
-</div>
-<button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700">LOGOUT</button>
+
+<!-- 1. FAKE WITHDRAWAL PATTI -->
+<div id="winTicker">
+  <div id="tickerContent"></div>
 </div>
 
-<div class="box">
-<h3>📱 Your Withdraw Number</h3>
-<div class="num-display" id="savedNum">Not Set</div>
-<input id="myNum" placeholder="03XX-XXXXXXX" type="tel" style="background:#000;border:1px solid #b8860b;color:#fff;padding:12px;border-radius:8px;width:100%;font-size:16px">
-<button onclick="saveMyNum()" style="background:#10b981;margin-top:10px;width:100%;padding:14px;border:none;border-radius:8px;color:#000;font-weight:900">SAVE NUMBER</button>
+<!-- 2. HEADER -->
+<div class="header">
+  <div>Balance: <span class="balance" id="userBalance">0 PKR</span></div>
 </div>
 
-<div class="bet">
-BET: <input type="number" id="bet" value="10" min="1">
-<button onclick="addBet(10)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+10</button>
-<button onclick="addBet(50)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+50</button>
+<!-- 3. FAKE LEADERBOARD TOP 10 -->
+<div class="leaderBox">
+  <div class="leaderTitle">🏆 TODAY'S TOP WINNERS 🏆</div>
+  <div class="top1" id="top1Box">
+    <div style="font-size:22px">👑 #1 WINNER 👑</div>
+    <div id="top1Name">Loading...</div>
+    <div class="date" id="todayDate"></div>
+  </div>
+  <div id="top10List"></div>
 </div>
 
-<div class="wheel">
-<img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
-<canvas id="w" width="500" height="500"></canvas>
-<div class="result-box" id="resultBox"></div>
-</div>
+<!-- 4. GAME AREA -->
+<div class="gameBox">
+  <h2 style="color:#ffd700;text-align:center">Crash Game</h2>
+  <input id="betAmount" type="number" placeholder="Bet Amount">
+  <button onclick="placeBet()">BET</button>
+  <button onclick="cashOut()">CASH OUT</button>
+  <div style="text-align:center;font-size:48px;color:#10b981;margin:20px 0" id="multiplier">1.00x</div>
 
-<button class="spin" id="spinBtn">SPIN NOW</button>
-
-<div class="grid">
-<button class="btn" onclick="location.href='./wallet.html'">💰 WALLET</button>
-<button class="btn" onclick="Swal.fire('KYC','Coming Soon','info')">🆔 KYC</button>
+  <!-- DEPOSIT INFO FIX - Yahan show hoga -->
+  <div style="background:#0b1018;padding:12px;border-radius:8px;margin-top:20px;border:1px solid #b8860b">
+    <b style="color:#ffd700">Deposit Info:</b>
+    <div id="depositInfo" style="color:#10b981;margin-top:8px">Loading...</div>
+  </div>
 </div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,onValue,get,update,set}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
+const firebaseConfig = {
+  apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+  authDomain: "kingmaker-crash.firebaseapp.com",
+  databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+  projectId: "kingmaker-crash",
+  storageBucket: "kingmaker-crash.firebasestorage.app",
+  messagingSenderId: "327400668393",
+  appId: "1:327400668393:web:0d02a340b9f5603f524478"
+};
+
+const app=initializeApp(firebaseConfig);
 const auth=getAuth(app),db=getDatabase(app);
-const segs=["2","100","5","5","1000","5000","20","1000"];
-const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
-let rot=0,ub=0,safe=false;
 
-function drawWheel(showNumbers=true){
-ctx.clearRect(0,0,500,500);
-ctx.translate(250,250);
-for(let i=0;i<segs.length;i++){
-let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
-ctx.beginPath();ctx.fillStyle=i%2===0?"#1a1f2e":"#0d1117";
-ctx.moveTo(0,0);ctx.arc(0,0,250,s,e);ctx.fill();
-ctx.strokeStyle="#b8860b";ctx.lineWidth=2;ctx.stroke();
-if(showNumbers){
-ctx.save();ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
-// Wheel ke numbers ab Blue hain - aankh ko achhe lagenge
-ctx.fillStyle="#00d4ff";ctx.shadowColor="#00d4ff";ctx.shadowBlur=10;
-ctx.font="900 36px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);
-ctx.restore();
-}}
-ctx.translate(-250,-250);
-}
-drawWheel(true);
+// 1. DEPOSIT INFO FIX - [object Object] ka solution
+onValue(ref(db,'admin/payment_info'),s=>{
+  let d=s.val();
+  if(d && d.type){
+    document.getElementById('depositInfo').innerHTML = `${d.type}: <b>${d.number}</b><br>Name: <b>${d.name}</b>`;
+  } else {
+    document.getElementById('depositInfo').innerText = 'Payment info not set';
+  }
+});
 
+// 2. USER BALANCE
 onAuthStateChanged(auth,u=>{
-if(!u)return location.replace("./login.html");
-document.getElementById("userEmail").innerText=u.email;
-onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById("bal").innerText=ub.toLocaleString()});
-onValue(ref(db,`users/${u.uid}/withdraw_number`),s=>{
-let n=s.val()||"Not Set";
-document.getElementById("savedNum").innerText=n;
-document.getElementById("myNum").value=n==="Not Set"?"":n;
-});
-onValue(ref(db,'admin/safe_mode'),s=>safe=s.val()===true);
+  if(u){
+    onValue(ref(db,`users/${u.uid}/balance`),s=>{
+      document.getElementById('userBalance').innerText = (s.val()||0) + ' PKR';
+    });
+  }
 });
 
-window.addBet=a=>{let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
-window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
-window.saveMyNum=async()=>{
-let n=document.getElementById('myNum').value.trim();
-if(!n)return Swal.fire("Error","Number daalo","error");
-await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
-Swal.fire("Saved!","Number save ho gaya","success");
-};
+// 3. FAKE WITHDRAWAL TICKER
+const fakeWins = [
+  "🔥 Ali 🇵🇰 ne 15,000 PKR jeete!",
+  "💰 Fatima 🇸🇦 ne 8,500 PKR withdraw kiye!",
+  "🚀 John 🇺🇸 ne 50,000 PKR ka Cash Out!",
+  "💎 Ayesha 🇦🇪 ne 22,300 PKR jeete!",
+  "⚡ Usman 🇵🇰 ne 1,20,000 PKR withdraw kiye!",
+  "👑 Sarah 🇬🇧 ne 45,000 PKR ka Jackpot!",
+  "🎯 Ahmed 🇶🇦 ne 9,800 PKR jeete!",
+  "💵 Maria 🇹🇷 ne 67,000 PKR withdraw kiye!"
+];
+document.getElementById('tickerContent').innerHTML = fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ") + " &nbsp;&nbsp;●&nbsp;&nbsp; " + fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ");
 
-document.getElementById("spinBtn").onclick=async function(){
-let b=parseFloat(document.getElementById("bet").value);
-if(b>ub)return Swal.fire("Error","Balance kam hai","error");
-if(b<1)return Swal.fire("Error","Min bet 1","error");
-this.disabled=true;this.innerText="SPINNING...";
-await update(ref(db,`users/${auth.currentUser.uid}`),{balance:ub-b});
+// 4. FAKE LEADERBOARD TOP 10 - Har 5 second mein change
+const fakeNames = ["Ali Khan","Sara Ahmed","Usman Ali","Fatima Noor","Ahmed Raza","Ayesha Malik","Bilal Shah","Zara Sheikh","Hassan Jan","Mariam Bibi","John Smith","Li Wei","Omar Farooq"];
+const flags = ["🇵🇰","🇸🇦","🇦🇪","🇺🇸","🇬🇧","🇹🇷","🇶🇦","🇮🇳","🇧🇩","🇨🇳"];
+const amounts = [150000,120000,98000,85000,67000,50000,45000,32000,25000,18000];
 
-c.classList.add('canvas-blur');
-drawWheel(false);
-resultBox.style.display='none';
-rot+=3600+Math.random()*360;
-c.style.transform=`rotate(${rot}deg)`;
+function updateLeaderboard(){
+  // Date
+  document.getElementById('todayDate').innerText = new Date().toLocaleDateString('en-GB');
 
-let rs=await get(ref(db,'admin/next_result')),winAmount;
-if(rs.exists()&&rs.val()){
-  winAmount=parseFloat(rs.val());
-  await set(ref(db,'admin/next_result'),null);
-}else if(safe){
-  if(b>=5000) winAmount=Math.floor(Math.random()*3000)+1000;
-  else if(b>=1000) winAmount=Math.floor(Math.random()*800)+100;
-  else if(b>=100) winAmount=Math.floor(Math.random()*80)+10;
-  else winAmount=Math.floor(Math.random()*b*0.8)+2;
-}else{
-  winAmount=parseFloat(segs[Math.floor(Math.random()*segs.length)]);
+  // Top 1 Random
+  let top1Name = fakeNames[Math.floor(Math.random()*fakeNames.length)];
+  let top1Flag = flags[Math.floor(Math.random()*flags.length)];
+  let top1Amount = amounts[0] + Math.floor(Math.random()*10000);
+  document.getElementById('top1Name').innerHTML = `${top1Flag} ${top1Name} - ${top1Amount.toLocaleString()} PKR`;
+
+  // Top 2-10 Random
+  let html = '';
+  for(let i=1; i<10; i++){
+    let name = fakeNames[Math.floor(Math.random()*fakeNames.length)];
+    let flag = flags[Math.floor(Math.random()*flags.length)];
+    let amount = amounts[i] + Math.floor(Math.random()*5000);
+    html += `<div class="leaderItem">
+      <span><span class="flag">${flag}</span> #${i+1} ${name}</span>
+      <span style="color:#10b981;font-weight:700">${amount.toLocaleString()} PKR</span>
+    </div>`;
+  }
+  document.getElementById('top10List').innerHTML = html;
 }
+updateLeaderboard();
+setInterval(updateLeaderboard, 5000); // Har 5 sec mein names change
 
-setTimeout(async()=>{
-let nb=ub-b+winAmount;
-await update(ref(db,`users/${auth.currentUser.uid}`),{balance:nb});
-
-c.classList.remove('canvas-blur');
-drawWheel(true);
-resultBox.innerText=winAmount;
-resultBox.style.display='block';
-
-// PHOOL/CONFETTI - MAZA AA JAYEGA
-confetti({
-  particleCount:150,
-  spread:100,
-  origin:{y:0.6},
-  colors:['#00d4ff','#ffd700','#ff0066','#10b981']
-});
-
-Swal.fire({
-  title:"🎉 WINNER!",
-  html:`<span style="font-size:48px;color:#00d4ff;text-shadow:0 0 20px #00d4ff">Rs. ${winAmount}</span>`,
-  background:'#0b1018',
-  color:'#fff',
-  confirmButtonColor:'#00d4ff'
-});
-this.disabled=false;this.innerText="SPIN NOW";
-},4000);
-};
+// GAME FUNCTIONS - Ye tumhare purane code se lena
+window.placeBet=()=>{Swal.fire("Demo","Game logic yahan lagao","info")};
+window.cashOut=()=>{Swal.fire("Demo","Cash out logic yahan lagao","info")};
 </script>
 </body>
 </html>
