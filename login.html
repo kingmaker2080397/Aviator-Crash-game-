@@ -68,7 +68,7 @@
      .tab-btn.active { background: var(--gold); color: #000; }
      .input-group { margin-bottom: 16px; text-align: left; }
      .input-label { font-size: 13px; color: #9ca3af; font-weight: 600; margin-bottom: 6px; display: block; }
-     .input-field {
+     .input-field, select {
             background: var(--dark-2);
             border: 1px solid var(--gold-dark);
             color: white;
@@ -79,7 +79,7 @@
             font-size: 15px;
             outline: none;
         }
-     .input-field:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
+     .input-field:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
      .action-btn {
             width: 100%;
             padding: 16px;
@@ -154,6 +154,18 @@
             <div class="input-group">
                 <label class="input-label">Password</label>
                 <input type="password" id="signupPassword" class="input-field" placeholder="Min 6 characters">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Mobile Number</label>
+                <input type="tel" id="signupMobile" class="input-field" placeholder="03XX-XXXXXXX">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Withdrawal Method</label>
+                <select id="signupMethod" class="input-field">
+                    <option value="EasyPaisa">EasyPaisa</option>
+                    <option value="JazzCash">JazzCash</option>
+                    <option value="Bank">Bank Transfer</option>
+                </select>
             </div>
             <button class="action-btn" id="signupBtn" onclick="signup()">CREATE ACCOUNT</button>
         </div>
@@ -231,10 +243,13 @@
     window.signup = async () => {
         const email = document.getElementById('signupEmail').value;
         const password = document.getElementById('signupPassword').value;
+        const mobile = document.getElementById('signupMobile').value;
+        const method = document.getElementById('signupMethod').value;
         const btn = document.getElementById('signupBtn');
 
-        if (!email ||!password) return Swal.fire("Error", "Email/Password required", "error");
+        if (!email ||!password ||!mobile) return Swal.fire("Error", "All fields required", "error");
         if (password.length < 6) return Swal.fire("Error", "Password must be 6+ characters", "error");
+        if (mobile.length < 11) return Swal.fire("Error", "Valid mobile number required", "error");
 
         btn.disabled = true;
         btn.innerText = "CREATING...";
@@ -243,6 +258,8 @@
             const userCred = await createUserWithEmailAndPassword(auth, email, password);
             await set(ref(db, `users/${userCred.user.uid}`), {
                 email: email,
+                mobile: mobile,
+                withdrawMethod: method,
                 balance: 0,
                 createdAt: Date.now()
             });
@@ -259,8 +276,32 @@
             const userRef = ref(db, `users/${result.user.uid}`);
             const snap = await get(userRef);
             if (!snap.exists()) {
+                const { value: mobile } = await Swal.fire({
+                    title: 'Complete Profile',
+                    input: 'tel',
+                    inputLabel: 'Mobile Number',
+                    inputPlaceholder: '03XX-XXXXXXX',
+                    confirmButtonColor: '#ffd700',
+                    inputValidator: (value) => {
+                        if (!value || value.length < 11) {
+                            return 'Valid mobile number required!'
+                        }
+                    }
+                });
+                const { value: method } = await Swal.fire({
+                    title: 'Withdrawal Method',
+                    input: 'select',
+                    inputOptions: {
+                        'EasyPaisa': 'EasyPaisa',
+                        'JazzCash': 'JazzCash',
+                        'Bank': 'Bank Transfer'
+                    },
+                    confirmButtonColor: '#ffd700'
+                });
                 await set(userRef, {
                     email: result.user.email,
+                    mobile: mobile,
+                    withdrawMethod: method,
                     balance: 0,
                     createdAt: Date.now()
                 });
