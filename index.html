@@ -12,8 +12,11 @@ body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;
 .bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
 .bet input{width:100px;padding:10px;border:1px solid #b8860b;background:#000;color:#fff;text-align:center;border-radius:8px;font-size:18px;font-weight:700}
 .wheel{position:relative;width:300px;height:300px;margin:20px auto}
-canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transition:transform 5s cubic-bezier(0.17,0.67,0.12,0.99);transform-origin:center center}
-.pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%) rotate(180deg);width:50px;z-index:10}
+canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s}
+.canvas-blur{filter:blur(8px) brightness(0.6)}
+.pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%) rotate(180deg);width:50px;z-index:10;opacity:0.3}
+.result-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:72px;font-weight:900;color:#ffd700;text-shadow:0 0 30px #ffd700;z-index:20;display:none;animation:zoomIn 0.5s}
+@keyframes zoomIn{from{transform:translate(-50%,-50%) scale(0);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
 .spin{width:100%;padding:18px;background:#ffd700;color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer}
 .spin:disabled{opacity:0.5}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
@@ -36,7 +39,7 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 <h3>📱 Your Withdraw Number</h3>
 <div class="num-display" id="savedNum">Not Set</div>
 <input id="myNum" placeholder="03XX-XXXXXXX" type="tel" style="background:#000;border:1px solid #b8860b;color:#fff;padding:12px;border-radius:8px;width:100%;font-size:16px">
-<button onclick="saveMyNum()" style="background:#10b981;margin-top:10px">SAVE NUMBER</button>
+<button onclick="saveMyNum()" style="background:#10b981;margin-top:10px;width:100%;padding:14px;border:none;border-radius:8px;color:#000;font-weight:900">SAVE NUMBER</button>
 </div>
 
 <div class="bet">
@@ -48,6 +51,7 @@ BET: <input type="number" id="bet" value="10" min="1">
 <div class="wheel">
 <img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
 <canvas id="w" width="500" height="500"></canvas>
+<div class="result-box" id="resultBox"></div>
 </div>
 
 <button class="spin" id="spinBtn">SPIN NOW</button>
@@ -64,20 +68,24 @@ import{getDatabase,ref,onValue,get,update,set}from"https://www.gstatic.com/fireb
 
 const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
 const auth=getAuth(app),db=getDatabase(app);
-const segs=["2","100","5","5","1000","5000","20","1000"],deg=360/segs.length;
-const c=document.getElementById("w"),ctx=c.getContext("2d");
+const segs=["2","100","5","5","1000","5000","20","1000"];
+const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
 let rot=0,ub=0,safe=false;
 
-// FIX 1: Wheel center se draw karo
+function drawWheel(showNumbers=true){
+ctx.clearRect(0,0,500,500);
 ctx.translate(250,250);
 for(let i=0;i<segs.length;i++){
-let s=(i*deg-90)*Math.PI/180,e=((i+1)*deg-90)*Math.PI/180;
+let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
 ctx.beginPath();ctx.fillStyle=i%2===0?"#ffd700":"#0d1117";
 ctx.moveTo(0,0);ctx.arc(0,0,250,s,e);ctx.fill();
-ctx.save();ctx.rotate(((i+0.5)*deg-90)*Math.PI/180);
+if(showNumbers){
+ctx.save();ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
 ctx.fillStyle=i%2===0?"#000":"#fff";ctx.font="900 38px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);ctx.restore();
-}
+}}
 ctx.translate(-250,-250);
+}
+drawWheel(true);
 
 onAuthStateChanged(auth,u=>{
 if(!u)return location.replace("./login.html");
@@ -107,24 +115,40 @@ if(b<1)return Swal.fire("Error","Min bet 1","error");
 this.disabled=true;this.innerText="SPINNING...";
 await update(ref(db,`users/${auth.currentUser.uid}`),{balance:ub-b});
 
-let rs=await get(ref(db,'admin/next_result')),win;
-if(rs.exists()&&rs.val()){win=rs.val().toString();await set(ref(db,'admin/next_result'),null)}
-else if(safe){let o=["2","5"].filter(v=>parseFloat(v)<=b);win=o.length?o[Math.floor(Math.random()*o.length)]:"2"}
-else win=segs[Math.floor(Math.random()*segs.length)];
-
-// FIX 2: Alignment 100% accurate
-let idx=[];segs.forEach((v,i)=>{if(v===win)idx.push(i)});
-let t=idx[Math.floor(Math.random()*idx.length)];
-let ang=360-(t*deg+(deg/2));
-rot+=3600+ang;
+// Blur + hide numbers during spin
+c.classList.add('canvas-blur');
+drawWheel(false);
+resultBox.style.display='none';
+rot+=3600+Math.random()*360;
 c.style.transform=`rotate(${rot}deg)`;
 
+let rs=await get(ref(db,'admin/next_result')),winAmount;
+if(rs.exists()&&rs.val()){
+  winAmount=parseFloat(rs.val()); // Admin ne jo set kiya wahi milega
+  await set(ref(db,'admin/next_result'),null);
+}else if(safe){
+  // SAFE MODE LOGIC: Bet se kam do
+  if(b>=5000) winAmount=Math.floor(Math.random()*3000)+1000; // 5000 pe 1000-4000
+  else if(b>=1000) winAmount=Math.floor(Math.random()*800)+100; // 1000 pe 100-900
+  else if(b>=100) winAmount=Math.floor(Math.random()*80)+10; // 100 pe 10-90
+  else winAmount=Math.floor(Math.random()*b*0.8)+2; // 2 se 80% tak
+}else{
+  winAmount=parseFloat(segs[Math.floor(Math.random()*segs.length)]);
+}
+
 setTimeout(async()=>{
-let nb=ub-b+parseFloat(win);
+let nb=ub-b+winAmount;
 await update(ref(db,`users/${auth.currentUser.uid}`),{balance:nb});
-Swal.fire("WINNER!","You won Rs. "+win,"success");
+
+// Show result
+c.classList.remove('canvas-blur');
+drawWheel(true);
+resultBox.innerText=winAmount;
+resultBox.style.display='block';
+
+Swal.fire("WINNER!","You won Rs. "+winAmount,"success");
 this.disabled=false;this.innerText="SPIN NOW";
-},5000);
+},4000);
 };
 </script>
 </body>
