@@ -1,520 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingmaker Admin - Owner Panel</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --gold: #ffd700;
-            --gold-dark: #b8860b;
-            --dark: #05070a;
-            --dark-2: #0b1018;
-            --glass: rgba(255, 255, 255, 0.06);
-            --glass-border: rgba(255, 215, 0, 0.15);
-            --green: #10b981;
-            --red: #ef4444;
-            --blue: #3b82f6;
-            --purple: #8b5cf6;
-        }
-        * { box-sizing: border-box; }
-        body {
-            background: radial-gradient(circle at 20% 0%, #1a1f2e 0%, var(--dark) 50%);
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-       .container { max-width: 1200px; margin: 0 auto; }
-       .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-        }
-       .title {
-            font-size: 32px;
-            font-weight: 900;
-            margin: 0;
-            background: linear-gradient(180deg, var(--gold) 0%, #ffed4e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-       .admin-email { color: #9ca3af; font-size: 14px; margin-top: 8px; }
-       .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-       .stat-card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-        }
-       .stat-label { font-size: 12px; color: #9ca3af; font-weight: 600; letter-spacing: 1px; }
-       .stat-val { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 8px; }
-       .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-       .card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            padding: 24px;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
-        }
-       .card-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin: 0 0 16px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        select, input {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: 1px solid var(--gold-dark);
-            background: var(--dark-2);
-            color: white;
-            font-weight: 600;
-            font-size: 15px;
-            outline: none;
-        }
-        select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
-       .btn {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: none;
-            font-weight: 800;
-            font-size: 15px;
-            cursor: pointer;
-        }
-       .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #000; }
-       .btn-blue { background: linear-gradient(135deg, var(--blue), #2563eb); color: white; }
-       .btn-purple { background: linear-gradient(135deg, var(--purple), #7c3aed); color: white; }
-       .btn-red { background: linear-gradient(135deg, var(--red), #dc2626); color: white; }
-       .filter-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-       .tab-btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--glass-border);
-            background: var(--dark-2);
-            color: #9ca3af;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-        }
-       .tab-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
-       .req-list { max-height: 500px; overflow-y: auto; }
-       .req-box {
-            background: var(--dark-2);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-       .req-info { flex: 1; text-align: left; }
-       .req-email { font-weight: 700; font-size: 14px; }
-       .req-meta { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-       .req-amount { font-weight: 900; font-size: 18px; color: var(--gold); }
-       .req-actions { display: flex; gap: 6px; }
-       .mini-btn {
-            padding: 8px 14px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 700;
-            font-size: 12px;
-            cursor: pointer;
-        }
-       .approve-btn { background: var(--green); color: white; }
-       .reject-btn { background: var(--red); color: white; }
-       .logout-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(239,68,68,0.1);
-            border: 1px solid rgba(239,68,68,0.3);
-            color: #ff6b6b;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            z-index: 1000;
-        }
-       .toggle-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--dark-2);
-            padding: 14px;
-            border-radius: 12px;
-            margin: 10px 0;
-       }
-       .toggle-label { font-weight: 700; font-size: 15px; }
-       .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-            background: #333;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: background 0.3s;
-       }
-       .toggle-switch.active { background: var(--green); }
-       .toggle-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-       }
-       .toggle-switch.active .toggle-slider { transform: translateX(30px); }
-       .swal2-popup {
-            background: var(--dark-2)!important;
-            color: white!important;
-            border: 1px solid var(--glass-border)!important;
-        }
-        #loadingScreen {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+body{background:#05070a;color:#fff;font-family:sans-serif;padding:20px;margin:0}
+.box{background:#0b1018;border:1px solid #b8860b;padding:20px;border-radius:12px;margin:10px 0}
+h1{color:#ffd700;text-align:center}
+input,select,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff;font-size:16px}
+button{background:#ffd700;color:#000;font-weight:900;cursor:pointer}
+.req{background:#000;padding:10px;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+.btn{padding:8px 12px;border:none;border-radius:6px;font-weight:700;cursor:pointer}
+.ok{background:#10b981;color:#fff}
+.no{background:#ef4444;color:#fff}
+</style>
 </head>
 <body>
-    <div id="loadingScreen">
-        <div style="text-align:center">
-            <h2 style="color:var(--gold)">Loading Admin Panel...</h2>
-        </div>
-    </div>
+<div class="box">
+<h1>👑 ADMIN PANEL</h1>
+<p id="email" style="text-align:center;color:#999"></p>
+<button onclick="logout()" style="background:#ef4444">LOGOUT</button>
+</div>
 
-    <button class="logout-btn" onclick="logout()">LOGOUT</button>
+<div class="box">
+<h3>🎯 Rig Next Spin</h3>
+<select id="rigVal">
+<option value="">Random</option>
+<option value="2">2</option><option value="5">5</option>
+<option value="20">20</option><option value="100">100</option>
+<option value="1000">1000</option><option value="5000">5000</option>
+</select>
+<button onclick="setRig()">LOCK</button>
+</div>
 
-    <div class="container">
-        <div class="header">
-            <h1 class="title">👑 KINGMAKER OWNER PANEL</h1>
-            <div class="admin-email" id="adminEmail">Loading...</div>
-        </div>
+<div class="box">
+<h3>🛡️ Safe Mode: <span id="safe">OFF</span></h3>
+<button onclick="toggleSafe()">TOGGLE SAFE MODE</button>
+</div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">TOTAL USERS</div>
-                <div class="stat-val" id="totalUsers">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">PENDING REQUESTS</div>
-                <div class="stat-val" id="pendingReq">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">NEXT RIGGED</div>
-                <div class="stat-val" id="nextRig">None</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">SAFE MODE</div>
-                <div class="stat-val" id="safeModeStatus">OFF</div>
-            </div>
-        </div>
-
-        <div class="grid">
-            <div>
-                <div class="card">
-                    <h3 class="card-title">🎯 Rig Next Result</h3>
-                    <select id="rigVal">
-                        <option value="">No Rig - Random</option>
-                        <option value="2">Rs. 2 (Safe)</option>
-                        <option value="5">Rs. 5 (Safe)</option>
-                        <option value="20">Rs. 20</option>
-                        <option value="100">Rs. 100</option>
-                        <option value="1000">Rs. 1000</option>
-                        <option value="5000">Rs. 5000</option>
-                    </select>
-                    <button class="btn btn-gold" onclick="setRig()">🔒 LOCK THIS NUMBER</button>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title">🛡️ Safe Mode</h3>
-                    <div class="toggle-container">
-                        <span class="toggle-label">Auto Safe Mode (2/5 Only)</span>
-                        <div class="toggle-switch" id="safeModeToggle" onclick="toggleSafeMode()">
-                            <div class="toggle-slider"></div>
-                        </div>
-                    </div>
-                    <p style="color:#9ca3af;font-size:12px;margin-top:8px">ON karne pe wheel sirf 2 ya 5 pe rukega. Loss nahi hoga.</p>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title">💳 Update Payment Number</h3>
-                    <input id="payNum" placeholder="EasyPaisa/JazzCash Number" type="text">
-                    <button class="btn btn-blue" onclick="updatePay()">💾 UPDATE NUMBER</button>
-                </div>
-            </div>
-
-            <div>
-                <div class="card">
-                    <h3 class="card-title">📥 Pending Requests</h3>
-                    <div class="filter-tabs">
-                        <button class="tab-btn active" onclick="filterReq('all')">All</button>
-                        <button class="tab-btn" onclick="filterReq('Win')">Wins</button>
-                        <button class="tab-btn" onclick="filterReq('deposit')">Deposits</button>
-                        <button class="tab-btn" onclick="filterReq('withdraw')">Withdraws</button>
-                    </div>
-                    <div id="reqList" class="req-list">Loading...</div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="box">
+<h3>📥 Requests</h3>
+<div id="reqList">Loading...</div>
+</div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, onValue, update, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,set,onValue,update,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-        authDomain: "kingmaker-crash.firebaseapp.com",
-        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-        projectId: "kingmaker-crash",
-        storageBucket: "kingmaker-crash.firebasestorage.app",
-        messagingSenderId: "327400668393",
-        appId: "1:327400668393:web:0d02a340b9f5603f524478"
-    };
+const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
+const auth=getAuth(app),db=getDatabase(app);
+const ADMINS=["abu143un@gmail.com"];
+let safeMode=false;
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+onAuthStateChanged(auth,u=>{
+if(!u)return location.replace("./login.html");
+if(!ADMINS.includes(u.email.toLowerCase()))return Swal.fire("Access Denied","Your: "+u.email,"error").then(()=>signOut(auth).then(()=>location.replace("./login.html")));
+document.getElementById('email').innerText=u.email;
+loadReq();loadSafe();
+});
 
-    // TUMHARI EMAIL ADD KAR DI
-    const ADMIN_EMAILS = ["abu143un@gmail.com"];
-    let currentFilter = 'all';
-    let safeMode = false;
+function loadSafe(){onValue(ref(db,'admin/safe_mode'),s=>{safeMode=s.val()===true;document.getElementById('safe').innerText=safeMode?'ON':'OFF';document.getElementById('safe').style.color=safeMode?'#10b981':'#ef4444';});}
 
-    onAuthStateChanged(auth, user => {
-        document.getElementById('loadingScreen').style.display = 'none';
+window.setRig=async()=>{await set(ref(db,'admin/next_result'),document.getElementById('rigVal').value||null);Swal.fire("Locked!","Next spin rigged","success")};
+window.toggleSafe=async()=>{await set(ref(db,'admin/safe_mode'),!safeMode);Swal.fire("Safe Mode",!safeMode?"ON":"OFF","success")};
+window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
 
-        if (!user) {
-            Swal.fire({
-                title: "Login Required",
-                text: "Please login first to access admin panel",
-                icon: "warning",
-                confirmButtonColor: '#ffd700'
-            }).then(() => {
-                window.location.replace("./login.html");
-            });
-            return;
-        }
+function loadReq(){
+onValue(ref(db,'requests'),s=>{
+let h='';if(!s.exists()){document.getElementById('reqList').innerHTML='No requests';return}
+s.forEach(c=>{let d=c.val();if(d.status==='pending')h+=`<div class="req"><div><b>${d.type}</b> - Rs.${d.amount}<br><small>${d.email}</small></div><div><button class="btn ok" onclick="appReq('${c.key}','${d.uid}',${d.amount},'${d.type}')">✓</button> <button class="btn no" onclick="rejReq('${c.key}','${d.uid}',${d.amount},'${d.type}')">✕</button></div></div>`});
+document.getElementById('reqList').innerHTML=h||'No pending';
+});
+}
 
-        if (!ADMIN_EMAILS.includes(user.email)) {
-            Swal.fire({
-                title: "Access Denied",
-                text: "You are not authorized as admin",
-                icon: "error",
-                confirmButtonColor: '#ffd700'
-            }).then(() => {
-                window.location.replace("./index.html");
-            });
-            return;
-        }
+window.appReq=async(id,uid,amt,type)=>{
+if(type==='Win'||type==='deposit'){let s=await get(ref(db,`users/${uid}/balance`));await update(ref(db,`users/${uid}`),{balance:(s.val()||0)+amt})}
+await update(ref(db,`requests/${id}`),{status:'approved'});
+Swal.fire("Approved!","","success");
+};
 
-        document.getElementById('adminEmail').innerText = user.email;
-        loadStats();
-        loadRequests();
-        loadSafeMode();
-    });
-
-    function loadStats() {
-        onValue(ref(db, 'users'), snap => {
-            document.getElementById('totalUsers').innerText = snap.exists()? Object.keys(snap.val()).length : 0;
-        });
-        onValue(ref(db, 'admin/next_result'), snap => {
-            document.getElementById('nextRig').innerText = snap.val()? `Rs. ${snap.val()}` : 'Random';
-        });
-    }
-
-    function loadSafeMode() {
-        onValue(ref(db, 'admin/safe_mode'), snap => {
-            safeMode = snap.val() === true;
-            document.getElementById('safeModeToggle').classList.toggle('active', safeMode);
-            document.getElementById('safeModeStatus').innerText = safeMode ? 'ON' : 'OFF';
-            document.getElementById('safeModeStatus').style.color = safeMode ? '#10b981' : '#ef4444';
-        });
-    }
-
-    window.setRig = async () => {
-        const val = document.getElementById('rigVal').value;
-        await set(ref(db, 'admin/next_result'), val || null);
-        await push(ref(db, 'admin/logs'), {
-            action: 'rig_set',
-            value: val || 'random',
-            admin: auth.currentUser.email,
-            timestamp: Date.now()
-        });
-        Swal.fire("Locked!", val? `Next winner: Rs. ${val}` : "Random mode enabled", "success");
-    };
-
-    window.toggleSafeMode = async () => {
-        const newState = !safeMode;
-        await set(ref(db, 'admin/safe_mode'), newState);
-        await push(ref(db, 'admin/logs'), {
-            action: 'safe_mode_toggle',
-            value: newState,
-            admin: auth.currentUser.email,
-            timestamp: Date.now()
-        });
-        Swal.fire(
-            "Safe Mode " + (newState ? "ON" : "OFF"),
-            newState ? "Wheel sirf 2 ya 5 pe rukega. Loss nahi hoga." : "Normal random mode active.",
-            "success"
-        );
-    };
-
-    window.updatePay = async () => {
-        const num = document.getElementById('payNum').value;
-        if (!num) return Swal.fire("Error", "Number dalo", "error");
-        await set(ref(db, 'admin/payment_info'), num);
-        Swal.fire("Updated!", "Payment number updated", "success");
-        document.getElementById('payNum').value = '';
-    };
-
-    window.filterReq = (type) => {
-        currentFilter = type;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        loadRequests();
-    }
-
-    function loadRequests() {
-        onValue(ref(db, 'requests'), snap => {
-            const list = document.getElementById("reqList");
-            list.innerHTML = "";
-            let pendingCount = 0;
-
-            if(!snap.exists()) {
-                list.innerHTML = "<p style='text-align:center;color:#9ca3af'>No requests</p>";
-                document.getElementById('pendingReq').innerText = 0;
-                return;
-            }
-
-            const requests = [];
-            snap.forEach(c => {
-                const d = c.val();
-                if(d.status === 'pending') {
-                    if(currentFilter === 'all' || d.type === currentFilter) {
-                        requests.push({key: c.key, ...d});
-                    }
-                    pendingCount++;
-                }
-            });
-
-            document.getElementById('pendingReq').innerText = pendingCount;
-
-            if(requests.length === 0) {
-                list.innerHTML = "<p style='text-align:center;color:#9ca3af'>No pending requests</p>";
-                return;
-            }
-
-            requests.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)).forEach(d => {
-                const typeColor = d.type === 'Win'? '#ffd700' : d.type === 'deposit'? '#10b981' : '#ef4444';
-                const time = d.timestamp? new Date(d.timestamp).toLocaleString() : 'N/A';
-                list.innerHTML += `
-                    <div class="req-box">
-                        <div class="req-info">
-                            <div class="req-email">${d.email || 'Unknown'}</div>
-                            <div class="req-meta">
-                                <span style="color:${typeColor};font-weight:700">${d.type.toUpperCase()}</span> •
-                                ${time}
-                            </div>
-                        </div>
-                        <div class="req-amount">Rs. ${d.amount}</div>
-                        <div class="req-actions">
-                            <button class="mini-btn approve-btn" onclick="approve('${d.key}','${d.uid}',${d.amount},'${d.type}')">✓</button>
-                            <button class="mini-btn reject-btn" onclick="reject('${d.key}','${d.uid}',${d.amount},'${d.type}')">✕</button>
-                        </div>
-                    </div>`;
-            });
-        });
-    }
-
-    window.approve = async (id, uid, amt, type) => {
-        const result = await Swal.fire({
-            title: 'Approve Request?',
-            html: `Type: <b>${type}</b><br>Amount: <b>Rs. ${amt}</b>`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#10b981',
-            confirmButtonText: 'Yes, Approve'
-        });
-
-        if (!result.isConfirmed) return;
-
-        // Sirf Win aur Deposit pe balance add karo, Withdraw pe nahi kyunki pehle hi cut ho gaya
-        if(type === 'Win' || type === 'deposit') {
-            const s = await get(ref(db, `users/${uid}/balance`));
-            await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
-        }
-        
-        await update(ref(db, `requests/${id}`), {
-            status: 'approved',
-            approvedBy: auth.currentUser.email,
-            approvedAt: Date.now()
-        });
-        Swal.fire("Approved!", "Request approved successfully", "success");
-    };
-
-    window.reject = async (id, uid, amt, type) => {
-        const result = await Swal.fire({
-            title: 'Reject Request?',
-            text: "This action cannot be undone",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            confirmButtonText: 'Yes, Reject'
-        });
-
-        if (!result.isConfirmed) return;
-
-        // Withdraw reject ho to balance wapas add karo
-        if(type === 'withdraw') {
-            const s = await get(ref(db, `users/${uid}/balance`));
-            await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
-        }
-
-        await update(ref(db, `requests/${id}`), {
-            status: 'rejected',
-            rejectedBy: auth.currentUser.email,
-            rejectedAt: Date.now()
-        });
-        Swal.fire("Rejected!", "Request rejected", "success");
-    };
-
-    window.logout = () => signOut(auth).then(() => window.location.replace("./login.html"));
+window.rejReq=async(id,uid,amt,type)=>{
+if(type==='withdraw'){let s=await get(ref(db,`users/${uid}/balance`));await update(ref(db,`users/${uid}`),{balance:(s.val()||0)+amt})}
+await update(ref(db,`requests/${id}`),{status:'rejected'});
+Swal.fire("Rejected!","","success");
+};
 </script>
 </body>
-    </html>
+                                  </html>
