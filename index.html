@@ -20,6 +20,69 @@ body{
   overflow-x: hidden;
 }
 
+/* SPLASH SCREEN */
+#splash{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeOut 0.5s ease 3s forwards;
+}
+
+.splash-logo{
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  animation: pulse 1.5s ease infinite;
+  box-shadow: 0 0 80px rgba(255,215,0,0.6);
+}
+
+.splash-text{
+  margin-top: 30px;
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(45deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slideUp 1s ease;
+}
+
+.splash-loading{
+  margin-top: 20px;
+  width: 200px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.splash-loading-bar{
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  animation: loading 2.5s ease forwards;
+  box-shadow: 0 0 20px rgba(255,215,0,0.8);
+}
+
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes loading{from{width:0%}to{width:100%}}
+@keyframes fadeOut{to{opacity:0;visibility:hidden}}
+
+#mainApp{opacity:0;animation:fadeIn 0.5s ease 3.2s forwards}
+@keyframes fadeIn{to{opacity:1}}
+
 #winTicker{
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
@@ -281,7 +344,7 @@ canvas{
   backdrop-filter: blur(10px);
 }
 
-input[type="tel"]{
+input[type="tel"], input[type="number"]{
   background:rgba(0,0,0,0.4);
   border:1px solid rgba(184, 134, 11, 0.5);
   color:#fff;
@@ -295,9 +358,27 @@ input[type="tel"]{
 button{
   font-family: inherit;
 }
+
+.fee-note{
+  font-size:11px;
+  color:#fbbf24;
+  margin-top:8px;
+  opacity:0.8;
+}
 </style>
 </head>
 <body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-logo">👑</div>
+  <div class="splash-text">KINGMAKER GOLD</div>
+  <div class="splash-loading">
+    <div class="splash-loading-bar"></div>
+  </div>
+</div>
+
+<div id="mainApp">
 
 <div id="winTicker">
   <div id="tickerContent"></div>
@@ -324,13 +405,7 @@ button{
   <div id="top10List"></div>
 </div>
 
-<div class="box">
-<h3>📱 Your Withdraw Number</h3>
-<div class="num-display" id="savedNum">Not Set</div>
-<input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
-<button onclick="saveMyNum()" style="background:linear-gradient(135deg,#10b981,#059669);margin-top:10px;width:100%;padding:14px;border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer">SAVE NUMBER</button>
-</div>
-
+<!-- GAME AB UPAR AA GAYA -->
 <div class="bet">
 BET: <input type="number" id="bet" value="10" min="1">
 <button onclick="addBet(10)">+10</button>
@@ -346,19 +421,34 @@ BET: <input type="number" id="bet" value="10" min="1">
 
 <button class="spin" id="spinBtn">SPIN NOW</button>
 
+<!-- WALLET AB NEECHE CHALA GAYA -->
+<div class="box">
+<h3>💰 WALLET</h3>
 <div class="grid">
-<button class="btn" onclick="location.href='./wallet.html'">💰 WALLET</button>
-<button class="btn" onclick="shareApp()">📤 SHARE</button>
+<button class="btn" onclick="showDeposit()">📥 DEPOSIT</button>
+<button class="btn" onclick="showWithdraw()">📤 WITHDRAW</button>
+</div>
+<div class="fee-note">* 3% maintenance fee on all withdrawals</div>
 </div>
 
-<div style="margin-top:20px">
-<button onclick="openTelegram()" style="width:100%;background:linear-gradient(135deg,#0088cc,#006699);color:#fff;padding:16px;border:none;border-radius:16px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 5px 20px rgba(0,136,204,0.4)">💬 CUSTOMER SUPPORT</button>
+<div class="box">
+<h3>📱 Your Withdraw Number</h3>
+<div class="num-display" id="savedNum">Not Set</div>
+<input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
+<button onclick="saveMyNum()" style="background:linear-gradient(135deg,#10b981,#059669);margin-top:10px;width:100%;padding:14px;border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer">SAVE NUMBER</button>
+</div>
+
+<div class="grid">
+<button class="btn" onclick="shareApp()">📤 SHARE APP</button>
+<button class="btn" onclick="openTelegram()">💬 SUPPORT</button>
+</div>
+
 </div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,onValue,get,update,set}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,onValue,get,update,set,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
 const auth=getAuth(app),db=getDatabase(app);
@@ -367,6 +457,7 @@ const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.g
 let rot=0,ub=0,safe=false;
 
 const TELEGRAM_SUPPORT_LINK = "https://t.me/+Tn9bUflQQtVlNGZk";
+const MAINTENANCE_FEE = 0.03; // 3%
 
 function drawWheel(showNumbers=true){
 ctx.clearRect(0,0,500,500);
@@ -462,6 +553,74 @@ window.openTelegram=()=>{
   window.open(TELEGRAM_SUPPORT_LINK,'_blank');
 };
 
+// DEPOSIT WITH FEE INFO
+window.showDeposit=()=>{
+  Swal.fire({
+    title:'📥 Deposit Karo',
+    html:`JazzCash / Easypaisa:<br><b>03XX-XXXXXXX</b><br><br>Deposit ke baad screenshot Telegram pe bhejo`,
+    background:'rgba(11, 16, 24, 0.95)',
+    color:'#fff',
+    confirmButtonText:'Telegram Kholo',
+    confirmButtonColor:'#0088cc'
+  }).then((r)=>{
+    if(r.isConfirmed) window.open(TELEGRAM_SUPPORT_LINK,'_blank');
+  });
+};
+
+// WITHDRAW WITH 3% FEE
+window.showWithdraw=async()=>{
+  const {value: amount} = await Swal.fire({
+    title: '📤 Withdraw Amount',
+    input: 'number',
+    inputLabel: 'Kitna withdraw karna hai?',
+    inputPlaceholder: 'Amount in PKR',
+    background:'rgba(11, 16, 24, 0.95)',
+    color:'#fff',
+    confirmButtonColor:'#10b981',
+    inputValidator: (value) => {
+      if(!value || value <= 0) return 'Sahi amount daalo!';
+      if(value > ub) return 'Balance kam hai!';
+      if(value < 100) return 'Min withdraw 100 PKR hai!';
+    }
+  });
+
+  if(amount){
+    let fee = Math.floor(amount * MAINTENANCE_FEE);
+    let finalAmount = amount - fee;
+
+    const confirm = await Swal.fire({
+      title: 'Confirm Withdrawal',
+      html: `
+        Amount: <b>${amount} PKR</b><br>
+        Maintenance Fee (3%): <b style="color:#fbbf24">-${fee} PKR</b><br>
+        <hr style="border-color:rgba(255,255,255,0.1)">
+        You'll Receive: <b style="color:#10b981;font-size:20px">${finalAmount} PKR</b>
+      `,
+      background:'rgba(11, 16, 24, 0.95)',
+      color:'#fff',
+      showCancelButton: true,
+      confirmButtonText: 'Request Withdraw',
+      confirmButtonColor:'#10b981',
+      cancelButtonColor:'#ef4444'
+    });
+
+    if(confirm.isConfirmed){
+      const uid = auth.currentUser.uid;
+      await update(ref(db,`users/${uid}`),{balance: ub - amount});
+      await push(ref(db,'requests'),{
+        uid: uid,
+        type: 'withdraw',
+        amount: amount,
+        fee: fee,
+        finalAmount: finalAmount,
+        status: 'pending',
+        timestamp: Date.now()
+      });
+      Swal.fire("Success!","Withdraw request send ho gayi. 24 hours mein process ho jayegi.","success");
+    }
+  }
+};
+
 // 3D TILT EFFECT
 document.addEventListener('mousemove', (e) => {
   const wheel = document.querySelector('.wheel');
@@ -471,7 +630,6 @@ document.addEventListener('mousemove', (e) => {
   wheel.style.transform = `perspective(1000px) rotateX(${y}deg) rotateY(${-x}deg)`;
 });
 
-// Mobile ke liye
 window.addEventListener('deviceorientation', (e) => {
   const wheel = document.querySelector('.wheel');
   if(!wheel) return;
@@ -498,7 +656,8 @@ if(rs.exists()&&rs.val()){
   winAmount=parseFloat(rs.val());
   await set(ref(db,'admin/next_result'),null);
 }else if(safe){
-  let safePercent = Math.random() * 0.4 + 0.8;
+  // SAFE MODE: 70% se 95% = TU HAMESHA PROFIT MEIN
+  let safePercent = Math.random() * 0.25 + 0.70;
   winAmount = Math.floor(b * safePercent);
   if(winAmount < 1) winAmount = 1;
 }else{
@@ -516,7 +675,6 @@ drawWheel(true);
 resultBox.innerText=winAmount;
 resultBox.style.display='block';
 
-// CONFETTI + RING BLAST EFFECT
 confetti({
   particleCount:150,
   spread:100,
@@ -524,7 +682,6 @@ confetti({
   colors:['#00d4ff','#ffd700','#ff0066','#10b981']
 });
 
-// RING BLAST
 for(let i=0; i<3; i++){
   setTimeout(()=>{
     confetti({
@@ -552,4 +709,4 @@ this.disabled=false;this.innerText="SPIN NOW";
 };
 </script>
 </body>
-  </html>
+                                           </html>
