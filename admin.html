@@ -267,7 +267,7 @@
     const db = getDatabase(app);
 
     // IMPORTANT: Yahan apni admin email add karo
-    const ADMIN_EMAILS = ["admin@kingmaker.com", "abu143un@gmail.com"];
+    const ADMIN_EMAILS = ["admin@kingmaker.com", "your-email@gmail.com"];
     let currentFilter = 'all';
 
     onAuthStateChanged(auth, user => {
@@ -383,7 +383,7 @@
                         <div class="req-amount">Rs. ${d.amount}</div>
                         <div class="req-actions">
                             <button class="mini-btn approve-btn" onclick="approve('${d.key}','${d.uid}',${d.amount},'${d.type}')">✓</button>
-                            <button class="mini-btn reject-btn" onclick="reject('${d.key}')">✕</button>
+                            <button class="mini-btn reject-btn" onclick="reject('${d.key}','${d.uid}',${d.amount},'${d.type}')">✕</button>
                         </div>
                     </div>`;
             });
@@ -402,10 +402,12 @@
 
         if (!result.isConfirmed) return;
 
+        // FIX: Sirf Win aur Deposit pe balance add karo, Withdraw pe nahi kyunki pehle hi cut ho gaya
         if(type === 'Win' || type === 'deposit') {
             const s = await get(ref(db, `users/${uid}/balance`));
             await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
         }
+        
         await update(ref(db, `requests/${id}`), {
             status: 'approved',
             approvedBy: auth.currentUser.email,
@@ -414,7 +416,7 @@
         Swal.fire("Approved!", "Request approved successfully", "success");
     };
 
-    window.reject = async (id) => {
+    window.reject = async (id, uid, amt, type) => {
         const result = await Swal.fire({
             title: 'Reject Request?',
             text: "This action cannot be undone",
@@ -425,6 +427,12 @@
         });
 
         if (!result.isConfirmed) return;
+
+        // FIX: Withdraw reject ho to balance wapas add karo
+        if(type === 'withdraw') {
+            const s = await get(ref(db, `users/${uid}/balance`));
+            await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
+        }
 
         await update(ref(db, `requests/${id}`), {
             status: 'rejected',
@@ -437,4 +445,4 @@
     window.logout = () => signOut(auth).then(() => window.location.replace("./login.html"));
 </script>
 </body>
-    </html>
+                    </html>
