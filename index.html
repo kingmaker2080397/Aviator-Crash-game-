@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
 body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;text-align:center}
-.hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:20px}
+.hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:20px;align-items:center}
 .bal{font-size:24px;font-weight:900;color:#ffd700}
 .bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
 .bet input{width:100px;padding:10px;border:1px solid #b8860b;background:#000;color:#fff;text-align:center;border-radius:8px;font-size:18px;font-weight:700}
@@ -17,19 +17,30 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 .spin{width:100%;padding:18px;background:#ffd700;color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer}
 .spin:disabled{opacity:0.5}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-.btn{background:#0b1018;border:1px solid #b8860b;color:#fff;padding:16px;border-radius:12px;cursor:pointer}
+.btn{background:#0b1018;border:1px solid #b8860b;color:#fff;padding:16px;border-radius:12px;cursor:pointer;font-weight:700}
+.box{background:#0b1018;border:1px solid #b8860b;padding:15px;border-radius:12px;margin:15px 0}
 </style>
 </head>
 <body>
 <div class="hdr">
-<div><small>BALANCE</small><div class="bal">Rs. <span id="bal">0</span></div></div>
-<button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px">LOGOUT</button>
+<div>
+<small>BALANCE</small>
+<div class="bal">Rs. <span id="bal">0</span></div>
+<small id="userEmail" style="color:#999;font-size:10px"></small>
+</div>
+<button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700">LOGOUT</button>
+</div>
+
+<div class="box">
+<h3>📱 Set Withdraw Number</h3>
+<input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
+<button onclick="saveMyNum()" style="background:#10b981">SAVE NUMBER</button>
 </div>
 
 <div class="bet">
 BET: <input type="number" id="bet" value="10" min="1">
-<button onclick="document.getElementById('bet').value=parseInt(document.getElementById('bet').value)+10">+10</button>
-<button onclick="document.getElementById('bet').value=parseInt(document.getElementById('bet').value)+50">+50</button>
+<button onclick="addBet(10)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+10</button>
+<button onclick="addBet(50)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+50</button>
 </div>
 
 <div class="wheel">
@@ -40,7 +51,7 @@ BET: <input type="number" id="bet" value="10" min="1">
 <button class="spin" id="spinBtn">SPIN NOW</button>
 
 <div class="grid">
-<button class="btn" onclick="window.location.href='./wallet.html'">💰 Wallet</button>
+<button class="btn" onclick="location.href='./wallet.html'">💰 WALLET</button>
 <button class="btn" onclick="Swal.fire('KYC','Coming Soon','info')">🆔 KYC</button>
 </div>
 
@@ -55,24 +66,30 @@ const segs=["2","100","5","5","1000","5000","20","1000"],deg=360/segs.length;
 const c=document.getElementById("w"),ctx=c.getContext("2d");
 let rot=0,ub=0,safe=false;
 
-function draw(){
-ctx.clearRect(0,0,500,500);
 for(let i=0;i<segs.length;i++){
 let s=(i*deg-90)*Math.PI/180,e=((i+1)*deg-90)*Math.PI/180;
 ctx.beginPath();ctx.fillStyle=i%2===0?"#ffd700":"#0d1117";
 ctx.moveTo(250,250);ctx.arc(250,250,250,s,e);ctx.fill();
 ctx.save();ctx.translate(250,250);ctx.rotate(((i+0.5)*deg-90)*Math.PI/180);
 ctx.fillStyle=i%2===0?"#000":"#fff";ctx.font="900 38px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);ctx.restore();
-}}
-draw();
+}
 
 onAuthStateChanged(auth,u=>{
 if(!u)return location.replace("./login.html");
+document.getElementById("userEmail").innerText=u.email;
 onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById("bal").innerText=ub.toLocaleString()});
+onValue(ref(db,`users/${u.uid}/withdraw_number`),s=>{document.getElementById("myNum").value=s.val()||""});
 onValue(ref(db,'admin/safe_mode'),s=>safe=s.val()===true);
 });
 
+window.addBet=a=>{let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
 window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
+window.saveMyNum=async()=>{
+let n=document.getElementById('myNum').value;
+if(!n)return Swal.fire("Error","Number daalo","error");
+await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
+Swal.fire("Saved!","Number save ho gaya","success");
+};
 
 document.getElementById("spinBtn").onclick=async function(){
 let b=parseFloat(document.getElementById("bet").value);
