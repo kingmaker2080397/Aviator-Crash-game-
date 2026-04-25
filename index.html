@@ -122,7 +122,7 @@
             position: absolute;
             top: -15px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) rotate(180deg);
             width: 50px;
             z-index: 100;
             filter: drop-shadow(0 4px 12px rgba(255,215,0,0.8));
@@ -232,7 +232,7 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // FIX 3: Segments array ko fix kiya - teer ke neeche wala number hi aayega
+    // FIX: Segments order - teer top pe hai, 0 index top se start
     const segments = ["2", "100", "5", "5", "1000", "5000", "20", "1000"];
     const canvas = document.getElementById("wheelCanvas");
     const ctx = canvas.getContext("2d");
@@ -248,11 +248,11 @@
             ctx.beginPath();
             ctx.fillStyle = i % 2 === 0? gradientGold : "#0d1117";
             ctx.moveTo(250,250);
-            ctx.arc(250,250,250, i*ang, (i+1)*ang);
+            ctx.arc(250,250,250, i*ang - Math.PI/2, (i+1)*ang - Math.PI/2);
             ctx.fill();
             ctx.save();
             ctx.translate(250,250);
-            ctx.rotate(i*ang + ang/2);
+            ctx.rotate(i*ang + ang/2 - Math.PI/2);
             ctx.fillStyle = i % 2 === 0? "#000" : "#fff";
             ctx.font = "900 38px Outfit";
             ctx.textAlign = "center";
@@ -272,7 +272,6 @@
                 userBalance = s.val() || 0;
                 document.getElementById("userBal").innerText = userBalance.toLocaleString();
             });
-            // FIX 1: Payment number load karo
             onValue(ref(db, 'admin/payment_info'), s => {
                 paymentNumber = s.val() || "Not Set";
             });
@@ -286,7 +285,6 @@
         input.value = parseInt(input.value) + amount;
     }
 
-    // FIX 1: Deposit button pe number show karo
     window.showDeposit = () => {
         Swal.fire({
             title: '💰 Deposit Funds',
@@ -310,14 +308,12 @@
         this.disabled = true;
         this.innerText = "SPINNING...";
 
-        // Bet pehle deduct karo
         await update(ref(db, `users/${auth.currentUser.uid}`), { balance: userBalance - bet });
 
         const nextResSnap = await get(ref(db, 'admin/next_result'));
         let winValue;
 
         if(nextResSnap.exists() && nextResSnap.val()) {
-            // FIX: Admin ne jo select kiya wahi aayega
             winValue = nextResSnap.val().toString();
             await set(ref(db, 'admin/next_result'), null);
         } else {
@@ -325,16 +321,22 @@
             winValue = (bet >= 20)? safeResults[Math.floor(Math.random()*2)] : segments[Math.floor(Math.random()*segments.length)];
         }
 
-        // FIX 3: Teer ke neeche wala number hi aaye
-        const targetIndex = segments.indexOf(winValue);
-        // Pointer top pe hai, to 0 degree se start
-        const stopAt = 360 - (targetIndex * segmentDeg) - (segmentDeg / 2);
-        currentRotation += 3600 + stopAt;
+        // FIX: Duplicate values handle karo - sab indexes dhundo
+        const matchingIndexes = [];
+        segments.forEach((val, idx) => {
+            if(val === winValue) matchingIndexes.push(idx);
+        });
+        // Random index chuno agar multiple hain
+        const targetIndex = matchingIndexes[Math.floor(Math.random() * matchingIndexes.length)];
+        
+        // FIX: Bilkul sahi angle pe ruko
+        const stopAngle = 360 - (targetIndex * segmentDeg) - (segmentDeg / 2);
+        const finalRotation = currentRotation + 3600 + stopAngle;
+        currentRotation = finalRotation;
 
-        canvas.style.transform = `rotate(${currentRotation}deg)`;
+        canvas.style.transform = `rotate(${finalRotation}deg)`;
 
         setTimeout(async () => {
-            // FIX 2: Jeet ke paise direct add karo
             const newBalance = userBalance - bet + parseFloat(winValue);
             await update(ref(db, `users/${auth.currentUser.uid}`), { balance: newBalance });
             
@@ -367,4 +369,4 @@
     window.logout = () => signOut(auth).then(() => window.location.replace("./login.html"));
 </script>
 </body>
-</html>
+            </html>
