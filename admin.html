@@ -7,10 +7,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --gold: #ffd700; 
+        :root {
+            --gold: #ffd700;
             --gold-dark: #b8860b;
-            --dark: #05070a; 
+            --dark: #05070a;
             --dark-2: #0b1018;
             --glass: rgba(255, 255, 255, 0.06);
             --glass-border: rgba(255, 215, 0, 0.15);
@@ -19,16 +19,15 @@
             --blue: #3b82f6;
         }
         * { box-sizing: border-box; }
-        body { 
+        body {
             background: radial-gradient(circle at 20% 0%, #1a1f2e 0%, var(--dark) 50%);
-            color: white; 
-            font-family: 'Outfit', sans-serif; 
-            margin: 0; 
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
             padding: 20px;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        
-        .header {
+       .container { max-width: 1200px; margin: 0 auto; }
+       .header {
             text-align: center;
             margin-bottom: 30px;
             padding: 20px;
@@ -37,7 +36,7 @@
             border-radius: 20px;
             border: 1px solid var(--glass-border);
         }
-        .title {
+       .title {
             font-size: 32px;
             font-weight: 900;
             margin: 0;
@@ -45,36 +44,33 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .admin-email { color: #9ca3af; font-size: 14px; margin-top: 8px; }
-
-        .stats-grid {
+       .admin-email { color: #9ca3af; font-size: 14px; margin-top: 8px; }
+       .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
-        .stat-card {
+       .stat-card {
             background: var(--glass);
             backdrop-filter: blur(10px);
             padding: 20px;
             border-radius: 16px;
             border: 1px solid var(--glass-border);
         }
-        .stat-label { font-size: 12px; color: #9ca3af; font-weight: 600; letter-spacing: 1px; }
-        .stat-val { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 8px; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+       .stat-label { font-size: 12px; color: #9ca3af; font-weight: 600; letter-spacing: 1px; }
+       .stat-val { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 8px; }
+       .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-
-        .card { 
+       .card {
             background: var(--glass);
             backdrop-filter: blur(10px);
-            padding: 24px; 
-            border-radius: 20px; 
-            border: 1px solid var(--glass-border); 
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
             margin-bottom: 20px;
         }
-        .card-title {
+       .card-title {
             font-size: 18px;
             font-weight: 800;
             margin: 0 0 16px 0;
@@ -82,12 +78,12 @@
             align-items: center;
             gap: 8px;
         }
-        select, input { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border-radius: 12px; 
-            border: 1px solid var(--gold-dark); 
+        select, input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid var(--gold-dark);
             background: var(--dark-2);
             color: white;
             font-weight: 600;
@@ -95,28 +91,24 @@
             outline: none;
         }
         select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
-        
-        .btn { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border-radius: 12px; 
-            border: none; 
-            font-weight: 800; 
+       .btn {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: none;
+            font-weight: 800;
             font-size: 15px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #000; }
-        .btn-blue { background: linear-gradient(135deg, var(--blue), #2563eb); color: white; }
-
-        .filter-tabs {
+       .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #000; }
+       .btn-blue { background: linear-gradient(135deg, var(--blue), #2563eb); color: white; }
+       .filter-tabs {
             display: flex;
             gap: 8px;
             margin-bottom: 16px;
         }
-        .tab-btn {
+       .tab-btn {
             padding: 8px 16px;
             border-radius: 8px;
             border: 1px solid var(--glass-border);
@@ -126,26 +118,25 @@
             font-size: 13px;
             cursor: pointer;
         }
-        .tab-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
-
-        .req-list { max-height: 500px; overflow-y: auto; }
-        .req-box { 
+       .tab-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+       .req-list { max-height: 500px; overflow-y: auto; }
+       .req-box {
             background: var(--dark-2);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
             padding: 14px;
             margin-bottom: 12px;
-            display: flex; 
-            justify-content: space-between; 
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             gap: 12px;
         }
-        .req-info { flex: 1; text-align: left; }
-        .req-email { font-weight: 700; font-size: 14px; }
-        .req-meta { font-size: 12px; color: #9ca3af; margin-top: 4px; }
-        .req-amount { font-weight: 900; font-size: 18px; color: var(--gold); }
-        .req-actions { display: flex; gap: 6px; }
-        .mini-btn {
+       .req-info { flex: 1; text-align: left; }
+       .req-email { font-weight: 700; font-size: 14px; }
+       .req-meta { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+       .req-amount { font-weight: 900; font-size: 18px; color: var(--gold); }
+       .req-actions { display: flex; gap: 6px; }
+       .mini-btn {
             padding: 8px 14px;
             border-radius: 8px;
             border: none;
@@ -153,10 +144,9 @@
             font-size: 12px;
             cursor: pointer;
         }
-        .approve-btn { background: var(--green); color: white; }
-        .reject-btn { background: var(--red); color: white; }
-
-        .logout-btn {
+       .approve-btn { background: var(--green); color: white; }
+       .reject-btn { background: var(--red); color: white; }
+       .logout-btn {
             position: fixed;
             top: 20px;
             right: 20px;
@@ -167,18 +157,33 @@
             border-radius: 10px;
             font-weight: 700;
             cursor: pointer;
+            z-index: 1000;
         }
-
-        .swal2-popup {
-            background: var(--dark-2) !important;
-            color: white !important;
-            border: 1px solid var(--glass-border) !important;
+       .swal2-popup {
+            background: var(--dark-2)!important;
+            color: white!important;
+            border: 1px solid var(--glass-border)!important;
+        }
+        #loadingScreen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
         }
     </style>
 </head>
 <body>
+    <div id="loadingScreen">
+        <div style="text-align:center">
+            <h2 style="color:var(--gold)">Loading Admin Panel...</h2>
+        </div>
+    </div>
+
     <button class="logout-btn" onclick="logout()">LOGOUT</button>
-    
+
     <div class="container">
         <div class="header">
             <h1 class="title">👑 KINGMAKER OWNER PANEL</h1>
@@ -245,7 +250,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, update, get, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
@@ -256,22 +261,42 @@
         messagingSenderId: "327400668393",
         appId: "1:327400668393:web:0d02a340b9f5603f524478"
     };
-    
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Admin emails list - yahan apne admin emails add karo
-    const ADMIN_EMAILS = ["admin@kingmaker.com", "owner@kingmaker.com"];
+    // IMPORTANT: Yahan apni admin email add karo
+    const ADMIN_EMAILS = ["admin@kingmaker.com", "abu143un@gmail.com"];
     let currentFilter = 'all';
 
     onAuthStateChanged(auth, user => {
-        if (!user || !ADMIN_EMAILS.includes(user.email)) {
-            Swal.fire("Access Denied", "Admin only area", "error").then(() => {
-                window.location.href = "/login";
+        document.getElementById('loadingScreen').style.display = 'none';
+
+        if (!user) {
+            Swal.fire({
+                title: "Login Required",
+                text: "Please login first to access admin panel",
+                icon: "warning",
+                confirmButtonColor: '#ffd700'
+            }).then(() => {
+                window.location.replace("./login.html");
             });
             return;
         }
+
+        if (!ADMIN_EMAILS.includes(user.email)) {
+            Swal.fire({
+                title: "Access Denied",
+                text: "You are not authorized as admin",
+                icon: "error",
+                confirmButtonColor: '#ffd700'
+            }).then(() => {
+                window.location.replace("./index.html");
+            });
+            return;
+        }
+
         document.getElementById('adminEmail').innerText = user.email;
         loadStats();
         loadRequests();
@@ -279,10 +304,10 @@
 
     function loadStats() {
         onValue(ref(db, 'users'), snap => {
-            document.getElementById('totalUsers').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
+            document.getElementById('totalUsers').innerText = snap.exists()? Object.keys(snap.val()).length : 0;
         });
         onValue(ref(db, 'admin/next_result'), snap => {
-            document.getElementById('nextRig').innerText = snap.val() ? `Rs. ${snap.val()}` : 'Random';
+            document.getElementById('nextRig').innerText = snap.val()? `Rs. ${snap.val()}` : 'Random';
         });
     }
 
@@ -295,7 +320,7 @@
             admin: auth.currentUser.email,
             timestamp: Date.now()
         });
-        Swal.fire("Locked!", val ? `Next winner: Rs. ${val}` : "Random mode enabled", "success");
+        Swal.fire("Locked!", val? `Next winner: Rs. ${val}` : "Random mode enabled", "success");
     };
 
     window.updatePay = async () => {
@@ -318,13 +343,13 @@
             const list = document.getElementById("reqList");
             list.innerHTML = "";
             let pendingCount = 0;
-            
-            if(!snap.exists()) { 
-                list.innerHTML = "<p style='text-align:center;color:#9ca3af'>No requests</p>"; 
+
+            if(!snap.exists()) {
+                list.innerHTML = "<p style='text-align:center;color:#9ca3af'>No requests</p>";
                 document.getElementById('pendingReq').innerText = 0;
-                return; 
+                return;
             }
-            
+
             const requests = [];
             snap.forEach(c => {
                 const d = c.val();
@@ -335,18 +360,24 @@
                     pendingCount++;
                 }
             });
-            
+
             document.getElementById('pendingReq').innerText = pendingCount;
-            
-            requests.sort((a,b) => b.timestamp - a.timestamp).forEach(d => {
-                const typeColor = d.type === 'Win' ? '#ffd700' : d.type === 'deposit' ? '#10b981' : '#ef4444';
+
+            if(requests.length === 0) {
+                list.innerHTML = "<p style='text-align:center;color:#9ca3af'>No pending requests</p>";
+                return;
+            }
+
+            requests.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)).forEach(d => {
+                const typeColor = d.type === 'Win'? '#ffd700' : d.type === 'deposit'? '#10b981' : '#ef4444';
+                const time = d.timestamp? new Date(d.timestamp).toLocaleString() : 'N/A';
                 list.innerHTML += `
                     <div class="req-box">
                         <div class="req-info">
-                            <div class="req-email">${d.email}</div>
+                            <div class="req-email">${d.email || 'Unknown'}</div>
                             <div class="req-meta">
-                                <span style="color:${typeColor};font-weight:700">${d.type.toUpperCase()}</span> • 
-                                ${new Date(d.timestamp).toLocaleString()}
+                                <span style="color:${typeColor};font-weight:700">${d.type.toUpperCase()}</span> •
+                                ${time}
                             </div>
                         </div>
                         <div class="req-amount">Rs. ${d.amount}</div>
@@ -368,15 +399,15 @@
             confirmButtonColor: '#10b981',
             confirmButtonText: 'Yes, Approve'
         });
-        
+
         if (!result.isConfirmed) return;
-        
+
         if(type === 'Win' || type === 'deposit') {
             const s = await get(ref(db, `users/${uid}/balance`));
             await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
         }
-        await update(ref(db, `requests/${id}`), { 
-            status: 'approved', 
+        await update(ref(db, `requests/${id}`), {
+            status: 'approved',
             approvedBy: auth.currentUser.email,
             approvedAt: Date.now()
         });
@@ -392,10 +423,10 @@
             confirmButtonColor: '#ef4444',
             confirmButtonText: 'Yes, Reject'
         });
-        
+
         if (!result.isConfirmed) return;
-        
-        await update(ref(db, `requests/${id}`), { 
+
+        await update(ref(db, `requests/${id}`), {
             status: 'rejected',
             rejectedBy: auth.currentUser.email,
             rejectedAt: Date.now()
@@ -403,7 +434,7 @@
         Swal.fire("Rejected!", "Request rejected", "success");
     };
 
-    window.logout = () => signOut(auth).then(() => location.reload());
+    window.logout = () => signOut(auth).then(() => window.location.replace("./login.html"));
 </script>
 </body>
-                    </html>
+    </html>
