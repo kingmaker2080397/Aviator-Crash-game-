@@ -20,9 +20,13 @@ th{background:#000;color:#ffd700}
 .slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background:#fff;transition:.4s;border-radius:50%}
 input:checked+.slider{background:#10b981}
 input:checked+.slider:before{transform:translateX(26px)}
+#mainContent{display:none}
 </style>
 </head>
 <body>
+<div id="loading" style="text-align:center;padding:50px;font-size:24px;color:#ffd700">Loading Admin Panel...</div>
+
+<div id="mainContent">
 <h1>👑 ADMIN PANEL</h1>
 
 <div class="box">
@@ -68,97 +72,78 @@ input:checked+.slider:before{transform:translateX(26px)}
 <tbody id="reqBody"></tbody>
 </table>
 </div>
+</div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,onValue,set,update,remove}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,onValue,set,update,remove,get}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
+// TUMHARA KINGMAKER-CRASH CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+  authDomain: "kingmaker-crash.firebaseapp.com",
+  databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+  projectId: "kingmaker-crash",
+  storageBucket: "kingmaker-crash.firebasestorage.app",
+  messagingSenderId: "327400668393",
+  appId: "1:327400668393:web:0d02a340b9f5603f524478",
+  measurementId: "G-LVVD55RDQV"
+};
+
+const app=initializeApp(firebaseConfig);
 const auth=getAuth(app),db=getDatabase(app);
-const ADMIN_UID="4ZEwGlG4lbPQvMYl5XfowPejXcF3"; // Apna UID daalo
 
-onAuthStateChanged(auth,u=>{
-if(!u||u.uid!==ADMIN_UID)return document.body.innerHTML='<h1 style="color:red;text-align:center">Access Denied</h1>';
+// TUMHARI UID YAHAN SET KAR DI - AB KUCH NAHI KARNA
+const ADMIN_UID="dSSoZIfxvNc8EJTXLJvJBfyJehR2"; 
+
+onAuthStateChanged(auth,async(u)=>{
+if(!u){
+  document.getElementById('loading').innerHTML='<h1 style="color:red">Please Login First</h1><p>Game mein login karo, phir admin panel kholo</p><button onclick="location.href=`./login.html`" style="background:#ffd700;color:#000;padding:12px 24px;border:none;border-radius:8px;font-weight:900;margin-top:20px">GO TO LOGIN</button>';
+  return;
+}
+if(u.uid!==ADMIN_UID){
+  document.getElementById('loading').innerHTML='<h1 style="color:red">Access Denied</h1><p style="color:#999">Your UID: '+u.uid+'</p><p style="color:#999">Admin UID: '+ADMIN_UID+'</p>';
+  return;
+}
+document.getElementById('loading').style.display='none';
+document.getElementById('mainContent').style.display='block';
 loadData();
 });
 
 function loadData(){
-// Payment Info Load
 onValue(ref(db,'admin/payment_info'),s=>{
 let d=s.val()||{};
 document.getElementById('currentPay').innerText=d.type?`${d.type}: ${d.number} (${d.name})`:'Not Set';
 });
-
-// Rig Load
-onValue(ref(db,'admin/next_result'),s=>{
-document.getElementById('nextRig').innerText=s.val()||'Random';
-});
-
-// Safe Mode Load
+onValue(ref(db,'admin/next_result'),s=>{document.getElementById('nextRig').innerText=s.val()||'Random'});
 onValue(ref(db,'admin/safe_mode'),s=>{
 let on=s.val()===true;
 document.getElementById('safeToggle').checked=on;
 document.getElementById('safeStatus').innerText=on?'ON':'OFF';
 document.getElementById('safeStatus').style.color=on?'#10b981':'#ef4444';
 });
-
-// Requests Load
 onValue(ref(db,'requests'),s=>{
 let html='';
 s.forEach(c=>{
 let r=c.val(),id=c.key;
-html+=`<tr>
-<td>${r.type}</td>
-<td>${r.email}</td>
-<td>${r.amount}</td>
-<td>${r.type==='deposit'?'TRX: '+r.trx:'To: '+r.user_number}</td>
-<td><button onclick="approveReq('${id}')" style="background:#10b981;padding:6px 12px;font-size:12px">APPROVE</button>
-<button onclick="rejectReq('${id}')" style="background:#ef4444;padding:6px 12px;font-size:12px">REJECT</button></td>
-</tr>`;
+html+=`<tr><td>${r.type}</td><td>${r.email}</td><td>${r.amount}</td><td>${r.type==='deposit'?'TRX: '+r.trx:'To: '+r.user_number}</td><td><button onclick="approveReq('${id}')" style="background:#10b981;padding:6px 12px;font-size:12px">APPROVE</button> <button onclick="rejectReq('${id}')" style="background:#ef4444;padding:6px 12px;font-size:12px">REJECT</button></td></tr>`;
 });
 document.getElementById('reqBody').innerHTML=html||'<tr><td colspan="5" style="text-align:center">No Requests</td></tr>';
 });
 }
 
 window.savePaymentInfo=async()=>{
-let t=document.getElementById('payType').value;
-let n=document.getElementById('payNumber').value.trim();
-let name=document.getElementById('payName').value.trim();
+let t=document.getElementById('payType').value,n=document.getElementById('payNumber').value.trim(),name=document.getElementById('payName').value.trim();
 if(!n||!name)return Swal.fire("Error","Sab fields bharo","error");
 await set(ref(db,'admin/payment_info'),{type:t,number:n,name:name});
 Swal.fire("Saved!","Payment info update ho gaya","success");
-document.getElementById('payNumber').value='';
-document.getElementById('payName').value='';
+document.getElementById('payNumber').value='';document.getElementById('payName').value='';
 };
-
-window.setRig=async()=>{
-let a=document.getElementById('rigAmt').value;
-if(!a)return Swal.fire("Error","Amount daalo","error");
-await set(ref(db,'admin/next_result'),parseFloat(a));
-Swal.fire("Set!","Next result: "+a,"success");
-document.getElementById('rigAmt').value='';
-};
-
-window.toggleSafe=async()=>{
-let on=document.getElementById('safeToggle').checked;
-await set(ref(db,'admin/safe_mode'),on);
-};
-
-window.approveReq=async(id)=>{
-let s=await get(ref(db,`requests/${id}`)),r=s.val();
-if(r.type==='deposit'){
-let ub=(await get(ref(db,`users/${r.uid}/balance`))).val()||0;
-await update(ref(db,`users/${r.uid}`),{balance:ub+r.amount});
-}
-await remove(ref(db,`requests/${id}`));
-Swal.fire("Approved!","Done","success");
-};
-
-window.rejectReq=async(id)=>{
-await remove(ref(db,`requests/${id}`));
-Swal.fire("Rejected!","Done","success");
-};
+window.setRig=async()=>{let a=document.getElementById('rigAmt').value;if(!a)return Swal.fire("Error","Amount daalo","error");await set(ref(db,'admin/next_result'),parseFloat(a));Swal.fire("Set!","Next result: "+a,"success");document.getElementById('rigAmt').value='';};
+window.toggleSafe=async()=>{await set(ref(db,'admin/safe_mode'),document.getElementById('safeToggle').checked)};
+window.approveReq=async(id)=>{let s=await get(ref(db,`requests/${id}`)),r=s.val();if(r.type==='deposit'){let ub=(await get(ref(db,`users/${r.uid}/balance`))).val()||0;await update(ref(db,`users/${r.uid}`),{balance:ub+r.amount})}await remove(ref(db,`requests/${id}`));Swal.fire("Approved!","Done","success")};
+window.rejectReq=async(id)=>{await remove(ref(db,`requests/${id}`));Swal.fire("Rejected!","Done","success")};
 </script>
 </body>
-  </html>
+</html>
