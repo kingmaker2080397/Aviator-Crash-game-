@@ -7,36 +7,294 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;text-align:center}
-#winTicker{background:#000;border-bottom:2px solid #ffd700;padding:8px 0;overflow:hidden;white-space:nowrap;margin:-16px -16px 16px -16px}
-#tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px}
+* { box-sizing: border-box; }
+
+body{
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  color:#fff;
+  font-family: 'Segoe UI', sans-serif;
+  margin:0;
+  padding:16px;
+  text-align:center;
+  min-height:100vh;
+  overflow-x: hidden;
+}
+
+#winTicker{
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border-bottom:2px solid rgba(255, 215, 0, 0.3);
+  padding:8px 0;
+  overflow:hidden;
+  white-space:nowrap;
+  margin:-16px -16px 16px -16px;
+}
+
+#tickerContent{
+  display:inline-block;
+  animation:scroll 40s linear infinite;
+  color:#10b981;
+  font-weight:700;
+  font-size:13px;
+  text-shadow: 0 0 10px rgba(16,185,129,0.5);
+}
+
 @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-.hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:16px;align-items:center}
-.bal{font-size:24px;font-weight:900;color:#ffd700}
-.leaderBox{background:#0b1018;border:2px solid #ffd700;border-radius:12px;margin-bottom:16px;padding:12px;display:none}
-.leaderBox.show{display:block;animation:slideDown 0.3s ease}
-@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-.leaderTitle{text-align:center;color:#ffd700;font-size:16px;font-weight:900;margin-bottom:10px}
-.top1{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#000;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;font-weight:900}
-.top1.date{font-size:11px;color:#333;margin-top:4px}
-.leaderItem{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #222;font-size:13px}
+
+.hdr,.box,.leaderBtn,.btn,.leaderBox{
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.hdr{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.bal{
+  font-size:28px;
+  font-weight:900;
+  background: linear-gradient(45deg, #ffd700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));
+}
+
+.leaderBtn{
+  width:100%;
+  color:#ffd700;
+  padding:14px;
+  font-weight:900;
+  font-size:16px;
+  cursor:pointer;
+  transition: all 0.3s ease;
+}
+
+.leaderBtn:hover{
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.leaderBox{
+  display:none;
+  padding:12px;
+}
+
+.leaderBox.show{
+  display:block;
+  animation:slideDown 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.leaderTitle{
+  text-align:center;
+  color:#ffd700;
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:12px;
+  text-shadow: 0 0 20px rgba(255,215,0,0.5);
+}
+
+.top1{
+  background: linear-gradient(135deg,#ffd700,#ff8c00);
+  color:#000;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  text-align:center;
+  font-weight:900;
+  box-shadow: 0 5px 20px rgba(255,215,0,0.4);
+}
+
+.top1.date{font-size:11px;color:#333;margin-top:4px;opacity:0.8}
+.leaderItem{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px}
 .leaderItem:last-child{border-bottom:none}
 .flag{font-size:16px;margin-right:6px}
-.leaderBtn{width:100%;background:#0b1018;border:2px solid #ffd700;color:#ffd700;padding:14px;border-radius:12px;font-weight:900;margin-bottom:16px;cursor:pointer}
-.bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
-.bet input{width:100px;padding:10px;border:1px solid #b8860b;background:#000;color:#fff;text-align:center;border-radius:8px;font-size:18px;font-weight:700}
-.wheel{position:relative;width:300px;height:300px;margin:20px auto}
-canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s}
+
+.bet{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+  margin:20px 0;
+}
+
+.bet input{
+  width:100px;
+  padding:12px;
+  border:1px solid rgba(184, 134, 11, 0.5);
+  background:rgba(0,0,0,0.4);
+  color:#fff;
+  text-align:center;
+  border-radius:12px;
+  font-size:18px;
+  font-weight:700;
+  backdrop-filter: blur(10px);
+}
+
+.bet button{
+  background: rgba(0,0,0,0.4);
+  color:#ffd700;
+  border:1px solid rgba(184, 134, 11, 0.5);
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  transition: all 0.2s;
+}
+
+.bet button:hover{
+  background: rgba(255,215,0,0.2);
+  transform: scale(1.05);
+}
+
+.wheel{
+  position:relative;
+  width:300px;
+  height:300px;
+  margin:20px auto;
+  transition: transform 0.1s ease-out;
+  transform-style: preserve-3d;
+}
+
+canvas{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  border:8px solid rgba(255, 255, 255, 0.1);
+  transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s;
+  box-shadow: 0 0 60px rgba(0, 212, 255, 0.3), inset 0 0 60px rgba(0,0,0,0.5);
+}
+
 .canvas-blur{filter:blur(10px) brightness(0.4)}
-.pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%) rotate(180deg);width:50px;z-index:10;opacity:0.2}
-.result-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#00d4ff;text-shadow:0 0 20px #00d4ff,0 0 40px #00d4ff,0 0 60px #0099ff;z-index:20;display:none;animation:zoomIn 0.6s cubic-bezier(0.34,1.56,0.64,1)}
+
+.pointer{
+  position:absolute;
+  top:-15px;
+  left:50%;
+  transform:translateX(-50%) rotate(180deg);
+  width:50px;
+  z-index:10;
+  opacity:0.3;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+}
+
+.result-box{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:80px;
+  font-weight:900;
+  color:#00d4ff;
+  text-shadow:0 0 20px #00d4ff,0 0 40px #00d4ff,0 0 60px #0099ff;
+  z-index:20;
+  display:none;
+  animation:zoomIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+
 @keyframes zoomIn{from{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:0}to{transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:1}}
-.spin{width:100%;padding:18px;background:linear-gradient(45deg,#ffd700,#ffed4e);color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 5px 20px rgba(255,215,0,0.4)}
-.spin:disabled{opacity:0.5}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-.btn{background:#0b1018;border:1px solid #b8860b;color:#fff;padding:16px;border-radius:12px;cursor:pointer;font-weight:700}
-.box{background:#0b1018;border:1px solid #b8860b;padding:15px;border-radius:12px;margin:15px 0}
-.num-display{background:#000;border:2px solid #10b981;padding:12px;border-radius:8px;color:#10b981;font-weight:900;font-size:18px;margin:10px 0;box-shadow:0 0 15px rgba(16,185,129,0.3)}
+
+.spin{
+  width:100%;
+  padding:18px;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color:#000;
+  border:none;
+  border-radius:16px;
+  font-size:20px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow: 0 10px 40px rgba(255,215,0,0.5);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.spin:before{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.spin:hover:before{
+  left: 100%;
+}
+
+.spin:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 15px 50px rgba(255,215,0,0.7);
+}
+
+.spin:active{
+  transform: translateY(0px);
+}
+
+.spin:disabled{
+  opacity:0.5;
+  transform: scale(1)!important;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:20px;
+}
+
+.btn{
+  color:#fff;
+  padding:16px;
+  cursor:pointer;
+  font-weight:700;
+  transition: all 0.3s ease;
+}
+
+.btn:hover{
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.num-display{
+  background:rgba(0,0,0,0.4);
+  border:2px solid #10b981;
+  padding:12px;
+  border-radius:12px;
+  color:#10b981;
+  font-weight:900;
+  font-size:18px;
+  margin:10px 0;
+  box-shadow:0 0 20px rgba(16,185,129,0.3);
+  backdrop-filter: blur(10px);
+}
+
+input[type="tel"]{
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(184, 134, 11, 0.5);
+  color:#fff;
+  padding:12px;
+  border-radius:12px;
+  width:100%;
+  font-size:16px;
+  backdrop-filter: blur(10px);
+}
+
+button{
+  font-family: inherit;
+}
 </style>
 </head>
 <body>
@@ -47,17 +305,15 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 
 <div class="hdr">
 <div>
-<small>BALANCE</small>
+<small style="opacity:0.7">BALANCE</small>
 <div class="bal">Rs. <span id="bal">0</span></div>
 <small id="userEmail" style="color:#999;font-size:10px"></small>
 </div>
-<button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700">LOGOUT</button>
+<button onclick="logout()" style="background:rgba(239,68,68,0.8);backdrop-filter:blur(10px);color:#fff;border:1px solid rgba(239,68,68,0.5);padding:8px 16px;border-radius:12px;font-weight:700;cursor:pointer">LOGOUT</button>
 </div>
 
-<!-- LEADERBOARD BUTTON -->
 <button class="leaderBtn" onclick="toggleLeaderboard()">🏆 LEADERBOARD - TOP WINNERS</button>
 
-<!-- LEADERBOARD BOX - AB CHHUPA HUA HAI -->
 <div class="leaderBox" id="leaderBox">
   <div class="leaderTitle">🏆 TODAY'S TOP WINNERS 🏆</div>
   <div class="top1">
@@ -71,14 +327,15 @@ canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transit
 <div class="box">
 <h3>📱 Your Withdraw Number</h3>
 <div class="num-display" id="savedNum">Not Set</div>
-<input id="myNum" placeholder="03XX-XXXXXXX" type="tel" style="background:#000;border:1px solid #b8860b;color:#fff;padding:12px;border-radius:8px;width:100%;font-size:16px">
-<button onclick="saveMyNum()" style="background:#10b981;margin-top:10px;width:100%;padding:14px;border:none;border-radius:8px;color:#000;font-weight:900">SAVE NUMBER</button>
+<input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
+<button onclick="saveMyNum()" style="background:linear-gradient(135deg,#10b981,#059669);margin-top:10px;width:100%;padding:14px;border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer">SAVE NUMBER</button>
 </div>
 
 <div class="bet">
 BET: <input type="number" id="bet" value="10" min="1">
-<button onclick="addBet(10)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+10</button>
-<button onclick="addBet(50)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+50</button>
+<button onclick="addBet(10)">+10</button>
+<button onclick="addBet(50)">+50</button>
+<button onclick="addBet(100)">+100</button>
 </div>
 
 <div class="wheel">
@@ -95,7 +352,7 @@ BET: <input type="number" id="bet" value="10" min="1">
 </div>
 
 <div style="margin-top:20px">
-<button onclick="openTelegram()" style="width:100%;background:#0088cc;color:#fff;padding:16px;border:none;border-radius:12px;font-weight:900;font-size:16px">💬 CUSTOMER SUPPORT</button>
+<button onclick="openTelegram()" style="width:100%;background:linear-gradient(135deg,#0088cc,#006699);color:#fff;padding:16px;border:none;border-radius:16px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 5px 20px rgba(0,136,204,0.4)">💬 CUSTOMER SUPPORT</button>
 </div>
 
 <script type="module">
@@ -116,13 +373,23 @@ ctx.clearRect(0,0,500,500);
 ctx.translate(250,250);
 for(let i=0;i<segs.length;i++){
 let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
-ctx.beginPath();ctx.fillStyle=i%2===0?"#1a1f2e":"#0d1117";
-ctx.moveTo(0,0);ctx.arc(0,0,250,s,e);ctx.fill();
-ctx.strokeStyle="#b8860b";ctx.lineWidth=2;ctx.stroke();
+ctx.beginPath();
+ctx.fillStyle=i%2===0?"rgba(26, 31, 46, 0.8)":"rgba(13, 17, 23, 0.8)";
+ctx.moveTo(0,0);
+ctx.arc(0,0,250,s,e);
+ctx.fill();
+ctx.strokeStyle="rgba(184, 134, 11, 0.3)";
+ctx.lineWidth=2;
+ctx.stroke();
 if(showNumbers){
-ctx.save();ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
-ctx.fillStyle="#00d4ff";ctx.shadowColor="#00d4ff";ctx.shadowBlur=10;
-ctx.font="900 36px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);
+ctx.save();
+ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
+ctx.fillStyle="#00d4ff";
+ctx.shadowColor="#00d4ff";
+ctx.shadowBlur=15;
+ctx.font="900 36px sans-serif";
+ctx.textAlign="center";
+ctx.fillText(segs[i],160,0);
 ctx.restore();
 }}
 ctx.translate(-250,-250);
@@ -195,6 +462,24 @@ window.openTelegram=()=>{
   window.open(TELEGRAM_SUPPORT_LINK,'_blank');
 };
 
+// 3D TILT EFFECT
+document.addEventListener('mousemove', (e) => {
+  const wheel = document.querySelector('.wheel');
+  if(!wheel) return;
+  const x = (window.innerWidth / 2 - e.clientX) / 30;
+  const y = (window.innerHeight / 2 - e.clientY) / 30;
+  wheel.style.transform = `perspective(1000px) rotateX(${y}deg) rotateY(${-x}deg)`;
+});
+
+// Mobile ke liye
+window.addEventListener('deviceorientation', (e) => {
+  const wheel = document.querySelector('.wheel');
+  if(!wheel) return;
+  const x = e.beta / 5;
+  const y = e.gamma / 5;
+  wheel.style.transform = `perspective(1000px) rotateX(${x}deg) rotateY(${y}deg)`;
+});
+
 document.getElementById("spinBtn").onclick=async function(){
 let b=parseFloat(document.getElementById("bet").value);
 if(b>ub)return Swal.fire("Error","Balance kam hai","error");
@@ -213,12 +498,13 @@ if(rs.exists()&&rs.val()){
   winAmount=parseFloat(rs.val());
   await set(ref(db,'admin/next_result'),null);
 }else if(safe){
-  if(b>=5000) winAmount=Math.floor(Math.random()*3000)+1000;
-  else if(b>=1000) winAmount=Math.floor(Math.random()*800)+100;
-  else if(b>=100) winAmount=Math.floor(Math.random()*80)+10;
-  else winAmount=Math.floor(Math.random()*b*0.8)+2;
+  let safePercent = Math.random() * 0.4 + 0.8;
+  winAmount = Math.floor(b * safePercent);
+  if(winAmount < 1) winAmount = 1;
 }else{
-  winAmount=parseFloat(segs[Math.floor(Math.random()*segs.length)]);
+  let multiplier=parseFloat(segs[Math.floor(Math.random()*segs.length)]);
+  winAmount = b * (multiplier / 100);
+  winAmount = Math.floor(winAmount);
 }
 
 setTimeout(async()=>{
@@ -230,6 +516,7 @@ drawWheel(true);
 resultBox.innerText=winAmount;
 resultBox.style.display='block';
 
+// CONFETTI + RING BLAST EFFECT
 confetti({
   particleCount:150,
   spread:100,
@@ -237,10 +524,26 @@ confetti({
   colors:['#00d4ff','#ffd700','#ff0066','#10b981']
 });
 
+// RING BLAST
+for(let i=0; i<3; i++){
+  setTimeout(()=>{
+    confetti({
+      particleCount: 50,
+      spread: 360,
+      startVelocity: 30,
+      decay: 0.9,
+      origin: { y: 0.5 },
+      colors: ['#00d4ff','#ffd700','#ff0066'],
+      shapes: ['circle']
+    });
+  }, i*200);
+}
+
 Swal.fire({
   title:"🎉 WINNER!",
   html:`<span style="font-size:48px;color:#00d4ff;text-shadow:0 0 20px #00d4ff">Rs. ${winAmount}</span>`,
-  background:'#0b1018',
+  background:'rgba(11, 16, 24, 0.9)',
+  backdrop: 'rgba(0,0,0,0.8)',
   color:'#fff',
   confirmButtonColor:'#00d4ff'
 });
@@ -249,4 +552,4 @@ this.disabled=false;this.innerText="SPIN NOW";
 };
 </script>
 </body>
-                                                          </html>
+  </html>
