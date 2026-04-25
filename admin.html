@@ -17,6 +17,7 @@
             --green: #10b981;
             --red: #ef4444;
             --blue: #3b82f6;
+            --purple: #8b5cf6;
         }
         * { box-sizing: border-box; }
         body {
@@ -103,6 +104,8 @@
         }
        .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #000; }
        .btn-blue { background: linear-gradient(135deg, var(--blue), #2563eb); color: white; }
+       .btn-purple { background: linear-gradient(135deg, var(--purple), #7c3aed); color: white; }
+       .btn-red { background: linear-gradient(135deg, var(--red), #dc2626); color: white; }
        .filter-tabs {
             display: flex;
             gap: 8px;
@@ -159,6 +162,37 @@
             cursor: pointer;
             z-index: 1000;
         }
+       .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--dark-2);
+            padding: 14px;
+            border-radius: 12px;
+            margin: 10px 0;
+       }
+       .toggle-label { font-weight: 700; font-size: 15px; }
+       .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #333;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+       }
+       .toggle-switch.active { background: var(--green); }
+       .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+       }
+       .toggle-switch.active .toggle-slider { transform: translateX(30px); }
        .swal2-popup {
             background: var(--dark-2)!important;
             color: white!important;
@@ -204,8 +238,8 @@
                 <div class="stat-val" id="nextRig">None</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">TODAY WINS</div>
-                <div class="stat-val" id="todayWins">Rs. 0</div>
+                <div class="stat-label">SAFE MODE</div>
+                <div class="stat-val" id="safeModeStatus">OFF</div>
             </div>
         </div>
 
@@ -223,6 +257,17 @@
                         <option value="5000">Rs. 5000</option>
                     </select>
                     <button class="btn btn-gold" onclick="setRig()">🔒 LOCK THIS NUMBER</button>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">🛡️ Safe Mode</h3>
+                    <div class="toggle-container">
+                        <span class="toggle-label">Auto Safe Mode (2/5 Only)</span>
+                        <div class="toggle-switch" id="safeModeToggle" onclick="toggleSafeMode()">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <p style="color:#9ca3af;font-size:12px;margin-top:8px">ON karne pe wheel sirf 2 ya 5 pe rukega. Loss nahi hoga.</p>
                 </div>
 
                 <div class="card">
@@ -266,9 +311,10 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // IMPORTANT: Yahan apni admin email add karo
-    const ADMIN_EMAILS = ["admin@kingmaker.com", "your-email@gmail.com"];
+    // TUMHARI EMAIL ADD KAR DI
+    const ADMIN_EMAILS = ["abu143un@gmail.com"];
     let currentFilter = 'all';
+    let safeMode = false;
 
     onAuthStateChanged(auth, user => {
         document.getElementById('loadingScreen').style.display = 'none';
@@ -300,6 +346,7 @@
         document.getElementById('adminEmail').innerText = user.email;
         loadStats();
         loadRequests();
+        loadSafeMode();
     });
 
     function loadStats() {
@@ -308,6 +355,15 @@
         });
         onValue(ref(db, 'admin/next_result'), snap => {
             document.getElementById('nextRig').innerText = snap.val()? `Rs. ${snap.val()}` : 'Random';
+        });
+    }
+
+    function loadSafeMode() {
+        onValue(ref(db, 'admin/safe_mode'), snap => {
+            safeMode = snap.val() === true;
+            document.getElementById('safeModeToggle').classList.toggle('active', safeMode);
+            document.getElementById('safeModeStatus').innerText = safeMode ? 'ON' : 'OFF';
+            document.getElementById('safeModeStatus').style.color = safeMode ? '#10b981' : '#ef4444';
         });
     }
 
@@ -321,6 +377,22 @@
             timestamp: Date.now()
         });
         Swal.fire("Locked!", val? `Next winner: Rs. ${val}` : "Random mode enabled", "success");
+    };
+
+    window.toggleSafeMode = async () => {
+        const newState = !safeMode;
+        await set(ref(db, 'admin/safe_mode'), newState);
+        await push(ref(db, 'admin/logs'), {
+            action: 'safe_mode_toggle',
+            value: newState,
+            admin: auth.currentUser.email,
+            timestamp: Date.now()
+        });
+        Swal.fire(
+            "Safe Mode " + (newState ? "ON" : "OFF"),
+            newState ? "Wheel sirf 2 ya 5 pe rukega. Loss nahi hoga." : "Normal random mode active.",
+            "success"
+        );
     };
 
     window.updatePay = async () => {
@@ -402,7 +474,7 @@
 
         if (!result.isConfirmed) return;
 
-        // FIX: Sirf Win aur Deposit pe balance add karo, Withdraw pe nahi kyunki pehle hi cut ho gaya
+        // Sirf Win aur Deposit pe balance add karo, Withdraw pe nahi kyunki pehle hi cut ho gaya
         if(type === 'Win' || type === 'deposit') {
             const s = await get(ref(db, `users/${uid}/balance`));
             await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
@@ -428,7 +500,7 @@
 
         if (!result.isConfirmed) return;
 
-        // FIX: Withdraw reject ho to balance wapas add karo
+        // Withdraw reject ho to balance wapas add karo
         if(type === 'withdraw') {
             const s = await get(ref(db, `users/${uid}/balance`));
             await update(ref(db, `users/${uid}`), { balance: (s.val() || 0) + parseFloat(amt) });
@@ -445,4 +517,4 @@
     window.logout = () => signOut(auth).then(() => window.location.replace("./login.html"));
 </script>
 </body>
-                    </html>
+    </html>
