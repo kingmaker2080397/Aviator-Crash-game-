@@ -16,6 +16,7 @@
             --glass-border: rgba(255, 215, 0, 0.15);
             --green: #10b981;
             --red: #ef4444;
+            --orange: #f59e0b;
         }
         * { box-sizing: border-box; }
         body {
@@ -118,6 +119,22 @@
             font-size: 14px;
             font-weight: 600;
         }
+       .history-title { font-size: 14px; font-weight: 700; margin: 24px 0 12px; text-align: left; }
+       .history-list { max-height: 200px; overflow-y: auto; }
+       .history-item {
+            background: var(--dark-2);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+       }
+       .status-pending { color: var(--orange); font-weight: 700; }
+       .status-approved { color: var(--green); font-weight: 700; }
+       .status-rejected { color: var(--red); font-weight: 700; }
        .swal2-popup {
             background: var(--dark-2)!important;
             color: white!important;
@@ -156,13 +173,16 @@
             <button id="withBtn" class="action-btn with-btn">💸 WITHDRAW</button>
         </div>
 
+        <div class="history-title">📋 Recent Requests</div>
+        <div id="historyList" class="history-list"></div>
+
         <a href="./index.html" class="back-link">← Back to Game</a>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, update, query, orderByChild, equalTo, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
@@ -188,10 +208,10 @@
                 userBalance = s.val() || 0;
                 document.getElementById("userBal").innerText = userBalance.toLocaleString();
             });
-            // FIX 1: Payment number load karo aur show karo
             onValue(ref(db, 'admin/payment_info'), s => {
                 document.getElementById("paymentNum").innerText = s.val() || "Not Set by Admin";
             });
+            loadHistory(user.uid);
         } else {
             window.location.replace("./login.html");
         }
@@ -199,6 +219,33 @@
 
     window.setAmount = (amount) => {
         document.getElementById('amt').value = amount;
+    }
+
+    function loadHistory(uid) {
+        const q = query(ref(db, 'requests'), orderByChild('uid'), equalTo(uid), limitToLast(10));
+        onValue(q, snap => {
+            const list = document.getElementById("historyList");
+            list.innerHTML = "";
+            if(!snap.exists()) {
+                list.innerHTML = "<p style='color:#9ca3af;font-size:12px'>No requests yet</p>";
+                return;
+            }
+            const requests = [];
+            snap.forEach(c => requests.push(c.val()));
+            requests.reverse().forEach(d => {
+                const statusClass = `status-${d.status}`;
+                const statusText = d.status === 'pending' ? 'Pending' : d.status === 'approved' ? 'Success' : 'Rejected';
+                const typeColor = d.type === 'deposit' ? '#10b981' : '#ef4444';
+                list.innerHTML += `
+                    <div class="history-item">
+                        <div>
+                            <span style="color:${typeColor};font-weight:700">${d.type.toUpperCase()}</span>
+                            <span style="color:#9ca3af;font-size:11px"> • Rs.${d.amount}</span>
+                        </div>
+                        <span class="${statusClass}">${statusText}</span>
+                    </div>`;
+            });
+        });
     }
 
     const makeRequest = async (type) => {
@@ -223,6 +270,11 @@
         depBtn.innerText = "SENDING...";
 
         try {
+            // FIX: Withdraw pe turant balance cut karo
+            if(type === 'withdraw') {
+                await update(ref(db, `users/${currentUser.uid}`), { balance: userBalance - val });
+            }
+
             await push(ref(db, 'requests'), {
                 uid: currentUser.uid,
                 email: currentUser.email,
@@ -242,6 +294,10 @@
 
         } catch (error) {
             Swal.fire("Error", "Request failed. Try again.", "error");
+            // Withdraw fail ho to balance wapas add karo
+            if(type === 'withdraw') {
+                await update(ref(db, `users/${currentUser.uid}`), { balance: userBalance });
+            }
         } finally {
             depBtn.disabled = false;
             withBtn.disabled = false;
@@ -253,4 +309,4 @@
     document.getElementById('withBtn').onclick = () => makeRequest('withdraw');
 </script>
 </body>
-                                                                   </html>
+            </html>
