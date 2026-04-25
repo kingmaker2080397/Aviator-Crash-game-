@@ -3,262 +3,159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Kingmaker Gold</title>
+<title>Wallet</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-body{background:#05070a;color:#fff;font-family:sans-serif;margin:0;padding:16px;text-align:center}
-#winTicker{background:#000;border-bottom:2px solid #ffd700;padding:8px 0;overflow:hidden;white-space:nowrap;margin:-16px -16px 16px -16px}
-#tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px}
-@keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-.hdr{background:#0b1018;padding:16px;border-radius:16px;display:flex;justify-content:space-between;margin-bottom:20px;align-items:center}
-.bal{font-size:24px;font-weight:900;color:#ffd700}
-.leaderBox{background:#0b1018;border:2px solid #ffd700;border-radius:12px;margin-bottom:20px;padding:12px}
-.leaderTitle{text-align:center;color:#ffd700;font-size:16px;font-weight:900;margin-bottom:10px}
-.top1{background:linear-gradient(45deg,#ffd700,#ff8c00);color:#000;padding:12px;border-radius:8px;margin-bottom:10px;text-align:center;font-weight:900}
-.top1.date{font-size:11px;color:#333;margin-top:4px}
-.leaderItem{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #222;font-size:13px}
-.leaderItem:last-child{border-bottom:none}
-.flag{font-size:16px;margin-right:6px}
-.bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
-.bet input{width:100px;padding:10px;border:1px solid #b8860b;background:#000;color:#fff;text-align:center;border-radius:8px;font-size:18px;font-weight:700}
-.wheel{position:relative;width:300px;height:300px;margin:20px auto}
-canvas{width:100%;height:100%;border-radius:50%;border:8px solid #0d1117;transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s}
-.canvas-blur{filter:blur(10px) brightness(0.4)}
-.pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%) rotate(180deg);width:50px;z-index:10;opacity:0.2}
-.result-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#00d4ff;text-shadow:0 0 20px #00d4ff,0 0 40px #00d4ff,0 0 60px #0099ff;z-index:20;display:none;animation:zoomIn 0.6s cubic-bezier(0.34,1.56,0.64,1)}
-@keyframes zoomIn{from{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:0}to{transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:1}}
-.spin{width:100%;padding:18px;background:linear-gradient(45deg,#ffd700,#ffed4e);color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 5px 20px rgba(255,215,0,0.4)}
-.spin:disabled{opacity:0.5}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-.btn{background:#0b1018;border:1px solid #b8860b;color:#fff;padding:16px;border-radius:12px;cursor:pointer;font-weight:700}
-.box{background:#0b1018;border:1px solid #b8860b;padding:15px;border-radius:12px;margin:15px 0}
-.num-display{background:#000;border:2px solid #10b981;padding:12px;border-radius:8px;color:#10b981;font-weight:900;font-size:18px;margin:10px 0;box-shadow:0 0 15px rgba(16,185,129,0.3)}
-.depositInfoBox{background:#0b1018;border:1px solid #10b981;padding:15px;border-radius:12px;margin:15px 0}
+body{background:#05070a;color:#fff;font-family:sans-serif;padding:20px;margin:0;text-align:center}
+.box{background:#0b1018;border:1px solid #b8860b;padding:20px;border-radius:12px;margin:10px 0}
+h1{color:#ffd700}
+input,button{width:100%;padding:14px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff;font-size:16px}
+button{background:#ffd700;color:#000;font-weight:900;cursor:pointer}
+.bal{font-size:32px;font-weight:900;color:#ffd700;margin:10px 0}
+.tab{display:flex;gap:8px;margin:20px 0}
+.tab button{flex:1;background:#000;color:#999}
+.tab button.active{background:#ffd700;color:#000}
+.num{color:#10b981;font-weight:900;font-size:18px;background:#000;padding:12px;border-radius:8px;border:1px solid #10b981;word-break:break-all}
+.fileBtn{background:#0088cc;color:#fff;border:none}
+.teleBtn{background:#0088cc;color:#fff;margin-top:10px}
 </style>
 </head>
 <body>
-
-<div id="winTicker">
-  <div id="tickerContent"></div>
-</div>
-
-<div class="hdr">
-<div>
-<small>BALANCE</small>
-<div class="bal">Rs. <span id="bal">0</span></div>
-<small id="userEmail" style="color:#999;font-size:10px"></small>
-</div>
-<button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700">LOGOUT</button>
-</div>
-
-<div class="leaderBox">
-  <div class="leaderTitle">🏆 TODAY'S TOP WINNERS 🏆</div>
-  <div class="top1">
-    <div style="font-size:18px">👑 #1 WINNER 👑</div>
-    <div id="top1Name">Loading...</div>
-    <div class="date" id="todayDate"></div>
-  </div>
-  <div id="top10List"></div>
-</div>
-
-<div class="depositInfoBox">
-<h3>💰 Deposit Info</h3>
-<div class="num-display" id="adminDepositInfo">Loading...</div>
-<button onclick="copyDeposit()" style="background:#10b981;margin-top:10px;width:100%;padding:10px;border:none;border-radius:8px;color:#000;font-weight:900">📋 COPY NUMBER</button>
-</div>
-
 <div class="box">
-<h3>📱 Your Withdraw Number</h3>
-<div class="num-display" id="savedNum">Not Set</div>
-<input id="myNum" placeholder="03XX-XXXXXXX" type="tel" style="background:#000;border:1px solid #b8860b;color:#fff;padding:12px;border-radius:8px;width:100%;font-size:16px">
-<button onclick="saveMyNum()" style="background:#10b981;margin-top:10px;width:100%;padding:14px;border:none;border-radius:8px;color:#000;font-weight:900">SAVE NUMBER</button>
+<h1>💰 WALLET</h1>
+<div class="bal">Rs. <span id="bal">0</span></div>
+<button onclick="location.href='./index.html'">BACK TO GAME</button>
 </div>
 
-<div class="bet">
-BET: <input type="number" id="bet" value="10" min="1">
-<button onclick="addBet(10)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+10</button>
-<button onclick="addBet(50)" style="background:#000;color:#ffd700;border:1px solid #b8860b;padding:8px 12px;border-radius:8px">+50</button>
+<div class="tab">
+<button id="depBtn" class="active" onclick="showTab('dep')">DEPOSIT</button>
+<button id="withBtn" onclick="showTab('with')">WITHDRAW</button>
 </div>
 
-<div class="wheel">
-<img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
-<canvas id="w" width="500" height="500"></canvas>
-<div class="result-box" id="resultBox"></div>
+<div id="depBox" class="box">
+<h3>💳 Deposit</h3>
+<p>Send to Admin Number:</p>
+<div class="num" id="adminNum" style="color:#ffd700;border-color:#ffd700">Loading...</div>
+<button class="fileBtn" onclick="document.getElementById('screenshot').click()">📸 UPLOAD SCREENSHOT</button>
+<input id="screenshot" type="file" accept="image/*" style="display:none">
+<div id="fileName" style="color:#10b981;font-size:12px;margin:5px 0"></div>
+<input id="depAmt" type="number" placeholder="Amount (Min 100)" min="100">
+<input id="trxId" placeholder="Transaction ID">
+<button onclick="reqDeposit()">SUBMIT DEPOSIT</button>
+<button class="teleBtn" onclick="window.open('https://t.me/+Tn9bUflQQtVlNGZk','_blank')">💬 JOIN TELEGRAM GROUP</button>
 </div>
 
-<button class="spin" id="spinBtn">SPIN NOW</button>
-
-<div class="grid">
-<button class="btn" onclick="location.href='./wallet.html'">💰 WALLET</button>
-<button class="btn" onclick="shareApp()">📤 SHARE</button>
-</div>
-
-<div style="margin-top:20px">
-<button onclick="openTelegram()" style="width:100%;background:#0088cc;color:#fff;padding:16px;border:none;border-radius:12px;font-weight:900;font-size:16px">💬 CUSTOMER SUPPORT</button>
+<div id="withBox" class="box" style="display:none">
+<h3>💸 Withdraw</h3>
+<p>Your Saved Number:</p>
+<div class="num" id="userNum">Loading...</div>
+<input id="withAmt" type="number" placeholder="Amount (Min 100)" min="100">
+<button onclick="reqWithdraw()">SUBMIT WITHDRAW</button>
 </div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,onValue,get,update,set}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,onValue,push,update}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
 const auth=getAuth(app),db=getDatabase(app);
-const segs=["2","100","5","5","1000","5000","20","1000"];
-const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
-let rot=0,ub=0,safe=false,adminPaymentData=null;
+let ub=0,userNum="",adminPaymentData=null,adminNumberForCopy="";
 
-// YE WALA LINK AB 100% CHALEGA JAANU
-const TELEGRAM_SUPPORT_LINK = "https://t.me/+Tn9bUflQQtVlNGZk";
-
-function drawWheel(showNumbers=true){
-ctx.clearRect(0,0,500,500);
-ctx.translate(250,250);
-for(let i=0;i<segs.length;i++){
-let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
-ctx.beginPath();ctx.fillStyle=i%2===0?"#1a1f2e":"#0d1117";
-ctx.moveTo(0,0);ctx.arc(0,0,250,s,e);ctx.fill();
-ctx.strokeStyle="#b8860b";ctx.lineWidth=2;ctx.stroke();
-if(showNumbers){
-ctx.save();ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
-ctx.fillStyle="#00d4ff";ctx.shadowColor="#00d4ff";ctx.shadowBlur=10;
-ctx.font="900 36px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);
-ctx.restore();
-}}
-ctx.translate(-250,-250);
-}
-drawWheel(true);
+const TELEGRAM_BOT_TOKEN = "PASTE_YOUR_BOT_TOKEN_HERE";
+const TELEGRAM_CHAT_ID = "-100PASTE_YOUR_CHAT_ID_HERE";
 
 onAuthStateChanged(auth,u=>{
 if(!u)return location.replace("./login.html");
-document.getElementById("userEmail").innerText=u.email;
-onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById("bal").innerText=ub.toLocaleString()});
-onValue(ref(db,`users/${u.uid}/withdraw_number`),s=>{
-let n=s.val()||"Not Set";
-document.getElementById("savedNum").innerText=n;
-document.getElementById("myNum").value=n==="Not Set"?"":n;
-});
-onValue(ref(db,'admin/safe_mode'),s=>safe=s.val()===true);
+onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById('bal').innerText=ub.toLocaleString()});
+onValue(ref(db,`users/${u.uid}/withdraw_number`),s=>{userNum=s.val()||"Not Set";document.getElementById('userNum').innerText=userNum});
 });
 
+// SMART DEPOSIT INFO - STRING YA OBJECT DONO CHALEGA
 onValue(ref(db,'admin/payment_info'),s=>{
   adminPaymentData=s.val();
-  if(adminPaymentData&&adminPaymentData.type){
-    document.getElementById('adminDepositInfo').innerHTML=`${adminPaymentData.type}: <b>${adminPaymentData.number}</b><br>Name: <b>${adminPaymentData.name}</b>`;
-  }else{
-    document.getElementById('adminDepositInfo').innerText='Payment info not set by admin';
+  let displayText = 'Not Set by Admin';
+
+  if(adminPaymentData){
+    // Agar object hai to
+    if(typeof adminPaymentData === 'object' && adminPaymentData.type){
+      displayText = `${adminPaymentData.type}: <b>${adminPaymentData.number}</b><br>Name: <b>${adminPaymentData.name}</b>`;
+      adminNumberForCopy = adminPaymentData.number;
+    }
+    // Agar string hai to
+    else if(typeof adminPaymentData === 'string'){
+      displayText = adminPaymentData;
+      // String mein se number nikalne ki koshish
+      let match = adminPaymentData.match(/\d{10,11}/);
+      adminNumberForCopy = match? match[0] : adminPaymentData;
+    }
+    // Agar number direct hai to
+    else if(typeof adminPaymentData === 'number'){
+      displayText = adminPaymentData;
+      adminNumberForCopy = adminPaymentData;
+    }
   }
+  document.getElementById('adminNum').innerHTML = displayText;
 });
 
-const fakeWins=["🔥 Ali 🇵🇰 ne 15,000 PKR jeete!","💰 Fatima 🇸🇦 ne 8,500 PKR withdraw kiye!","🚀 John 🇺🇸 ne 50,000 PKR ka Cash Out!","💎 Ayesha 🇦🇪 ne 22,300 PKR jeete!","⚡ Usman 🇵🇰 ne 1,20,000 PKR withdraw kiye!","👑 Sarah 🇬🇧 ne 45,000 PKR ka Jackpot!"];
-document.getElementById('tickerContent').innerHTML=fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ")+" &nbsp;&nbsp;●&nbsp;&nbsp; "+fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ");
-
-const fakeNames=["Ali Khan","Sara Ahmed","Usman Ali","Fatima Noor","Ahmed Raza","Ayesha Malik","Bilal Shah","Zara Sheikh","Hassan Jan","John Smith"];
-const flags=["🇵🇰","🇸🇦","🇦🇪","🇺🇸","🇬🇧","🇹🇷","🇶🇦","🇮🇳","🇧🇩","🇨🇳"];
-const amounts=[150000,120000,98000,85000,67000,50000,45000,32000,25000,18000];
-function updateLeaderboard(){
-  document.getElementById('todayDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  let top1Name=fakeNames[Math.floor(Math.random()*fakeNames.length)];
-  let top1Flag=flags[Math.floor(Math.random()*flags.length)];
-  let top1Amount=amounts[0]+Math.floor(Math.random()*10000);
-  document.getElementById('top1Name').innerHTML=`${top1Flag} ${top1Name} - ${top1Amount.toLocaleString()} PKR`;
-  let html='';
-  for(let i=1;i<10;i++){
-    let name=fakeNames[Math.floor(Math.random()*fakeNames.length)];
-    let flag=flags[Math.floor(Math.random()*flags.length)];
-    let amount=amounts[i]+Math.floor(Math.random()*5000);
-    html+=`<div class="leaderItem"><span><span class="flag">${flag}</span> #${i+1} ${name}</span><span style="color:#10b981;font-weight:700">${amount.toLocaleString()} PKR</span></div>`;
-  }
-  document.getElementById('top10List').innerHTML=html;
-}
-updateLeaderboard();
-setInterval(updateLeaderboard,8000);
-
-window.addBet=a=>{let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
-window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
-window.saveMyNum=async()=>{
-let n=document.getElementById('myNum').value.trim();
-if(!n)return Swal.fire("Error","Number daalo","error");
-await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
-Swal.fire("Saved!","Number save ho gaya","success");
+document.getElementById('screenshot').onchange=function(e){
+  let fileName = e.target.files[0]? e.target.files[0].name : '';
+  document.getElementById('fileName').innerText = fileName? `Selected: ${fileName}` : '';
 };
 
-window.shareApp=()=>{
-  if(navigator.share){
-    navigator.share({
-      title:'Kingmaker Gold',
-      text:'Aao khelo aur paisa jeeto! 🎡💰',
-      url:window.location.href
-    });
-  }else{
-    navigator.clipboard.writeText(window.location.href);
-    Swal.fire("Copied!","Link copy ho gaya. Doston ko bhejo","success");
-  }
+window.showTab=t=>{
+document.getElementById('depBox').style.display=t==='dep'?'block':'none';
+document.getElementById('withBox').style.display=t==='with'?'block':'none';
+document.getElementById('depBtn').classList.toggle('active',t==='dep');
+document.getElementById('withBtn').classList.toggle('active',t==='with');
 };
 
-window.copyDeposit=()=>{
-  if(adminPaymentData&&adminPaymentData.number){
-    navigator.clipboard.writeText(adminPaymentData.number);
-    Swal.fire("Copied!",`Number ${adminPaymentData.number} copy ho gaya`,"success");
-  }
-};
+window.reqDeposit=async()=>{
+let a=parseFloat(document.getElementById('depAmt').value);
+let tr=document.getElementById('trxId').value.trim();
+let file=document.getElementById('screenshot').files[0];
 
-window.openTelegram=()=>{
-  window.location.href = TELEGRAM_SUPPORT_LINK;
-};
+if(!a||a<100)return Swal.fire("Error","Min 100 PKR daalo","error");
+if(!tr)return Swal.fire("Error","Transaction ID daalo","error");
+if(!file)return Swal.fire("Error","Screenshot upload karo","error");
 
-document.getElementById("spinBtn").onclick=async function(){
-let b=parseFloat(document.getElementById("bet").value);
-if(b>ub)return Swal.fire("Error","Balance kam hai","error");
-if(b<1)return Swal.fire("Error","Min bet 1","error");
-this.disabled=true;this.innerText="SPINNING...";
-await update(ref(db,`users/${auth.currentUser.uid}`),{balance:ub-b});
+Swal.fire({title:"Uploading...",text:"Request bhej rahe hain",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
 
-c.classList.add('canvas-blur');
-drawWheel(false);
-resultBox.style.display='none';
-rot+=3600+Math.random()*360;
-c.style.transform=`rotate(${rot}deg)`;
+await push(ref(db,'requests'),{
+  uid:auth.currentUser.uid,
+  email:auth.currentUser.email,
+  type:'deposit',
+  amount:a,
+  trx:tr,
+  admin_number:adminNumberForCopy||'N/A',
+  status:'pending',
+  timestamp:Date.now()
+});
 
-let rs=await get(ref(db,'admin/next_result')),winAmount;
-if(rs.exists()&&rs.val()){
-  winAmount=parseFloat(rs.val());
-  await set(ref(db,'admin/next_result'),null);
-}else if(safe){
-  if(b>=5000) winAmount=Math.floor(Math.random()*3000)+1000;
-  else if(b>=1000) winAmount=Math.floor(Math.random()*800)+100;
-  else if(b>=100) winAmount=Math.floor(Math.random()*80)+10;
-  else winAmount=Math.floor(Math.random()*b*0.8)+2;
-}else{
-  winAmount=parseFloat(segs[Math.floor(Math.random()*segs.length)]);
+if(TELEGRAM_BOT_TOKEN!== "PASTE_YOUR_BOT_TOKEN_HERE"){
+  let formData = new FormData();
+  formData.append('chat_id', TELEGRAM_CHAT_ID);
+  formData.append('photo', file);
+  formData.append('caption', `🔥 NEW DEPOSIT\n\n💰 Amount: ${a} PKR\n📧 Email: ${auth.currentUser.email}\n🆔 TRX: ${tr}`);
+  try{await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,{method:'POST',body:formData});}catch(e){}
 }
 
-setTimeout(async()=>{
-let nb=ub-b+winAmount;
-await update(ref(db,`users/${auth.currentUser.uid}`),{balance:nb});
+Swal.fire("Sent!","Deposit request admin ko bhej di","success");
+document.getElementById('depAmt').value='';
+document.getElementById('trxId').value='';
+document.getElementById('screenshot').value='';
+document.getElementById('fileName').innerText='';
+};
 
-c.classList.remove('canvas-blur');
-drawWheel(true);
-resultBox.innerText=winAmount;
-resultBox.style.display='block';
-
-confetti({
-  particleCount:150,
-  spread:100,
-  origin:{y:0.6},
-  colors:['#00d4ff','#ffd700','#ff0066','#10b981']
-});
-
-Swal.fire({
-  title:"🎉 WINNER!",
-  html:`<span style="font-size:48px;color:#00d4ff;text-shadow:0 0 20px #00d4ff">Rs. ${winAmount}</span>`,
-  background:'#0b1018',
-  color:'#fff',
-  confirmButtonColor:'#00d4ff'
-});
-this.disabled=false;this.innerText="SPIN NOW";
-},4000);
+window.reqWithdraw=async()=>{
+let a=parseFloat(document.getElementById('withAmt').value);
+if(!a||a<100)return Swal.fire("Error","Min 100","error");
+if(a>ub)return Swal.fire("Error","Balance kam hai","error");
+if(userNum==="Not Set"||userNum==="Loading...")return Swal.fire("Error","Index page pe jaake number save karo","error");
+await update(ref(db,`users/${auth.currentUser.uid}`),{balance:ub-a});
+await push(ref(db,'requests'),{uid:auth.currentUser.uid,email:auth.currentUser.email,type:'withdraw',amount:a,user_number:userNum,status:'pending',timestamp:Date.now()});
+Swal.fire("Sent!","Withdraw request sent","success");
+document.getElementById('withAmt').value='';
 };
 </script>
 </body>
