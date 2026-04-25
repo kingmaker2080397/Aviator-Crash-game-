@@ -15,7 +15,9 @@ button{background:#ffd700;color:#000;font-weight:900;cursor:pointer}
 .tab{display:flex;gap:8px;margin:20px 0}
 .tab button{flex:1;background:#000;color:#999}
 .tab button.active{background:#ffd700;color:#000}
-.num{color:#10b981;font-weight:900;font-size:22px;background:#000;padding:12px;border-radius:8px;border:1px solid #10b981}
+.num{color:#10b981;font-weight:900;font-size:18px;background:#000;padding:12px;border-radius:8px;border:1px solid #10b981}
+.fileBtn{background:#0088cc;color:#fff;border:none}
+.teleBtn{background:#0088cc;color:#fff;margin-top:10px}
 </style>
 </head>
 <body>
@@ -34,9 +36,13 @@ button{background:#ffd700;color:#000;font-weight:900;cursor:pointer}
 <h3>💳 Deposit</h3>
 <p>Send to Admin Number:</p>
 <div class="num" id="adminNum" style="color:#ffd700;border-color:#ffd700">Loading...</div>
+<button class="fileBtn" onclick="document.getElementById('screenshot').click()">📸 UPLOAD SCREENSHOT</button>
+<input id="screenshot" type="file" accept="image/*" style="display:none">
+<div id="fileName" style="color:#10b981;font-size:12px;margin:5px 0"></div>
 <input id="depAmt" type="number" placeholder="Amount (Min 100)" min="100">
 <input id="trxId" placeholder="Transaction ID">
 <button onclick="reqDeposit()">SUBMIT DEPOSIT</button>
+<button class="teleBtn" onclick="window.open('https://t.me/+Tn9bUflQQtVlNGZk','_blank')">💬 JOIN TELEGRAM GROUP</button>
 </div>
 
 <div id="withBox" class="box" style="display:none">
@@ -54,14 +60,32 @@ import{getDatabase,ref,onValue,push,update}from"https://www.gstatic.com/firebase
 
 const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
 const auth=getAuth(app),db=getDatabase(app);
-let ub=0,userNum="",adminNum="";
+let ub=0,userNum="",adminPaymentData=null;
+
+// TELEGRAM BOT KA TOKEN + CHAT ID YAHAN DALNA - MAIN TUJHE BATAUNGA KAISE BANANA HAI
+const TELEGRAM_BOT_TOKEN = "PASTE_YOUR_BOT_TOKEN_HERE"; // ← Ye khali hai abhi
+const TELEGRAM_CHAT_ID = "-100PASTE_YOUR_CHAT_ID_HERE"; // ← Ye bhi khali hai
 
 onAuthStateChanged(auth,u=>{
 if(!u)return location.replace("./login.html");
 onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById('bal').innerText=ub.toLocaleString()});
 onValue(ref(db,`users/${u.uid}/withdraw_number`),s=>{userNum=s.val()||"Not Set";document.getElementById('userNum').innerText=userNum});
-onValue(ref(db,'admin/payment_info'),s=>{adminNum=s.val()||"Not Set";document.getElementById('adminNum').innerText=adminNum});
 });
+
+// DEPOSIT INFO FIX - OBJECT OBJECT KHATAM
+onValue(ref(db,'admin/payment_info'),s=>{
+  adminPaymentData=s.val();
+  if(adminPaymentData&&adminPaymentData.type){
+    document.getElementById('adminNum').innerHTML=`${adminPaymentData.type}: <b>${adminPaymentData.number}</b><br>Name: <b>${adminPaymentData.name}</b>`;
+  }else{
+    document.getElementById('adminNum').innerText='Payment info not set by admin';
+  }
+});
+
+document.getElementById('screenshot').onchange=function(e){
+  let fileName = e.target.files[0]? e.target.files[0].name : '';
+  document.getElementById('fileName').innerText = fileName? `Selected: ${fileName}` : '';
+};
 
 window.showTab=t=>{
 document.getElementById('depBox').style.display=t==='dep'?'block':'none';
@@ -71,12 +95,45 @@ document.getElementById('withBtn').classList.toggle('active',t==='with');
 };
 
 window.reqDeposit=async()=>{
-let a=parseFloat(document.getElementById('depAmt').value),tr=document.getElementById('trxId').value;
-if(!a||a<100)return Swal.fire("Error","Min 100","error");
+let a=parseFloat(document.getElementById('depAmt').value);
+let tr=document.getElementById('trxId').value.trim();
+let file=document.getElementById('screenshot').files[0];
+
+if(!a||a<100)return Swal.fire("Error","Min 100 PKR daalo","error");
 if(!tr)return Swal.fire("Error","Transaction ID daalo","error");
-await push(ref(db,'requests'),{uid:auth.currentUser.uid,email:auth.currentUser.email,type:'deposit',amount:a,trx:tr,admin_number:adminNum,status:'pending',timestamp:Date.now()});
-Swal.fire("Sent!","Request sent","success");
-document.getElementById('depAmt').value='';document.getElementById('trxId').value='';
+if(!file)return Swal.fire("Error","Screenshot upload karo","error");
+
+Swal.fire({title:"Uploading...",text:"Screenshot Telegram pe bhej rahe hain",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+
+// 1. Firebase mein request save karo
+await push(ref(db,'requests'),{
+  uid:auth.currentUser.uid,
+  email:auth.currentUser.email,
+  type:'deposit',
+  amount:a,
+  trx:tr,
+  admin_number:adminPaymentData?.number||'N/A',
+  status:'pending',
+  timestamp:Date.now()
+});
+
+// 2. Telegram pe bhejo - YE TABHI CHALEGA JAB BOT TOKEN DALOGE
+if(TELEGRAM_BOT_TOKEN!== "PASTE_YOUR_BOT_TOKEN_HERE"){
+  let formData = new FormData();
+  formData.append('chat_id', TELEGRAM_CHAT_ID);
+  formData.append('photo', file);
+  formData.append('caption', `🔥 NEW DEPOSIT REQUEST\n\n💰 Amount: ${a} PKR\n📧 Email: ${auth.currentUser.email}\n🆔 TRX ID: ${tr}\n⏰ Time: ${new Date().toLocaleString()}`);
+
+  try{
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,{method:'POST',body:formData});
+  }catch(e){console.log('Telegram Error:',e)}
+}
+
+Swal.fire("Sent!","Deposit request + Screenshot admin ko bhej diya","success");
+document.getElementById('depAmt').value='';
+document.getElementById('trxId').value='';
+document.getElementById('screenshot').value='';
+document.getElementById('fileName').innerText='';
 };
 
 window.reqWithdraw=async()=>{
