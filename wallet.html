@@ -58,6 +58,15 @@
         }
        .bal-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; font-weight: 600; }
        .bal-val { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 4px; }
+       .payment-info {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid var(--gold-dark);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 20px;
+       }
+       .payment-label { font-size: 12px; color: #9ca3af; }
+       .payment-number { font-size: 20px; font-weight: 900; color: var(--gold); margin-top: 4px; }
        .input-group { margin: 20px 0; }
        .amount-input {
             background: var(--dark-2);
@@ -127,6 +136,11 @@
             <div class="bal-val">Rs. <span id="userBal">0</span></div>
         </div>
 
+        <div class="payment-info">
+            <div class="payment-label">SEND PAYMENT TO:</div>
+            <div class="payment-number" id="paymentNum">Loading...</div>
+        </div>
+
         <div class="input-group">
             <input type="number" id="amt" class="amount-input" placeholder="Enter Amount" min="1">
             <div class="chip-grid">
@@ -173,6 +187,10 @@
             onValue(ref(db, `users/${user.uid}/balance`), s => {
                 userBalance = s.val() || 0;
                 document.getElementById("userBal").innerText = userBalance.toLocaleString();
+            });
+            // FIX 1: Payment number load karo aur show karo
+            onValue(ref(db, 'admin/payment_info'), s => {
+                document.getElementById("paymentNum").innerText = s.val() || "Not Set by Admin";
             });
         } else {
             window.location.replace("./login.html");
@@ -235,4 +253,4 @@
     document.getElementById('withBtn').onclick = () => makeRequest('withdraw');
 </script>
 </body>
-    </html>
+                                                                   </html>
