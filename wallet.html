@@ -7,10 +7,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --gold: #ffd700; 
+        :root {
+            --gold: #ffd700;
             --gold-dark: #b8860b;
-            --dark: #05070a; 
+            --dark: #05070a;
             --dark-2: #0b1018;
             --glass: rgba(255, 255, 255, 0.06);
             --glass-border: rgba(255, 215, 0, 0.15);
@@ -18,18 +18,18 @@
             --red: #ef4444;
         }
         * { box-sizing: border-box; }
-        body { 
+        body {
             background: radial-gradient(circle at 50% 0%, #1a1f2e 0%, var(--dark) 40%);
-            color: white; 
-            font-family: 'Outfit', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            min-height: 100vh; 
+            min-height: 100vh;
             padding: 20px;
         }
-        .wallet-card {
+       .wallet-card {
             width: 100%;
             max-width: 400px;
             background: linear-gradient(145deg, var(--glass), rgba(255,255,255,0.02));
@@ -37,10 +37,10 @@
             padding: 30px 24px;
             border-radius: 24px;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             text-align: center;
         }
-        .title {
+       .title {
             font-size: 26px;
             font-weight: 900;
             margin: 0 0 8px 0;
@@ -48,40 +48,37 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .subtitle { color: #9ca3af; font-size: 13px; margin-bottom: 24px; }
-        
-        .bal-card {
+       .subtitle { color: #9ca3af; font-size: 13px; margin-bottom: 24px; }
+       .bal-card {
             background: var(--dark-2);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 24px;
         }
-        .bal-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; font-weight: 600; }
-        .bal-val { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 4px; }
-
-        .input-group { margin: 20px 0; }
-        .amount-input { 
-            background: var(--dark-2); 
-            border: 1px solid var(--gold-dark); 
-            color: white; 
-            padding: 14px; 
-            border-radius: 12px; 
+       .bal-label { font-size: 11px; color: #9ca3af; letter-spacing: 1px; font-weight: 600; }
+       .bal-val { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 4px; }
+       .input-group { margin: 20px 0; }
+       .amount-input {
+            background: var(--dark-2);
+            border: 1px solid var(--gold-dark);
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
             width: 100%;
-            text-align: center; 
-            font-weight: 800; 
+            text-align: center;
+            font-weight: 800;
             font-size: 20px;
             outline: none;
         }
-        .amount-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
-        
-        .chip-grid {
+       .amount-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
+       .chip-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             margin-top: 12px;
         }
-        .chip-btn {
+       .chip-btn {
             background: rgba(255,215,0,0.08);
             border: 1px solid var(--gold-dark);
             color: var(--gold);
@@ -90,27 +87,21 @@
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .chip-btn:active { transform: scale(0.95); background: rgba(255,215,0,0.15); }
-
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
-        .action-btn {
+       .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+       .action-btn {
             padding: 16px;
             border-radius: 14px;
             font-size: 16px;
             font-weight: 800;
             border: none;
             cursor: pointer;
-            transition: all 0.2s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .action-btn:active { transform: scale(0.97); }
-        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .dep-btn { background: linear-gradient(135deg, var(--green), #059669); color: white; }
-        .with-btn { background: linear-gradient(135deg, var(--red), #dc2626); color: white; }
-        
-        .back-link {
+       .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+       .dep-btn { background: linear-gradient(135deg, var(--green), #059669); color: white; }
+       .with-btn { background: linear-gradient(135deg, var(--red), #dc2626); color: white; }
+       .back-link {
             display: inline-block;
             margin-top: 24px;
             color: #9ca3af;
@@ -118,13 +109,11 @@
             font-size: 14px;
             font-weight: 600;
         }
-        .back-link:hover { color: var(--gold); }
-
-        .swal2-popup {
-            background: var(--dark-2) !important;
-            color: white !important;
-            border: 1px solid var(--glass-border) !important;
-            border-radius: 20px !important;
+       .swal2-popup {
+            background: var(--dark-2)!important;
+            color: white!important;
+            border: 1px solid var(--glass-border)!important;
+            border-radius: 20px!important;
         }
     </style>
 </head>
@@ -153,7 +142,7 @@
             <button id="withBtn" class="action-btn with-btn">💸 WITHDRAW</button>
         </div>
 
-        <a href="index.html" class="back-link">← Back to Game</a>
+        <a href="./index.html" class="back-link">← Back to Game</a>
     </div>
 
 <script type="module">
@@ -170,10 +159,80 @@
         messagingSenderId: "327400668393",
         appId: "1:327400668393:web:0d02a340b9f5603f524478"
     };
-    
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
     let userBalance = 0;
-    let currentUser
+    let currentUser = null;
+
+    onAuthStateChanged(auth, user => {
+        if(user) {
+            currentUser = user;
+            onValue(ref(db, `users/${user.uid}/balance`), s => {
+                userBalance = s.val() || 0;
+                document.getElementById("userBal").innerText = userBalance.toLocaleString();
+            });
+        } else {
+            window.location.replace("./login.html");
+        }
+    });
+
+    window.setAmount = (amount) => {
+        document.getElementById('amt').value = amount;
+    }
+
+    const makeRequest = async (type) => {
+        const val = parseFloat(document.getElementById('amt').value);
+        const depBtn = document.getElementById('depBtn');
+        const withBtn = document.getElementById('withBtn');
+
+        if(!currentUser) return Swal.fire("Error", "Please login first!", "error");
+        if(!val || val <= 0) return Swal.fire("Invalid Amount", "Please enter valid amount", "error");
+
+        if(type === 'withdraw') {
+            if(val < 500) return Swal.fire("Minimum Limit", "Minimum withdraw Rs. 500 hai", "warning");
+            if(val > userBalance) return Swal.fire("Insufficient Balance", "Aapka balance kam hai", "error");
+        }
+
+        if(type === 'deposit' && val < 100) {
+            return Swal.fire("Minimum Limit", "Minimum deposit Rs. 100 hai", "warning");
+        }
+
+        depBtn.disabled = true;
+        withBtn.disabled = true;
+        depBtn.innerText = "SENDING...";
+
+        try {
+            await push(ref(db, 'requests'), {
+                uid: currentUser.uid,
+                email: currentUser.email,
+                amount: val,
+                type: type,
+                status: 'pending',
+                timestamp: Date.now()
+            });
+
+            Swal.fire({
+                title: "Request Sent!",
+                html: `Your <b style="color:${type === 'deposit' ? '#10b981' : '#ef4444'}">${type}</b> request of <b style="color:#ffd700">Rs. ${val}</b> is pending approval.`,
+                icon: "success",
+                confirmButtonColor: '#ffd700'
+            });
+            document.getElementById('amt').value = '';
+
+        } catch (error) {
+            Swal.fire("Error", "Request failed. Try again.", "error");
+        } finally {
+            depBtn.disabled = false;
+            withBtn.disabled = false;
+            depBtn.innerText = "💰 DEPOSIT";
+        }
+    };
+
+    document.getElementById('depBtn').onclick = () => makeRequest('deposit');
+    document.getElementById('withBtn').onclick = () => makeRequest('withdraw');
+</script>
+</body>
+    </html>
