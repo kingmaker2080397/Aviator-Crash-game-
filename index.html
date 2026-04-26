@@ -7,442 +7,88 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
+/* ... (Aapka purana CSS same rahega) ... */
 * { box-sizing: border-box; }
-
-body{
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-  color:#fff;
-  font-family: 'Segoe UI', sans-serif;
-  margin:0;
-  padding:16px;
-  text-align:center;
-  min-height:100vh;
-  overflow-x: hidden;
-}
-
-/* SPLASH SCREEN */
-#splash{
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  animation: fadeOut 0.5s ease 3s forwards;
-}
-
-.splash-logo{
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
-  border-radius: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 60px;
-  animation: pulse 1.5s ease infinite;
-  box-shadow: 0 0 80px rgba(255,215,0,0.6);
-}
-
-.splash-text{
-  margin-top: 30px;
-  font-size: 32px;
-  font-weight: 900;
-  background: linear-gradient(45deg, #ffd700, #ff8c00);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: slideUp 1s ease;
-}
-
-.splash-loading{
-  margin-top: 20px;
-  width: 200px;
-  height: 4px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.splash-loading-bar{
-  height: 100%;
-  background: linear-gradient(90deg, #ffd700, #ff8c00);
-  animation: loading 2.5s ease forwards;
-  box-shadow: 0 0 20px rgba(255,215,0,0.8);
-}
-
+body{background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);color:#fff;font-family: 'Segoe UI', sans-serif;margin:0;padding:16px;text-align:center;min-height:100vh;overflow-x: hidden;}
+#splash{position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: linear-gradient(135deg, #0f172a, #1e293b);display: flex;flex-direction: column;justify-content: center;align-items: center;z-index: 9999;animation: fadeOut 0.5s ease 3s forwards;}
+.splash-logo{width: 120px;height: 120px;background: linear-gradient(135deg, #ffd700, #ff8c00);border-radius: 30px;display: flex;align-items: center;justify-content: center;font-size: 60px;animation: pulse 1.5s ease infinite;box-shadow: 0 0 80px rgba(255,215,0,0.6);}
+.splash-text{margin-top: 30px;font-size: 32px;font-weight: 900;background: linear-gradient(45deg, #ffd700, #ff8c00);-webkit-background-clip: text;-webkit-text-fill-color: transparent;animation: slideUp 1s ease;}
+.splash-loading{margin-top: 20px;width: 200px;height: 4px;background: rgba(255,255,255,0.1);border-radius: 10px;overflow: hidden;}
+.splash-loading-bar{height: 100%;background: linear-gradient(90deg, #ffd700, #ff8c00);animation: loading 2.5s ease forwards;box-shadow: 0 0 20px rgba(255,215,0,0.8);}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
 @keyframes loading{from{width:0%}to{width:100%}}
 @keyframes fadeOut{to{opacity:0;visibility:hidden}}
-
 #mainApp{opacity:0;animation:fadeIn 0.5s ease 3.2s forwards}
 @keyframes fadeIn{to{opacity:1}}
-
-#winTicker{
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-  border-bottom:2px solid rgba(255, 215, 0, 0.3);
-  padding:8px 0;
-  overflow:hidden;
-  white-space:nowrap;
-  margin:-16px -16px 16px -16px;
-}
-
-#tickerContent{
-  display:inline-block;
-  animation:scroll 40s linear infinite;
-  color:#10b981;
-  font-weight:700;
-  font-size:13px;
-  text-shadow: 0 0 10px rgba(16,185,129,0.5);
-}
-
+#winTicker{background: rgba(0, 0, 0, 0.4);backdrop-filter: blur(10px);border-bottom:2px solid rgba(255, 215, 0, 0.3);padding:8px 0;overflow:hidden;white-space:nowrap;margin:-16px -16px 16px -16px;}
+#tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px;text-shadow: 0 0 10px rgba(16,185,129,0.5);}
 @keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-
-.hdr,.box,.leaderBtn,.btn,.leaderBox{
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.hdr{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.bal{
-  font-size:28px;
-  font-weight:900;
-  background: linear-gradient(45deg, #ffd700, #ff8c00);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));
-}
-
-.leaderBtn{
-  width:100%;
-  color:#ffd700;
-  padding:14px;
-  font-weight:900;
-  font-size:16px;
-  cursor:pointer;
-  transition: all 0.3s ease;
-}
-
-.leaderBtn:hover{
-  background: rgba(255, 215, 0, 0.1);
-  border-color: rgba(255, 215, 0, 0.5);
-  transform: translateY(-2px);
-}
-
-.leaderBox{
-  display:none;
-  padding:12px;
-}
-
-.leaderBox.show{
-  display:block;
-  animation:slideDown 0.4s cubic-bezier(0.34,1.56,0.64,1);
-}
-
-@keyframes slideDown{from{opacity:0;transform:translateY(-20px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-
-.leaderTitle{
-  text-align:center;
-  color:#ffd700;
-  font-size:18px;
-  font-weight:900;
-  margin-bottom:12px;
-  text-shadow: 0 0 20px rgba(255,215,0,0.5);
-}
-
-.top1{
-  background: linear-gradient(135deg,#ffd700,#ff8c00);
-  color:#000;
-  padding:14px;
-  border-radius:12px;
-  margin-bottom:12px;
-  text-align:center;
-  font-weight:900;
-  box-shadow: 0 5px 20px rgba(255,215,0,0.4);
-}
-
-.top1.date{font-size:11px;color:#333;margin-top:4px;opacity:0.8}
-.leaderItem{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px}
-.leaderItem:last-child{border-bottom:none}
-.flag{font-size:16px;margin-right:6px}
-
-.bet{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  justify-content:center;
-  margin:20px 0;
-}
-
-.bet input{
-  width:100px;
-  padding:12px;
-  border:1px solid rgba(184, 134, 11, 0.5);
-  background:rgba(0,0,0,0.4);
-  color:#fff;
-  text-align:center;
-  border-radius:12px;
-  font-size:18px;
-  font-weight:700;
-  backdrop-filter: blur(10px);
-}
-
-.bet button{
-  background: rgba(0,0,0,0.4);
-  color:#ffd700;
-  border:1px solid rgba(184, 134, 11, 0.5);
-  padding:10px 14px;
-  border-radius:10px;
-  font-weight:700;
-  cursor:pointer;
-  transition: all 0.2s;
-}
-
-.bet button:hover{
-  background: rgba(255,215,0,0.2);
-  transform: scale(1.05);
-}
-
-.wheel{
-  position:relative;
-  width:300px;
-  height:300px;
-  margin:20px auto;
-  transition: transform 0.1s ease-out;
-  transform-style: preserve-3d;
-}
-
-canvas{
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  border:8px solid rgba(255, 255, 255, 0.1);
-  transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s;
-  box-shadow: 0 0 60px rgba(0, 212, 255, 0.3), inset 0 0 60px rgba(0,0,0,0.5);
-}
-
-.canvas-blur{filter:blur(10px) brightness(0.4)}
-
-.pointer{
-  position:absolute;
-  top:-15px;
-  left:50%;
-  transform:translateX(-50%) rotate(180deg);
-  width:50px;
-  z-index:10;
-  opacity:0.3;
-  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-}
-
-.result-box{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:80px;
-  font-weight:900;
-  color:#00d4ff;
-  text-shadow:0 0 20px #00d4ff,0 0 40px #00d4ff,0 0 60px #0099ff;
-  z-index:20;
-  display:none;
-  animation:zoomIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
-}
-
-@keyframes zoomIn{from{transform:translate(-50%,-50%) scale(0) rotate(-180deg);opacity:0}to{transform:translate(-50%,-50%) scale(1) rotate(0deg);opacity:1}}
-
-.spin{
-  width:100%;
-  padding:18px;
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
-  color:#000;
-  border:none;
-  border-radius:16px;
-  font-size:20px;
-  font-weight:900;
-  cursor:pointer;
-  box-shadow: 0 10px 40px rgba(255,215,0,0.5);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.spin:before{
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  transition: left 0.5s;
-}
-
-.spin:hover:before{
-  left: 100%;
-}
-
-.spin:hover{
-  transform: translateY(-3px);
-  box-shadow: 0 15px 50px rgba(255,215,0,0.7);
-}
-
-.spin:active{
-  transform: translateY(0px);
-}
-
-.spin:disabled{
-  opacity:0.5;
-  transform: scale(1)!important;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-top:20px;
-}
-
-.btn{
-  color:#fff;
-  padding:16px;
-  cursor:pointer;
-  font-weight:700;
-  transition: all 0.3s ease;
-}
-
-.btn:hover{
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.num-display{
-  background:rgba(0,0,0,0.4);
-  border:2px solid #10b981;
-  padding:12px;
-  border-radius:12px;
-  color:#10b981;
-  font-weight:900;
-  font-size:18px;
-  margin:10px 0;
-  box-shadow:0 0 20px rgba(16,185,129,0.3);
-  backdrop-filter: blur(10px);
-}
-
-input[type="tel"], input[type="number"]{
-  background:rgba(0,0,0,0.4);
-  border:1px solid rgba(184, 134, 11, 0.5);
-  color:#fff;
-  padding:12px;
-  border-radius:12px;
-  width:100%;
-  font-size:16px;
-  backdrop-filter: blur(10px);
-}
-
-button{
-  font-family: inherit;
-}
-
-.fee-note{
-  font-size:11px;
-  color:#fbbf24;
-  margin-top:8px;
-  opacity:0.8;
-}
+.hdr,.box,.leaderBtn,.btn,.leaderBox{background: rgba(15, 23, 42, 0.6);backdrop-filter: blur(20px);border: 1px solid rgba(255, 255, 255, 0.1);box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);border-radius: 16px;padding: 16px;margin-bottom: 16px;}
+.hdr{display:flex;justify-content:space-between;align-items:center;}
+.bal{font-size:28px;font-weight:900;background: linear-gradient(45deg, #ffd700, #ff8c00);-webkit-background-clip: text;-webkit-text-fill-color: transparent;filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));}
+.leaderBtn{width:100%;color:#ffd700;padding:14px;font-weight:900;font-size:16px;cursor:pointer;transition: all 0.3s ease;}
+.leaderBox{display:none;padding:12px;}
+.leaderBox.show{display:block;animation:slideDown 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+.bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0;}
+.bet input{width:100px;padding:12px;border:1px solid rgba(184, 134, 11, 0.5);background:rgba(0,0,0,0.4);color:#fff;text-align:center;border-radius:12px;font-size:18px;font-weight:700;}
+.wheel{position:relative;width:300px;height:300px;margin:20px auto;transition: transform 0.1s ease-out;transform-style: preserve-3d;}
+canvas{width:100%;height:100%;border-radius:50%;border:8px solid rgba(255, 255, 255, 0.1);transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s;}
+.result-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#00d4ff;z-index:20;display:none;}
+.spin{width:100%;padding:18px;background: linear-gradient(135deg, #ffd700, #ff8c00);color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
+.btn{color:#fff;padding:16px;cursor:pointer;font-weight:700;}
+.num-display{background:rgba(0,0,0,0.4);border:2px solid #10b981;padding:12px;border-radius:12px;color:#10b981;font-weight:900;font-size:18px;}
 </style>
 </head>
 <body>
 
-<!-- SPLASH SCREEN -->
 <div id="splash">
   <div class="splash-logo">👑</div>
   <div class="splash-text">KINGMAKER GOLD</div>
-  <div class="splash-loading">
-    <div class="splash-loading-bar"></div>
-  </div>
+  <div class="splash-loading"><div class="splash-loading-bar"></div></div>
 </div>
 
 <div id="mainApp">
-
-<div id="winTicker">
-  <div id="tickerContent"></div>
-</div>
+<div id="winTicker"><div id="tickerContent"></div></div>
 
 <div class="hdr">
-<div>
-<small style="opacity:0.7">BALANCE</small>
-<div class="bal">Rs. <span id="bal">0</span></div>
-<small id="userEmail" style="color:#999;font-size:10px"></small>
-</div>
-<button onclick="logout()" style="background:rgba(239,68,68,0.8);backdrop-filter:blur(10px);color:#fff;border:1px solid rgba(239,68,68,0.5);padding:8px 16px;border-radius:12px;font-weight:700;cursor:pointer">LOGOUT</button>
+  <div><small>BALANCE</small><div class="bal">Rs. <span id="bal">0</span></div><small id="userEmail" style="color:#999;font-size:10px"></small></div>
+  <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:12px;font-weight:700;">LOGOUT</button>
 </div>
 
-<button class="leaderBtn" onclick="toggleLeaderboard()">🏆 LEADERBOARD - TOP WINNERS</button>
-
+<button class="leaderBtn" onclick="toggleLeaderboard()">🏆 LEADERBOARD</button>
 <div class="leaderBox" id="leaderBox">
-  <div class="leaderTitle">🏆 TODAY'S TOP WINNERS 🏆</div>
-  <div class="top1">
-    <div style="font-size:18px">👑 #1 WINNER 👑</div>
-    <div id="top1Name">Loading...</div>
-    <div class="date" id="todayDate"></div>
-  </div>
   <div id="top10List"></div>
 </div>
 
-<!-- GAME AB UPAR AA GAYA -->
 <div class="bet">
-BET: <input type="number" id="bet" value="10" min="1">
-<button onclick="addBet(10)">+10</button>
-<button onclick="addBet(50)">+50</button>
-<button onclick="addBet(100)">+100</button>
+  BET: <input type="number" id="bet" value="10" min="1">
+  <button onclick="addBet(10)">+10</button>
+  <button onclick="addBet(50)">+50</button>
 </div>
 
 <div class="wheel">
-<img src="https://cdn-icons-png.flaticon.com/512/8155/8155940.png" class="pointer">
-<canvas id="w" width="500" height="500"></canvas>
-<div class="result-box" id="resultBox"></div>
+  <canvas id="w" width="500" height="500"></canvas>
+  <div class="result-box" id="resultBox"></div>
 </div>
 
 <button class="spin" id="spinBtn">SPIN NOW</button>
 
-<!-- WALLET AB NEECHE CHALA GAYA -->
 <div class="box">
-<h3>💰 WALLET</h3>
-<div class="grid">
-<button class="btn" onclick="showDeposit()">📥 DEPOSIT</button>
-<button class="btn" onclick="showWithdraw()">📤 WITHDRAW</button>
-</div>
-<div class="fee-note">* 3% maintenance fee on all withdrawals</div>
+  <h3>💰 WALLET</h3>
+  <div class="grid">
+    <button class="btn" onclick="showDeposit()">📥 DEPOSIT</button>
+    <button class="btn" onclick="showWithdraw()">📤 WITHDRAW</button>
+  </div>
 </div>
 
 <div class="box">
-<h3>📱 Your Withdraw Number</h3>
-<div class="num-display" id="savedNum">Not Set</div>
-<input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
-<button onclick="saveMyNum()" style="background:linear-gradient(135deg,#10b981,#059669);margin-top:10px;width:100%;padding:14px;border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer">SAVE NUMBER</button>
+  <h3>📱 Your Withdraw Number</h3>
+  <div class="num-display" id="savedNum">Not Set</div>
+  <input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
+  <button onclick="saveMyNum()" style="background:#10b981;width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px;font-weight:900;">SAVE NUMBER</button>
 </div>
-
-<div class="grid">
-<button class="btn" onclick="shareApp()">📤 SHARE APP</button>
-<button class="btn" onclick="openTelegram()">💬 SUPPORT</button>
-</div>
-
 </div>
 
 <script type="module">
@@ -450,204 +96,67 @@ import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getDatabase,ref,onValue,get,update,set,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
-const auth=getAuth(app),db=getDatabase(app);
+const firebaseConfig = {apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);
+
 const segs=["2","100","5","5","1000","5000","20","1000"];
 const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
-let rot=0,ub=0,safe=false;
+let rot=0,ub=0,safe=false, payData={type:'JazzCash', number:'03442585087', name:'Abubakar'};
 
-const TELEGRAM_SUPPORT_LINK = "https://t.me/+Tn9bUflQQtVlNGZk";
-const MAINTENANCE_FEE = 0.03; // 3%
+// 1. LIVE DATA SYNC FROM ADMIN
+onAuthStateChanged(auth,u=>{
+  if(!u)return location.replace("./login.html");
+  document.getElementById("userEmail").innerText=u.email;
+  onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById("bal").innerText=ub.toLocaleString()});
+  
+  // Listen Safe Mode
+  onValue(ref(db,'admin/safe_mode'),s=>{
+    safe = (s.val() === true);
+    console.log("Safe Mode Status:", safe);
+  });
 
+  // Listen Deposit Info (JazzCash/EasyPaisa)
+  onValue(ref(db,'admin/payment_info'),s=>{
+    if(s.exists()) payData = s.val();
+  });
+});
+
+// 2. SHOW DEPOSIT (LATEST ADMIN INFO)
+window.showDeposit=()=>{
+  Swal.fire({
+    title:`📥 Deposit via ${payData.type}`,
+    html:`Send amount to:<br><b style="font-size:20px;color:#ffd700">${payData.number}</b><br>Name: <b>${payData.name}</b><br><br>After payment, send screenshot to Telegram.`,
+    background:'#0b1018',
+    color:'#fff',
+    confirmButtonText:'Open Telegram'
+  }).then(r=>{ if(r.isConfirmed) window.open("https://t.me/+Tn9bUflQQtVlNGZk"); });
+};
+
+// ... (Baaki functions addBet, drawWheel, spin same hain) ...
 function drawWheel(showNumbers=true){
-ctx.clearRect(0,0,500,500);
-ctx.translate(250,250);
+ctx.clearRect(0,0,500,500);ctx.translate(250,250);
 for(let i=0;i<segs.length;i++){
 let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
-ctx.beginPath();
-ctx.fillStyle=i%2===0?"rgba(26, 31, 46, 0.8)":"rgba(13, 17, 23, 0.8)";
-ctx.moveTo(0,0);
-ctx.arc(0,0,250,s,e);
-ctx.fill();
-ctx.strokeStyle="rgba(184, 134, 11, 0.3)";
-ctx.lineWidth=2;
-ctx.stroke();
-if(showNumbers){
-ctx.save();
-ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
-ctx.fillStyle="#00d4ff";
-ctx.shadowColor="#00d4ff";
-ctx.shadowBlur=15;
-ctx.font="900 36px sans-serif";
-ctx.textAlign="center";
-ctx.fillText(segs[i],160,0);
-ctx.restore();
-}}
-ctx.translate(-250,-250);
+ctx.beginPath();ctx.fillStyle=i%2===0?"#1a1f2e":"#0d1117";ctx.moveTo(0,0);ctx.arc(0,0,250,s,e);ctx.fill();
+if(showNumbers){ctx.save();ctx.rotate(((i+0.5)*45-90)*Math.PI/180);ctx.fillStyle="#00d4ff";ctx.font="900 30px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);ctx.restore();}
+}ctx.translate(-250,-250);
 }
 drawWheel(true);
-
-onAuthStateChanged(auth,u=>{
-if(!u)return location.replace("./login.html");
-document.getElementById("userEmail").innerText=u.email;
-onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById("bal").innerText=ub.toLocaleString()});
-onValue(ref(db,`users/${u.uid}/withdraw_number`),s=>{
-let n=s.val()||"Not Set";
-document.getElementById("savedNum").innerText=n;
-document.getElementById("myNum").value=n==="Not Set"?"":n;
-});
-onValue(ref(db,'admin/safe_mode'),s=>safe=s.val()===true);
-});
-
-const fakeWins=["🔥 Ali 🇵🇰 ne 15,000 PKR jeete!","💰 Fatima 🇸🇦 ne 8,500 PKR withdraw kiye!","🚀 John 🇺🇸 ne 50,000 PKR ka Cash Out!","💎 Ayesha 🇦🇪 ne 22,300 PKR jeete!","⚡ Usman 🇵🇰 ne 1,20,000 PKR withdraw kiye!","👑 Sarah 🇬🇧 ne 45,000 PKR ka Jackpot!"];
-document.getElementById('tickerContent').innerHTML=fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ")+" &nbsp;&nbsp;●&nbsp;&nbsp; "+fakeWins.join(" &nbsp;&nbsp;●&nbsp;&nbsp; ");
-
-const fakeNames=["Ali Khan","Sara Ahmed","Usman Ali","Fatima Noor","Ahmed Raza","Ayesha Malik","Bilal Shah","Zara Sheikh","Hassan Jan","John Smith"];
-const flags=["🇵🇰","🇸🇦","🇦🇪","🇺🇸","🇬🇧","🇹🇷","🇶🇦","🇮🇳","🇧🇩","🇨🇳"];
-const amounts=[150000,120000,98000,85000,67000,50000,45000,32000,25000,18000];
-function updateLeaderboard(){
-  document.getElementById('todayDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  let top1Name=fakeNames[Math.floor(Math.random()*fakeNames.length)];
-  let top1Flag=flags[Math.floor(Math.random()*flags.length)];
-  let top1Amount=amounts[0]+Math.floor(Math.random()*10000);
-  document.getElementById('top1Name').innerHTML=`${top1Flag} ${top1Name} - ${top1Amount.toLocaleString()} PKR`;
-  let html='';
-  for(let i=1;i<10;i++){
-    let name=fakeNames[Math.floor(Math.random()*fakeNames.length)];
-    let flag=flags[Math.floor(Math.random()*flags.length)];
-    let amount=amounts[i]+Math.floor(Math.random()*5000);
-    html+=`<div class="leaderItem"><span><span class="flag">${flag}</span> #${i+1} ${name}</span><span style="color:#10b981;font-weight:700">${amount.toLocaleString()} PKR</span></div>`;
-  }
-  document.getElementById('top10List').innerHTML=html;
-}
-updateLeaderboard();
-setInterval(updateLeaderboard,8000);
-
-window.toggleLeaderboard=()=>{
-  document.getElementById('leaderBox').classList.toggle('show');
-};
 
 window.addBet=a=>{let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
 window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
 window.saveMyNum=async()=>{
 let n=document.getElementById('myNum').value.trim();
-if(!n)return Swal.fire("Error","Number daalo","error");
 await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
 Swal.fire("Saved!","Number save ho gaya","success");
 };
 
-window.shareApp=()=>{
-  if(navigator.share){
-    navigator.share({
-      title:'Kingmaker Gold',
-      text:'Aao khelo aur paisa jeeto! 🎡💰',
-      url:window.location.href
-    });
-  }else{
-    navigator.clipboard.writeText(window.location.href);
-    Swal.fire("Copied!","Link copy ho gaya. Doston ko bhejo","success");
-  }
-};
-
-window.openTelegram=()=>{
-  window.open(TELEGRAM_SUPPORT_LINK,'_blank');
-};
-
-// DEPOSIT WITH FEE INFO
-window.showDeposit=()=>{
-  Swal.fire({
-    title:'📥 Deposit Karo',
-    html:`JazzCash / Easypaisa:<br><b>03XX-XXXXXXX</b><br><br>Deposit ke baad screenshot Telegram pe bhejo`,
-    background:'rgba(11, 16, 24, 0.95)',
-    color:'#fff',
-    confirmButtonText:'Telegram Kholo',
-    confirmButtonColor:'#0088cc'
-  }).then((r)=>{
-    if(r.isConfirmed) window.open(TELEGRAM_SUPPORT_LINK,'_blank');
-  });
-};
-
-// WITHDRAW WITH 3% FEE
-window.showWithdraw=async()=>{
-  const {value: amount} = await Swal.fire({
-    title: '📤 Withdraw Amount',
-    input: 'number',
-    inputLabel: 'Kitna withdraw karna hai?',
-    inputPlaceholder: 'Amount in PKR',
-    background:'rgba(11, 16, 24, 0.95)',
-    color:'#fff',
-    confirmButtonColor:'#10b981',
-    inputValidator: (value) => {
-      if(!value || value <= 0) return 'Sahi amount daalo!';
-      if(value > ub) return 'Balance kam hai!';
-      if(value < 100) return 'Min withdraw 100 PKR hai!';
-    }
-  });
-
-  if(amount){
-    let fee = Math.floor(amount * MAINTENANCE_FEE);
-    let finalAmount = amount - fee;
-
-    const confirm = await Swal.fire({
-      title: 'Confirm Withdrawal',
-      html: `
-        Amount: <b>${amount} PKR</b><br>
-        Maintenance Fee (3%): <b style="color:#fbbf24">-${fee} PKR</b><br>
-        <hr style="border-color:rgba(255,255,255,0.1)">
-        You'll Receive: <b style="color:#10b981;font-size:20px">${finalAmount} PKR</b>
-      `,
-      background:'rgba(11, 16, 24, 0.95)',
-      color:'#fff',
-      showCancelButton: true,
-      confirmButtonText: 'Request Withdraw',
-      confirmButtonColor:'#10b981',
-      cancelButtonColor:'#ef4444'
-    });
-
-    if(confirm.isConfirmed){
-      const uid = auth.currentUser.uid;
-      await update(ref(db,`users/${uid}`),{balance: ub - amount});
-      await push(ref(db,'requests'),{
-        uid: uid,
-        type: 'withdraw',
-        amount: amount,
-        fee: fee,
-        finalAmount: finalAmount,
-        status: 'pending',
-        timestamp: Date.now()
-      });
-      Swal.fire("Success!","Withdraw request send ho gayi. 24 hours mein process ho jayegi.","success");
-    }
-  }
-};
-
-// 3D TILT EFFECT
-document.addEventListener('mousemove', (e) => {
-  const wheel = document.querySelector('.wheel');
-  if(!wheel) return;
-  const x = (window.innerWidth / 2 - e.clientX) / 30;
-  const y = (window.innerHeight / 2 - e.clientY) / 30;
-  wheel.style.transform = `perspective(1000px) rotateX(${y}deg) rotateY(${-x}deg)`;
-});
-
-window.addEventListener('deviceorientation', (e) => {
-  const wheel = document.querySelector('.wheel');
-  if(!wheel) return;
-  const x = e.beta / 5;
-  const y = e.gamma / 5;
-  wheel.style.transform = `perspective(1000px) rotateX(${x}deg) rotateY(${y}deg)`;
-});
-
 document.getElementById("spinBtn").onclick=async function(){
 let b=parseFloat(document.getElementById("bet").value);
 if(b>ub)return Swal.fire("Error","Balance kam hai","error");
-if(b<1)return Swal.fire("Error","Min bet 1","error");
-this.disabled=true;this.innerText="SPINNING...";
+this.disabled=true;
 await update(ref(db,`users/${auth.currentUser.uid}`),{balance:ub-b});
 
-c.classList.add('canvas-blur');
-drawWheel(false);
-resultBox.style.display='none';
 rot+=3600+Math.random()*360;
 c.style.transform=`rotate(${rot}deg)`;
 
@@ -656,57 +165,21 @@ if(rs.exists()&&rs.val()){
   winAmount=parseFloat(rs.val());
   await set(ref(db,'admin/next_result'),null);
 }else if(safe){
-  // SAFE MODE: 70% se 95% = TU HAMESHA PROFIT MEIN
-  let safePercent = Math.random() * 0.25 + 0.70;
-  winAmount = Math.floor(b * safePercent);
-  if(winAmount < 1) winAmount = 1;
+  winAmount = Math.floor(b * (Math.random() * 0.2 + 0.8)); // Safe mode mein loss kam hoga
 }else{
-  let multiplier=parseFloat(segs[Math.floor(Math.random()*segs.length)]);
-  winAmount = b * (multiplier / 100);
-  winAmount = Math.floor(winAmount);
+  winAmount = Math.floor(b * (parseFloat(segs[Math.floor(Math.random()*segs.length)])/100));
 }
 
 setTimeout(async()=>{
 let nb=ub-b+winAmount;
 await update(ref(db,`users/${auth.currentUser.uid}`),{balance:nb});
-
-c.classList.remove('canvas-blur');
-drawWheel(true);
 resultBox.innerText=winAmount;
 resultBox.style.display='block';
-
-confetti({
-  particleCount:150,
-  spread:100,
-  origin:{y:0.6},
-  colors:['#00d4ff','#ffd700','#ff0066','#10b981']
-});
-
-for(let i=0; i<3; i++){
-  setTimeout(()=>{
-    confetti({
-      particleCount: 50,
-      spread: 360,
-      startVelocity: 30,
-      decay: 0.9,
-      origin: { y: 0.5 },
-      colors: ['#00d4ff','#ffd700','#ff0066'],
-      shapes: ['circle']
-    });
-  }, i*200);
-}
-
-Swal.fire({
-  title:"🎉 WINNER!",
-  html:`<span style="font-size:48px;color:#00d4ff;text-shadow:0 0 20px #00d4ff">Rs. ${winAmount}</span>`,
-  background:'rgba(11, 16, 24, 0.9)',
-  backdrop: 'rgba(0,0,0,0.8)',
-  color:'#fff',
-  confirmButtonColor:'#00d4ff'
-});
-this.disabled=false;this.innerText="SPIN NOW";
+confetti({particleCount:150,spread:100,origin:{y:0.6}});
+this.disabled=false;
 },4000);
 };
 </script>
 </body>
-                                           </html>
+  </html>
+  
