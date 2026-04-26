@@ -7,179 +7,179 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-/* ... (Aapka purana CSS same rahega) ... */
-* { box-sizing: border-box; }
-body{background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);color:#fff;font-family: 'Segoe UI', sans-serif;margin:0;padding:16px;text-align:center;min-height:100vh;overflow-x: hidden;}
-#splash{position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: linear-gradient(135deg, #0f172a, #1e293b);display: flex;flex-direction: column;justify-content: center;align-items: center;z-index: 9999;animation: fadeOut 0.5s ease 3s forwards;}
-.splash-logo{width: 120px;height: 120px;background: linear-gradient(135deg, #ffd700, #ff8c00);border-radius: 30px;display: flex;align-items: center;justify-content: center;font-size: 60px;animation: pulse 1.5s ease infinite;box-shadow: 0 0 80px rgba(255,215,0,0.6);}
-.splash-text{margin-top: 30px;font-size: 32px;font-weight: 900;background: linear-gradient(45deg, #ffd700, #ff8c00);-webkit-background-clip: text;-webkit-text-fill-color: transparent;animation: slideUp 1s ease;}
-.splash-loading{margin-top: 20px;width: 200px;height: 4px;background: rgba(255,255,255,0.1);border-radius: 10px;overflow: hidden;}
-.splash-loading-bar{height: 100%;background: linear-gradient(90deg, #ffd700, #ff8c00);animation: loading 2.5s ease forwards;box-shadow: 0 0 20px rgba(255,215,0,0.8);}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-@keyframes loading{from{width:0%}to{width:100%}}
-@keyframes fadeOut{to{opacity:0;visibility:hidden}}
-#mainApp{opacity:0;animation:fadeIn 0.5s ease 3.2s forwards}
-@keyframes fadeIn{to{opacity:1}}
-#winTicker{background: rgba(0, 0, 0, 0.4);backdrop-filter: blur(10px);border-bottom:2px solid rgba(255, 215, 0, 0.3);padding:8px 0;overflow:hidden;white-space:nowrap;margin:-16px -16px 16px -16px;}
-#tickerContent{display:inline-block;animation:scroll 40s linear infinite;color:#10b981;font-weight:700;font-size:13px;text-shadow: 0 0 10px rgba(16,185,129,0.5);}
-@keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
-.hdr,.box,.leaderBtn,.btn,.leaderBox{background: rgba(15, 23, 42, 0.6);backdrop-filter: blur(20px);border: 1px solid rgba(255, 255, 255, 0.1);box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);border-radius: 16px;padding: 16px;margin-bottom: 16px;}
-.hdr{display:flex;justify-content:space-between;align-items:center;}
-.bal{font-size:28px;font-weight:900;background: linear-gradient(45deg, #ffd700, #ff8c00);-webkit-background-clip: text;-webkit-text-fill-color: transparent;filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));}
-.leaderBtn{width:100%;color:#ffd700;padding:14px;font-weight:900;font-size:16px;cursor:pointer;transition: all 0.3s ease;}
-.leaderBox{display:none;padding:12px;}
-.leaderBox.show{display:block;animation:slideDown 0.4s cubic-bezier(0.34,1.56,0.64,1);}
-.bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0;}
-.bet input{width:100px;padding:12px;border:1px solid rgba(184, 134, 11, 0.5);background:rgba(0,0,0,0.4);color:#fff;text-align:center;border-radius:12px;font-size:18px;font-weight:700;}
-.wheel{position:relative;width:300px;height:300px;margin:20px auto;transition: transform 0.1s ease-out;transform-style: preserve-3d;}
-canvas{width:100%;height:100%;border-radius:50%;border:8px solid rgba(255, 255, 255, 0.1);transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99), filter 0.3s;}
-.result-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px;font-weight:900;color:#00d4ff;z-index:20;display:none;}
-.spin{width:100%;padding:18px;background: linear-gradient(135deg, #ffd700, #ff8c00);color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer;}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
-.btn{color:#fff;padding:16px;cursor:pointer;font-weight:700;}
-.num-display{background:rgba(0,0,0,0.4);border:2px solid #10b981;padding:12px;border-radius:12px;color:#10b981;font-weight:900;font-size:18px;}
+*{box-sizing:border-box}
+body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);color:#fff;font-family:'Segoe UI',sans-serif;margin:0;padding:16px;text-align:center;min-height:100vh}
+.hdr,.box,.btn{background:rgba(15,23,42,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4);border-radius:16px;padding:16px;margin-bottom:16px}
+.hdr{display:flex;justify-content:space-between;align-items:center}
+.bal{font-size:28px;font-weight:900;background:linear-gradient(45deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
+.bet input{width:100px;padding:12px;border:1px solid rgba(184,134,11,0.5);background:rgba(0,0,0,0.4);color:#fff;text-align:center;border-radius:12px;font-size:18px;font-weight:700}
+.wheel{position:relative;width:300px;height:300px;margin:20px auto}
+canvas{width:100%;height:100%;border-radius:50%;border:8px solid rgba(255,255,255,0.1);transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99)}
+.spin{width:100%;padding:18px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.btn{color:#fff;padding:16px;cursor:pointer;font-weight:700}
+input[type="tel"],input[type="number"]{background:rgba(0,0,0,0.4);border:1px solid rgba(184,134,11,0.5);color:#fff;padding:12px;border-radius:12px;width:100%;font-size:16px}
 </style>
 </head>
 <body>
 
-<div id="splash">
-  <div class="splash-logo">👑</div>
-  <div class="splash-text">KINGMAKER GOLD</div>
-  <div class="splash-loading"><div class="splash-loading-bar"></div></div>
-</div>
-
-<div id="mainApp">
-<div id="winTicker"><div id="tickerContent"></div></div>
-
 <div class="hdr">
-  <div><small>BALANCE</small><div class="bal">Rs. <span id="bal">0</span></div><small id="userEmail" style="color:#999;font-size:10px"></small></div>
-  <button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:12px;font-weight:700;">LOGOUT</button>
+<div>
+<small>BALANCE</small>
+<div class="bal">Rs. <span id="bal">0</span></div>
+<small id="userEmail" style="color:#999;font-size:10px"></small>
 </div>
-
-<button class="leaderBtn" onclick="toggleLeaderboard()">🏆 LEADERBOARD</button>
-<div class="leaderBox" id="leaderBox">
-  <div id="top10List"></div>
+<button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:12px;font-weight:700;cursor:pointer">LOGOUT</button>
 </div>
 
 <div class="bet">
-  BET: <input type="number" id="bet" value="10" min="1">
-  <button onclick="addBet(10)">+10</button>
-  <button onclick="addBet(50)">+50</button>
+BET: <input type="number" id="bet" value="10" min="1">
+<button onclick="addBet(10)">+10</button>
+<button onclick="addBet(50)">+50</button>
+<button onclick="addBet(100)">+100</button>
 </div>
 
 <div class="wheel">
-  <canvas id="w" width="500" height="500"></canvas>
-  <div class="result-box" id="resultBox"></div>
+<canvas id="w" width="500" height="500"></canvas>
 </div>
 
 <button class="spin" id="spinBtn">SPIN NOW</button>
 
 <div class="box">
-  <h3>💰 WALLET</h3>
-  <div class="grid">
-    <button class="btn" onclick="showDeposit()">📥 DEPOSIT</button>
-    <button class="btn" onclick="showWithdraw()">📤 WITHDRAW</button>
-  </div>
+<h3>💰 WALLET</h3>
+<div class="grid">
+<button class="btn" onclick="showWithdraw()">📤 WITHDRAW</button>
+<button class="btn" onclick="window.location.href='admin.html'">⚙️ ADMIN</button>
+</div>
 </div>
 
 <div class="box">
-  <h3>📱 Your Withdraw Number</h3>
-  <div class="num-display" id="savedNum">Not Set</div>
-  <input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
-  <button onclick="saveMyNum()" style="background:#10b981;width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px;font-weight:900;">SAVE NUMBER</button>
-</div>
+<h3>📱 Your Withdraw Number</h3>
+<input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
+<button onclick="saveMyNum()" style="background:#10b981;margin-top:10px;width:100%;padding:14px;border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer">SAVE NUMBER</button>
 </div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,onValue,get,update,set,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,onValue,get,update,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const firebaseConfig = {apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app);
+// FIREBASE CONFIG - TERI WALI ID
+const firebaseConfig = {
+  apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+  authDomain: "kingmaker-crash.firebaseapp.com",
+  databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+  projectId: "kingmaker-crash",
+  storageBucket: "kingmaker-crash.firebasestorage.app",
+  messagingSenderId: "327400668393",
+  appId: "1:327400668393:web:0d02a340b9f5603f524478"
+};
 
-const segs=["2","100","5","5","1000","5000","20","1000"];
-const c=document.getElementById("w"),ctx=c.getContext("2d"),resultBox=document.getElementById("resultBox");
-let rot=0,ub=0,safe=false, payData={type:'JazzCash', number:'03442585087', name:'Abubakar'};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const segs = ["2","100","5","5","1000","5000","20","1000"];
+const c = document.getElementById("w"), ctx = c.getContext("2d");
+let rot = 0, ub = 0, userNum = "";
 
-// 1. LIVE DATA SYNC FROM ADMIN
-onAuthStateChanged(auth,u=>{
-  if(!u)return location.replace("./login.html");
-  document.getElementById("userEmail").innerText=u.email;
-  onValue(ref(db,`users/${u.uid}/balance`),s=>{ub=s.val()||0;document.getElementById("bal").innerText=ub.toLocaleString()});
-  
-  // Listen Safe Mode
-  onValue(ref(db,'admin/safe_mode'),s=>{
-    safe = (s.val() === true);
-    console.log("Safe Mode Status:", safe);
-  });
+function drawWheel(){
+    ctx.clearRect(0,0,500,500);
+    ctx.translate(250,250);
+    for(let i=0;i<segs.length;i++){
+        let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
+        ctx.beginPath();
+        ctx.fillStyle=i%2===0?"#1a1f2e":"#0d1117";
+        ctx.moveTo(0,0);
+        ctx.arc(0,0,250,s,e);
+        ctx.fill();
+        ctx.save();
+        ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
+        ctx.fillStyle="#00d4ff";
+        ctx.font="900 36px sans-serif";
+        ctx.textAlign="center";
+        ctx.fillText(segs[i],160,0);
+        ctx.restore();
+    }
+    ctx.translate(-250,-250);
+}
+drawWheel();
 
-  // Listen Deposit Info (JazzCash/EasyPaisa)
-  onValue(ref(db,'admin/payment_info'),s=>{
-    if(s.exists()) payData = s.val();
-  });
+onAuthStateChanged(auth, u => {
+    if(!u) return location.replace("./login.html");
+    document.getElementById("userEmail").innerText = u.email;
+    onValue(ref(db,`users/${u.uid}/balance`), s => {
+        ub = s.val() || 0;
+        document.getElementById("bal").innerText = ub.toLocaleString();
+    });
+    onValue(ref(db,`users/${u.uid}/withdraw_number`), s => {
+        userNum = s.val() || "";
+        document.getElementById("myNum").value = userNum;
+    });
 });
 
-// 2. SHOW DEPOSIT (LATEST ADMIN INFO)
-window.showDeposit=()=>{
-  Swal.fire({
-    title:`📥 Deposit via ${payData.type}`,
-    html:`Send amount to:<br><b style="font-size:20px;color:#ffd700">${payData.number}</b><br>Name: <b>${payData.name}</b><br><br>After payment, send screenshot to Telegram.`,
-    background:'#0b1018',
-    color:'#fff',
-    confirmButtonText:'Open Telegram'
-  }).then(r=>{ if(r.isConfirmed) window.open("https://t.me/+Tn9bUflQQtVlNGZk"); });
+window.addBet = a => {let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
+window.logout = () => signOut(auth).then(() => location.replace("./login.html"));
+
+window.saveMyNum = async () => {
+    let n = document.getElementById('myNum').value.trim();
+    if(!n) return Swal.fire("Error","Number daalo","error");
+    await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
+    Swal.fire("Saved!","Number save ho gaya","success");
 };
 
-// ... (Baaki functions addBet, drawWheel, spin same hain) ...
-function drawWheel(showNumbers=true){
-ctx.clearRect(0,0,500,500);ctx.translate(250,250);
-for(let i=0;i<segs.length;i++){
-let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
-ctx.beginPath();ctx.fillStyle=i%2===0?"#1a1f2e":"#0d1117";ctx.moveTo(0,0);ctx.arc(0,0,250,s,e);ctx.fill();
-if(showNumbers){ctx.save();ctx.rotate(((i+0.5)*45-90)*Math.PI/180);ctx.fillStyle="#00d4ff";ctx.font="900 30px sans-serif";ctx.textAlign="center";ctx.fillText(segs[i],160,0);ctx.restore();}
-}ctx.translate(-250,-250);
-}
-drawWheel(true);
+window.showWithdraw = async () => {
+    if(!userNum) return Swal.fire("Error","Pehle withdraw number save karo","error");
+    const {value: amount} = await Swal.fire({
+        title: 'Withdraw Karo',
+        input: 'number',
+        inputLabel: `Balance: Rs. ${ub}`,
+        inputPlaceholder: 'Amount daalo',
+        showCancelButton: true,
+        inputValidator: (value) => {
+            if(!value || value <= 0) return 'Amount daalo!';
+            if(value > ub) return 'Balance kam hai!';
+            if(value < 100) return 'Min 100 PKR withdraw';
+        }
+    });
 
-window.addBet=a=>{let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
-window.logout=()=>signOut(auth).then(()=>location.replace("./login.html"));
-window.saveMyNum=async()=>{
-let n=document.getElementById('myNum').value.trim();
-await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
-Swal.fire("Saved!","Number save ho gaya","success");
+    if(amount){
+        const fee = Math.floor(amount * 0.03);
+        const final = amount - fee;
+        await push(ref(db,'withdrawals'), {
+            uid: auth.currentUser.uid,
+            email: auth.currentUser.email,
+            amount: final,
+            number: userNum,
+            status: 'pending',
+            time: Date.now()
+        });
+        await update(ref(db,`users/${auth.currentUser.uid}`),{balance: ub - amount});
+        Swal.fire("Request Sent!",`Rs. ${final} ka withdrawal request bhej diya. 3% fee kat gaya.`,"success");
+    }
 };
 
-document.getElementById("spinBtn").onclick=async function(){
-let b=parseFloat(document.getElementById("bet").value);
-if(b>ub)return Swal.fire("Error","Balance kam hai","error");
-this.disabled=true;
-await update(ref(db,`users/${auth.currentUser.uid}`),{balance:ub-b});
+document.getElementById("spinBtn").onclick = async () => {
+    let b = parseInt(document.getElementById("bet").value);
+    if(b > ub) return Swal.fire("Error","Balance kam hai","error");
+    if(b <= 0) return Swal.fire("Error","Bet amount daalo","error");
 
-rot+=3600+Math.random()*360;
-c.style.transform=`rotate(${rot}deg)`;
+    document.getElementById("spinBtn").disabled = true;
+    await update(ref(db,`users/${auth.currentUser.uid}`),{balance: ub - b});
 
-let rs=await get(ref(db,'admin/next_result')),winAmount;
-if(rs.exists()&&rs.val()){
-  winAmount=parseFloat(rs.val());
-  await set(ref(db,'admin/next_result'),null);
-}else if(safe){
-  winAmount = Math.floor(b * (Math.random() * 0.2 + 0.8)); // Safe mode mein loss kam hoga
-}else{
-  winAmount = Math.floor(b * (parseFloat(segs[Math.floor(Math.random()*segs.length)])/100));
-}
+    let s = Math.floor(Math.random() * 8);
+    let a = 360*8 + (360-(s*45+22.5));
+    rot += a;
+    c.style.transform = `rotate(${rot}deg)`;
 
-setTimeout(async()=>{
-let nb=ub-b+winAmount;
-await update(ref(db,`users/${auth.currentUser.uid}`),{balance:nb});
-resultBox.innerText=winAmount;
-resultBox.style.display='block';
-confetti({particleCount:150,spread:100,origin:{y:0.6}});
-this.disabled=false;
-},4000);
+    setTimeout(async () => {
+        let w = parseInt(segs[s]);
+        let win = b * w;
+        await update(ref(db,`users/${auth.currentUser.uid}`),{balance: ub - b + win});
+        Swal.fire("Jeet Gaye!",`Tu ${w}x jeeta! Rs. ${win} mil gaye`,"success");
+        document.getElementById("spinBtn").disabled = false;
+    }, 4000);
 };
 </script>
 </body>
   </html>
-  
