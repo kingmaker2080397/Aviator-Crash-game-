@@ -6,17 +6,17 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body{background:#0f172a;color:#fff;font-family:sans-serif;padding:20px}
-        .box{background:rgba(15,23,42,0.8);border:1px solid #ffd700;padding:20px;border-radius:12px;margin-bottom:20px}
+       .box{background:rgba(15,23,42,0.8);border:1px solid #ffd700;padding:20px;border-radius:12px;margin-bottom:20px}
         input{width:100%;padding:10px;margin:8px 0;background:#000;color:#fff;border:1px solid #ffd700;border-radius:8px}
         button{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;padding:12px;border-radius:8px;font-weight:900;cursor:pointer;width:100%}
         table{width:100%;border-collapse:collapse;margin-top:15px}
         td,th{border:1px solid #333;padding:10px;text-align:left}
-        .btn-sm{padding:5px 10px;width:auto;margin:2px}
+       .btn-sm{padding:5px 10px;width:auto;margin:2px}
     </style>
 </head>
 <body>
     <h1>👑 KINGMAKER ADMIN PANEL</h1>
-    
+
     <div class="box">
         <h3>User ko Coin Bhejo</h3>
         <input type="email" id="userEmail" placeholder="User ka Email daalo">
@@ -27,7 +27,7 @@
     <div class="box">
         <h3>Sabhi Users</h3>
         <table id="usersTable">
-            <tr><th>Email</th><th>Balance</th><th>Withdraw Number</th><th>Status</th><th>Action</th></tr>
+            <tr><th>Email</th><th>Balance</th><th>Number</th><th>Status</th><th>Action</th></tr>
         </table>
     </div>
 
@@ -58,13 +58,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// Admin check - sirf tera email allow hai
-const ADMIN_EMAIL = "apna-email@gmail.com"; // <-- YAHAN APNA EMAIL DAAL DE
+// ADMIN EMAIL - TERA EMAIL DAAL DIYA
+const ADMIN_EMAIL = "abu143un@gmail.com";
 
 onAuthStateChanged(auth, user => {
     if (!user || user.email !== ADMIN_EMAIL) {
-        alert("Access Denied! Tu admin nahi hai.");
-        window.location.href = "index.html";
+        Swal.fire("Access Denied!","Tu admin nahi hai.","error").then(()=>{
+            window.location.href = "index.html";
+        });
         return;
     }
     loadAllUsers();
@@ -75,17 +76,22 @@ window.sendCoins = async () => {
     const email = document.getElementById('userEmail').value;
     const amount = parseInt(document.getElementById('coinAmount').value);
     if(!email || !amount) return Swal.fire("Error","Email aur Amount daal","error");
-    
+
     const usersRef = ref(db,'users');
     const snapshot = await get(usersRef);
+    let found = false;
     snapshot.forEach((child) => {
         if(child.val().email === email){
+            found = true;
             update(ref(db,`users/${child.key}`),{
                 balance: (child.val().balance || 0) + amount
             });
             Swal.fire("Done!","Coins bhej diye","success");
+            document.getElementById('userEmail').value = "";
+            document.getElementById('coinAmount').value = "";
         }
     });
+    if(!found) Swal.fire("Error","User nahi mila","error");
 };
 
 function loadAllUsers(){
@@ -95,7 +101,7 @@ function loadAllUsers(){
         snapshot.forEach((child) => {
             let u = child.val();
             let row = `<tr>
-                <td>${u.email}</td>
+                <td>${u.email || '-'}</td>
                 <td>Rs. ${u.balance || 0}</td>
                 <td>${u.withdraw_number || 'Not Set'}</td>
                 <td>${u.blocked ? 'Blocked' : 'Active'}</td>
@@ -108,6 +114,7 @@ function loadAllUsers(){
 
 window.toggleBlock = (uid, status) => {
     update(ref(db,`users/${uid}`),{blocked: status});
+    Swal.fire("Updated!","User status badal diya","success");
 };
 
 function loadWithdrawRequests(){
@@ -121,14 +128,14 @@ function loadWithdrawRequests(){
                 <td>Rs. ${w.amount}</td>
                 <td>${w.number}</td>
                 <td>${w.status}</td>
-                <td>${w.status === 'pending' ? `<button class="btn-sm" onclick="approveWithdraw('${child.key}','${w.uid}',${w.amount})">Approve</button>` : 'Done'}</td>
+                <td>${w.status === 'pending' ? `<button class="btn-sm" onclick="approveWithdraw('${child.key}')">Approve</button>` : 'Paid'}</td>
             </tr>`;
             table.innerHTML += row;
         });
     });
 }
 
-window.approveWithdraw = async (wid, uid, amount) => {
+window.approveWithdraw = async (wid) => {
     await update(ref(db,`withdrawals/${wid}`),{status:'paid'});
     Swal.fire("Paid!","Withdrawal approve kar diya","success");
 };
