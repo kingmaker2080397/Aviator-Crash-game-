@@ -3,67 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Kingmaker Gold</title>
+<title>Ludo King - Play & Win</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-*{box-sizing:border-box}
-body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);color:#fff;font-family:'Segoe UI',sans-serif;margin:0;padding:16px;text-align:center;min-height:100vh}
-.hdr,.box,.btn{background:rgba(15,23,42,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4);border-radius:16px;padding:16px;margin-bottom:16px}
-.hdr{display:flex;justify-content:space-between;align-items:center}
-.bal{font-size:28px;font-weight:900;background:linear-gradient(45deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.bet{display:flex;gap:8px;align-items:center;justify-content:center;margin:20px 0}
-.bet input{width:100px;padding:12px;border:1px solid rgba(184,134,11,0.5);background:rgba(0,0,0,0.4);color:#fff;text-align:center;border-radius:12px;font-size:18px;font-weight:700}
-.wheel{position:relative;width:300px;height:300px;margin:20px auto}
-canvas{width:100%;height:100%;border-radius:50%;border:8px solid rgba(255,255,255,0.1);transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99)}
-.spin{width:100%;padding:18px;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;border-radius:16px;font-size:20px;font-weight:900;cursor:pointer}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;font-family:'Segoe UI',sans-serif;min-height:100vh;padding:16px}
+.hdr{background:rgba(15,23,42,0.8);backdrop-filter:blur(10px);border:1px solid #ffd700;border-radius:16px;padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.bal{font-size:24px;font-weight:900;background:linear-gradient(45deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.btn{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;padding:10px 20px;border-radius:12px;font-weight:900;cursor:pointer}
+.game-box{background:rgba(15,23,42,0.8);border:1px solid #ffd700;border-radius:16px;padding:20px;text-align:center}
+#ludoBoard{width:100%;max-width:500px;height:500px;background:#1a1a2e;border:4px solid #ffd700;border-radius:12px;margin:20px auto;display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);gap:1px}
+.cell{background:#0f172a;border:1px solid #333}
+.red{background:#ef4444}.green{background:#10b981}.yellow{background:#fbbf24}.blue{background:#3b82f6}
+.home{background:#1e293b}.safe{background:#ffd700}.center{background:#8b5cf6}
+.goti{width:80%;height:80%;border-radius:50%;margin:10%;border:2px solid #fff;cursor:pointer;box-shadow:0 0 10px rgba(0,0,0,0.5)}
+.dice-box{margin:20px 0}
+#dice{width:80px;height:80px;background:#fff;color:#000;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;cursor:pointer;box-shadow:0 5px 20px rgba(255,215,0,0.5)}
+#dice.roll{animation:shake 0.5s}
+@keyframes shake{0%,100%{transform:rotate(0deg)}25%{transform:rotate(20deg)}75%{transform:rotate(-20deg)}}
+.player-turn{font-size:20px;font-weight:900;margin:10px 0;color:#ffd700}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
-.btn{color:#fff;padding:16px;cursor:pointer;font-weight:700}
-input[type="tel"],input[type="number"]{background:rgba(0,0,0,0.4);border:1px solid rgba(184,134,11,0.5);color:#fff;padding:12px;border-radius:12px;width:100%;font-size:16px}
 </style>
 </head>
 <body>
 
 <div class="hdr">
-<div>
-<small>BALANCE</small>
-<div class="bal">Rs. <span id="bal">0</span></div>
-<small id="userEmail" style="color:#999;font-size:10px"></small>
-</div>
-<button onclick="logout()" style="background:#ef4444;color:#fff;border:none;padding:8px 16px;border-radius:12px;font-weight:700;cursor:pointer">LOGOUT</button>
-</div>
-
-<div class="bet">
-BET: <input type="number" id="bet" value="10" min="1">
-<button onclick="addBet(10)">+10</button>
-<button onclick="addBet(50)">+50</button>
-<button onclick="addBet(100)">+100</button>
+    <div>
+        <small>BALANCE</small>
+        <div class="bal">Rs. <span id="bal">0</span></div>
+        <small id="userEmail" style="color:#999;font-size:10px"></small>
+    </div>
+    <button class="btn" onclick="logout()">LOGOUT</button>
 </div>
 
-<div class="wheel">
-<canvas id="w" width="500" height="500"></canvas>
-</div>
+<div class="game-box">
+    <h2>🎲 LUDO KING 🎲</h2>
+    <div class="player-turn" id="playerTurn">Teri Baari</div>
 
-<button class="spin" id="spinBtn">SPIN NOW</button>
+    <div id="ludoBoard"></div>
 
-<div class="box">
-<h3>💰 WALLET</h3>
-<div class="grid">
-<button class="btn" onclick="showWithdraw()">📤 WITHDRAW</button>
-<button class="btn" onclick="window.location.href='admin.html'">⚙️ ADMIN</button>
-</div>
-</div>
+    <div class="dice-box">
+        <div id="dice" onclick="rollDice()">🎲</div>
+        <p>Dice: <span id="diceValue">0</span></p>
+    </div>
 
-<div class="box">
-<h3>📱 Your Withdraw Number</h3>
-<input id="myNum" placeholder="03XX-XXXXXXX" type="tel">
-<button onclick="saveMyNum()" style="background:#10b981;margin-top:10px;width:100%;padding:14px;border:none;border-radius:12px;color:#000;font-weight:900;cursor:pointer">SAVE NUMBER</button>
+    <div class="grid">
+        <button class="btn" onclick="window.location.href='wallet.html'">💰 WALLET</button>
+        <button class="btn" onclick="window.location.href='admin.html'">⚙️ ADMIN</button>
+    </div>
 </div>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getDatabase,ref,onValue,get,update,push}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,onValue,get,update}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 // FIREBASE CONFIG - TERI WALI ID
 const firebaseConfig = {
@@ -79,107 +72,118 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const segs = ["2","100","5","5","1000","5000","20","1000"];
-const c = document.getElementById("w"), ctx = c.getContext("2d");
-let rot = 0, ub = 0, userNum = "";
 
-function drawWheel(){
-    ctx.clearRect(0,0,500,500);
-    ctx.translate(250,250);
-    for(let i=0;i<segs.length;i++){
-        let s=(i*45-90)*Math.PI/180,e=((i+1)*45-90)*Math.PI/180;
-        ctx.beginPath();
-        ctx.fillStyle=i%2===0?"#1a1f2e":"#0d1117";
-        ctx.moveTo(0,0);
-        ctx.arc(0,0,250,s,e);
-        ctx.fill();
-        ctx.save();
-        ctx.rotate(((i+0.5)*45-90)*Math.PI/180);
-        ctx.fillStyle="#00d4ff";
-        ctx.font="900 36px sans-serif";
-        ctx.textAlign="center";
-        ctx.fillText(segs[i],160,0);
-        ctx.restore();
-    }
-    ctx.translate(-250,-250);
-}
-drawWheel();
+let currentUser = null;
+let diceVal = 0;
+let canRoll = true;
 
-onAuthStateChanged(auth, u => {
-    if(!u) return location.replace("./login.html");
-    document.getElementById("userEmail").innerText = u.email;
-    onValue(ref(db,`users/${u.uid}/balance`), s => {
-        ub = s.val() || 0;
-        document.getElementById("bal").innerText = ub.toLocaleString();
+// LOGIN CHECK
+onAuthStateChanged(auth, user => {
+    if(!user) return window.location.href = "login.html";
+    currentUser = user;
+    document.getElementById("userEmail").innerText = user.email;
+
+    // Balance load karo
+    onValue(ref(db,`users/${user.uid}/balance`), snap => {
+        document.getElementById("bal").innerText = (snap.val() || 0).toLocaleString();
     });
-    onValue(ref(db,`users/${u.uid}/withdraw_number`), s => {
-        userNum = s.val() || "";
-        document.getElementById("myNum").value = userNum;
-    });
-});
 
-window.addBet = a => {let i=document.getElementById("bet");i.value=parseInt(i.value)+a};
-window.logout = () => signOut(auth).then(() => location.replace("./login.html"));
-
-window.saveMyNum = async () => {
-    let n = document.getElementById('myNum').value.trim();
-    if(!n) return Swal.fire("Error","Number daalo","error");
-    await update(ref(db,`users/${auth.currentUser.uid}`),{withdraw_number:n});
-    Swal.fire("Saved!","Number save ho gaya","success");
-};
-
-window.showWithdraw = async () => {
-    if(!userNum) return Swal.fire("Error","Pehle withdraw number save karo","error");
-    const {value: amount} = await Swal.fire({
-        title: 'Withdraw Karo',
-        input: 'number',
-        inputLabel: `Balance: Rs. ${ub}`,
-        inputPlaceholder: 'Amount daalo',
-        showCancelButton: true,
-        inputValidator: (value) => {
-            if(!value || value <= 0) return 'Amount daalo!';
-            if(value > ub) return 'Balance kam hai!';
-            if(value < 100) return 'Min 100 PKR withdraw';
+    // Block check
+    onValue(ref(db,`users/${user.uid}/blocked`), snap => {
+        if(snap.val() === true){
+            Swal.fire("Blocked!","Admin ne tumhe block kar diya","error").then(()=>{
+                logout();
+            });
         }
     });
 
-    if(amount){
-        const fee = Math.floor(amount * 0.03);
-        const final = amount - fee;
-        await push(ref(db,'withdrawals'), {
-            uid: auth.currentUser.uid,
-            email: auth.currentUser.email,
-            amount: final,
-            number: userNum,
-            status: 'pending',
-            time: Date.now()
-        });
-        await update(ref(db,`users/${auth.currentUser.uid}`),{balance: ub - amount});
-        Swal.fire("Request Sent!",`Rs. ${final} ka withdrawal request bhej diya. 3% fee kat gaya.`,"success");
+    initLudoBoard();
+});
+
+window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
+
+// LUDO BOARD BANAO
+function initLudoBoard(){
+    const board = document.getElementById("ludoBoard");
+    board.innerHTML = "";
+
+    // 15x15 grid = 225 cells
+    for(let i = 0; i < 225; i++){
+        const cell = document.createElement("div");
+        cell.className = "cell";
+
+        // Red home area
+        if((i >= 0 && i <= 5) || (i >= 15 && i <= 20) || (i >= 30 && i <= 35) || (i >= 45 && i <= 50) || (i >= 60 && i <= 65) || (i >= 75 && i <= 80)){
+            cell.classList.add("red","home");
+        }
+        // Green home area
+        if((i >= 9 && i <= 14) || (i >= 24 && i <= 29) || (i >= 39 && i <= 44) || (i >= 54 && i <= 59) || (i >= 69 && i <= 74) || (i >= 84 && i <= 89)){
+            cell.classList.add("green","home");
+        }
+        // Center
+        if(i === 112) cell.classList.add("center");
+
+        board.appendChild(cell);
     }
+
+    // Goti daalo - Red
+    addGoti(1, "red");
+    addGoti(3, "red");
+    addGoti(16, "red");
+    addGoti(18, "red");
+
+    // Goti daalo - Green
+    addGoti(10, "green");
+    addGoti(12, "green");
+    addGoti(25, "green");
+    addGoti(27, "green");
+}
+
+function addGoti(pos, color){
+    const cells = document.querySelectorAll(".cell");
+    const goti = document.createElement("div");
+    goti.className = `goti ${color}`;
+    goti.onclick = () => moveGoti(goti, color);
+    cells[pos].appendChild(goti);
+}
+
+// DICE ROLL
+window.rollDice = () => {
+    if(!canRoll) return;
+    canRoll = false;
+
+    const dice = document.getElementById("dice");
+    dice.classList.add("roll");
+
+    let count = 0;
+    const interval = setInterval(() => {
+        diceVal = Math.floor(Math.random() * 6) + 1;
+        dice.innerText = diceVal;
+        count++;
+        if(count > 10){
+            clearInterval(interval);
+            dice.classList.remove("roll");
+            document.getElementById("diceValue").innerText = diceVal;
+            canRoll = true;
+
+            if(diceVal === 6){
+                Swal.fire("6 Aaya!","Ab goti chalo","success");
+            }
+        }
+    }, 100);
 };
 
-document.getElementById("spinBtn").onclick = async () => {
-    let b = parseInt(document.getElementById("bet").value);
-    if(b > ub) return Swal.fire("Error","Balance kam hai","error");
-    if(b <= 0) return Swal.fire("Error","Bet amount daalo","error");
+function moveGoti(goti, color){
+    if(diceVal === 0) return Swal.fire("Pehle dice roll karo","error");
+    if(diceVal!== 6 &&!goti.dataset.out){
+        return Swal.fire("6 nahi aaya","Goti nikalne ke liye 6 chahiye","warning");
+    }
 
-    document.getElementById("spinBtn").disabled = true;
-    await update(ref(db,`users/${auth.currentUser.uid}`),{balance: ub - b});
-
-    let s = Math.floor(Math.random() * 8);
-    let a = 360*8 + (360-(s*45+22.5));
-    rot += a;
-    c.style.transform = `rotate(${rot}deg)`;
-
-    setTimeout(async () => {
-        let w = parseInt(segs[s]);
-        let win = b * w;
-        await update(ref(db,`users/${auth.currentUser.uid}`),{balance: ub - b + win});
-        Swal.fire("Jeet Gaye!",`Tu ${w}x jeeta! Rs. ${win} mil gaye`,"success");
-        document.getElementById("spinBtn").disabled = false;
-    }, 4000);
-};
+    Swal.fire("Chal Di!","Goti move ho gayi","success");
+    goti.dataset.out = true;
+    diceVal = 0;
+    document.getElementById("diceValue").innerText = "0";
+}
 </script>
 </body>
-  </html>
+</html>
