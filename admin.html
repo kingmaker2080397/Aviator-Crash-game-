@@ -1,70 +1,137 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Panel - Jaanu Ludo</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Admin Panel - Kingmaker Gold</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        table { width: 100%; border-collapse: collapse; }
-        td, th { border: 1px solid #ddd; padding: 8px; }
-        .btn { padding: 5px 10px; margin: 2px; }
+        body{background:#0f172a;color:#fff;font-family:sans-serif;padding:20px}
+        .box{background:rgba(15,23,42,0.8);border:1px solid #ffd700;padding:20px;border-radius:12px;margin-bottom:20px}
+        input{width:100%;padding:10px;margin:8px 0;background:#000;color:#fff;border:1px solid #ffd700;border-radius:8px}
+        button{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;padding:12px;border-radius:8px;font-weight:900;cursor:pointer;width:100%}
+        table{width:100%;border-collapse:collapse;margin-top:15px}
+        td,th{border:1px solid #333;padding:10px;text-align:left}
+        .btn-sm{padding:5px 10px;width:auto;margin:2px}
     </style>
 </head>
 <body>
-    <h2>Admin Panel</h2>
+    <h1>👑 KINGMAKER ADMIN PANEL</h1>
     
-    <h3>User ko Coin Do</h3>
-    <input type="text" id="userUID" placeholder="User ka UID ya Email">
-    <input type="number" id="coinAmount" placeholder="Kitne coins">
-    <button onclick="sendCoins()">Bhej Do</button>
-    
-    <h3>Sabhi Users</h3>
-    <table id="userTable">
-        <tr><th>Email</th><th>Coins</th><th>Status</th><th>Action</th></tr>
-    </table>
+    <div class="box">
+        <h3>User ko Coin Bhejo</h3>
+        <input type="email" id="userEmail" placeholder="User ka Email daalo">
+        <input type="number" id="coinAmount" placeholder="Kitne Coins dene hain">
+        <button onclick="sendCoins()">COINS BHEJ DO</button>
+    </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="app.js"></script>
-    <script>
-        // Sab users load karo
-        db.collection("users").onSnapshot((snapshot) => {
-            let table = document.getElementById('userTable');
-            table.innerHTML = '<tr><th>Email</th><th>Coins</th><th>Status</th><th>Action</th></tr>';
-            
-            snapshot.forEach((doc) => {
-                let user = doc.data();
-                let row = `<tr>
-                    <td>${user.email}</td>
-                    <td>${user.coins}</td>
-                    <td>${user.blocked ? 'Blocked' : 'Active'}</td>
-                    <td>
-                        <button class="btn" onclick="blockUser('${doc.id}', ${!user.blocked})">
-                            ${user.blocked ? 'Unblock' : 'Block'}
-                        </button>
-                    </td>
-                </tr>`;
-                table.innerHTML += row;
+    <div class="box">
+        <h3>Sabhi Users</h3>
+        <table id="usersTable">
+            <tr><th>Email</th><th>Balance</th><th>Withdraw Number</th><th>Status</th><th>Action</th></tr>
+        </table>
+    </div>
+
+    <div class="box">
+        <h3>Withdrawal Requests</h3>
+        <table id="withdrawTable">
+            <tr><th>Email</th><th>Amount</th><th>Number</th><th>Status</th><th>Action</th></tr>
+        </table>
+    </div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import{getDatabase,ref,onValue,get,update}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// FIREBASE CONFIG - TERI WALI ID
+const firebaseConfig = {
+  apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+  authDomain: "kingmaker-crash.firebaseapp.com",
+  databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+  projectId: "kingmaker-crash",
+  storageBucket: "kingmaker-crash.firebasestorage.app",
+  messagingSenderId: "327400668393",
+  appId: "1:327400668393:web:0d02a340b9f5603f524478"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// Admin check - sirf tera email allow hai
+const ADMIN_EMAIL = "apna-email@gmail.com"; // <-- YAHAN APNA EMAIL DAAL DE
+
+onAuthStateChanged(auth, user => {
+    if (!user || user.email !== ADMIN_EMAIL) {
+        alert("Access Denied! Tu admin nahi hai.");
+        window.location.href = "index.html";
+        return;
+    }
+    loadAllUsers();
+    loadWithdrawRequests();
+});
+
+window.sendCoins = async () => {
+    const email = document.getElementById('userEmail').value;
+    const amount = parseInt(document.getElementById('coinAmount').value);
+    if(!email || !amount) return Swal.fire("Error","Email aur Amount daal","error");
+    
+    const usersRef = ref(db,'users');
+    const snapshot = await get(usersRef);
+    snapshot.forEach((child) => {
+        if(child.val().email === email){
+            update(ref(db,`users/${child.key}`),{
+                balance: (child.val().balance || 0) + amount
             });
+            Swal.fire("Done!","Coins bhej diye","success");
+        }
+    });
+};
+
+function loadAllUsers(){
+    onValue(ref(db,'users'), (snapshot) => {
+        let table = document.getElementById('usersTable');
+        table.innerHTML = '<tr><th>Email</th><th>Balance</th><th>Number</th><th>Status</th><th>Action</th></tr>';
+        snapshot.forEach((child) => {
+            let u = child.val();
+            let row = `<tr>
+                <td>${u.email}</td>
+                <td>Rs. ${u.balance || 0}</td>
+                <td>${u.withdraw_number || 'Not Set'}</td>
+                <td>${u.blocked ? 'Blocked' : 'Active'}</td>
+                <td><button class="btn-sm" onclick="toggleBlock('${child.key}',${!u.blocked})">${u.blocked ? 'Unblock' : 'Block'}</button></td>
+            </tr>`;
+            table.innerHTML += row;
         });
+    });
+}
 
-        function sendCoins() {
-            let email = document.getElementById('userUID').value;
-            let amount = parseInt(document.getElementById('coinAmount').value);
-            
-            db.collection("users").where("email", "==", email).get().then((query) => {
-                query.forEach((doc) => {
-                    db.collection("users").doc(doc.id).update({
-                        coins: firebase.firestore.FieldValue.increment(amount)
-                    });
-                    alert("Coin bhej diye bhai!");
-                });
-            });
-        }
+window.toggleBlock = (uid, status) => {
+    update(ref(db,`users/${uid}`),{blocked: status});
+};
 
-        function blockUser(uid, status) {
-            db.collection("users").doc(uid).update({ blocked: status });
-        }
-    </script>
+function loadWithdrawRequests(){
+    onValue(ref(db,'withdrawals'), (snapshot) => {
+        let table = document.getElementById('withdrawTable');
+        table.innerHTML = '<tr><th>Email</th><th>Amount</th><th>Number</th><th>Status</th><th>Action</th></tr>';
+        snapshot.forEach((child) => {
+            let w = child.val();
+            let row = `<tr>
+                <td>${w.email}</td>
+                <td>Rs. ${w.amount}</td>
+                <td>${w.number}</td>
+                <td>${w.status}</td>
+                <td>${w.status === 'pending' ? `<button class="btn-sm" onclick="approveWithdraw('${child.key}','${w.uid}',${w.amount})">Approve</button>` : 'Done'}</td>
+            </tr>`;
+            table.innerHTML += row;
+        });
+    });
+}
+
+window.approveWithdraw = async (wid, uid, amount) => {
+    await update(ref(db,`withdrawals/${wid}`),{status:'paid'});
+    Swal.fire("Paid!","Withdrawal approve kar diya","success");
+};
+</script>
 </body>
 </html>
