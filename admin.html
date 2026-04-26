@@ -1,195 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Admin Panel - Fixed</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Admin Panel</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
-body{background:#05070a;color:#fff;font-family:sans-serif;padding:20px;margin:0}
+body{background:#05070a;color:#fff;font-family:sans-serif;padding:20px;}
 .box{background:#0b1018;border:1px solid #b8860b;padding:20px;border-radius:12px;margin:15px 0}
-h1{color:#ffd700;text-align:center}
-h3{color:#ffd700;margin:10px 0}
-input,button,select{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff;font-size:16px}
+input,button,select{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #b8860b;background:#000;color:#fff;}
 button{background:#ffd700;color:#000;font-weight:900;cursor:pointer}
-.tab{display:flex;gap:8px;margin:20px 0}
-.tab button{flex:1;background:#000;color:#999}
-.tab button.active{background:#ffd700;color:#000}
-.req{background:#111;padding:12px;border-radius:8px;margin:8px 0;border-left:4px solid #ffd700}
-.green{border-left-color:#10b981}
-.red{border-left-color:#ef4444}
-.small{font-size:12px;color:#999}
-.flex{display:flex;gap:8px}
-.flex button{flex:1}
 </style>
 </head>
 <body>
 <h1>⚙️ ADMIN PANEL</h1>
 
-<div class="tab">
-<button id="tab1" class="active" onclick="showTab(1)">DEPOSIT INFO</button>
-<button id="tab2" onclick="showTab(2)">REQUESTS</button>
-<button id="tab3" onclick="showTab(3)">CONTROLS</button>
+<div class="box">
+  <h3>💰 Deposit Info Set Karo</h3>
+  <select id="payType">
+    <option value="JazzCash">JazzCash</option>
+    <option value="EasyPaisa">EasyPaisa</option>
+  </select>
+  <input id="payNumber" placeholder="Account Number">
+  <input id="payName" placeholder="Account Name">
+  <button onclick="savePaymentInfo()">SAVE DEPOSIT INFO</button>
+  <p id="currentInfo" style="font-size:12px; color:#999">Loading current info...</p>
 </div>
 
-<div id="box1" class="box">
-<h3>💰 Deposit Info Set Karo</h3>
-<select id="payType">
-  <option value="JazzCash">JazzCash</option>
-  <option value="EasyPaisa">EasyPaisa</option>
-  <option value="Bank">Bank Transfer</option>
-</select>
-<input id="payNumber" placeholder="Account Number (e.g. 0300...)" type="tel">
-<input id="payName" placeholder="Account Name">
-<button onclick="savePaymentInfo()">SAVE DEPOSIT INFO</button>
-<div class="small" style="margin-top:10px">Current: <span id="currentInfo">Loading...</span></div>
-</div>
-
-<div id="box2" class="box" style="display:none">
-<h3>📋 Deposit/Withdraw Requests</h3>
-<div id="reqList">Loading...</div>
-</div>
-
-<div id="box3" class="box" style="display:none">
-<h3>🎮 Game Controls</h3>
-<p>Safe Mode: <b id="safeStatus">Loading...</b></p>
-<div class="flex">
+<div class="box">
+  <h3>🎮 Game Controls</h3>
+  <p>Safe Mode: <b id="safeStatus">...</b></p>
   <button onclick="toggleSafe(true)" style="background:#10b981">SAFE ON</button>
   <button onclick="toggleSafe(false)" style="background:#ef4444">SAFE OFF</button>
 </div>
 
-<h3 style="margin-top:20px">🎯 Next Result Set Karo</h3>
-<input id="nextResult" type="number" step="0.01" placeholder="Next Win Multiplier (e.g. 2.50)">
-<button onclick="setNextResult()">SET NEXT RESULT</button>
-<div class="small">Current Next Result: <span id="currentResult">None</span></div>
-</div>
-
-<button onclick="location.href='./index.html'" style="background:#555;margin-top:20px">BACK TO GAME</button>
-
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase, ref, onValue, set, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getDatabase,ref,onValue,set}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// Firebase Configuration (Same as yours)
-const firebaseConfig = {
-  apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-  authDomain: "kingmaker-crash.firebaseapp.com",
-  databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-  projectId: "kingmaker-crash",
-  storageBucket: "kingmaker-crash.firebasestorage.app",
-  messagingSenderId: "327400668393",
-  appId: "1:327400668393:web:0d02a340b9f5603f524478"
-};
+const app=initializeApp({apiKey:"AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",authDomain:"kingmaker-crash.firebaseapp.com",databaseURL:"https://kingmaker-crash-default-rtdb.firebaseio.com",projectId:"kingmaker-crash",storageBucket:"kingmaker-crash.firebasestorage.app",messagingSenderId:"327400668393",appId:"1:327400668393:web:0d02a340b9f5603f524478"});
+const db=getDatabase(app);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-// Global Variables for ease
-onAuthStateChanged(auth, u => {
-  if (!u) return location.replace("./login.html");
-  loadAll();
-});
-
-function loadAll() {
-  // 1. Fixed Payment Info Load
-  onValue(ref(db, 'admin/payment_info'), s => {
-    const d = s.val();
-    if (d && typeof d === 'object') {
-      document.getElementById('payType').value = d.type || 'JazzCash';
-      document.getElementById('payNumber').value = d.number || '';
-      document.getElementById('payName').value = d.name || '';
-      document.getElementById('currentInfo').innerText = `${d.type}: ${d.number} (${d.name})`;
+// Load Current Data
+onValue(ref(db,'admin'), s => {
+  const data = s.val();
+  if(data){
+    if(data.payment_info){
+       document.getElementById('currentInfo').innerText = `Current: ${data.payment_info.type} - ${data.payment_info.number}`;
     }
-  });
-
-  // 2. Safe Mode Load
-  onValue(ref(db, 'admin/safe_mode'), s => {
-    const isSafe = s.val();
-    document.getElementById('safeStatus').innerText = isSafe ? 'ON 🟢' : 'OFF 🔴';
-  });
-
-  // 3. Next Result Load
-  onValue(ref(db, 'admin/next_result'), s => {
-    document.getElementById('currentResult').innerText = s.val() || 'None';
-  });
-
-  // 4. Requests Load
-  onValue(ref(db, 'requests'), s => {
-    let html = '';
-    if (s.exists()) {
-      let reqs = [];
-      s.forEach(c => { reqs.push({ key: c.key, ...c.val() }); });
-      reqs.reverse().forEach(r => {
-        let cls = r.status === 'approved' ? 'green' : r.status === 'rejected' ? 'red' : '';
-        html += `<div class="req ${cls}">
-          <b>${r.type?.toUpperCase()}</b> - Rs.${r.amount} - ${r.status}<br>
-          <div class="small">${r.email}</div>
-          <div class="small">TRX/No: ${r.trx || r.user_number || 'N/A'}</div>
-          ${r.status === 'pending' ? `<div class="flex" style="margin-top:8px">
-            <button onclick="approveReq('${r.key}',${r.amount},'${r.uid}','${r.type}')" style="background:#10b981;padding:6px;font-size:12px">APPROVE</button>
-            <button onclick="rejectReq('${r.key}')" style="background:#ef4444;padding:6px;font-size:12px">REJECT</button>
-          </div>` : ''}
-        </div>`;
-      });
-    } else {
-      html = 'No requests yet';
-    }
-    document.getElementById('reqList').innerHTML = html;
-  });
-}
-
-// Attach functions to window for onclick compatibility
-window.showTab = n => {
-  for (let i = 1; i <= 3; i++) {
-    document.getElementById('box' + i).style.display = n === i ? 'block' : 'none';
-    document.getElementById('tab' + i).classList.toggle('active', n === i);
+    document.getElementById('safeStatus').innerText = data.safe_mode ? "ON (🟢)" : "OFF (🔴)";
   }
-};
+});
 
 window.savePaymentInfo = async () => {
   const type = document.getElementById('payType').value;
-  const number = document.getElementById('payNumber').value.trim();
-  const name = document.getElementById('payName').value.trim();
-  if (!number || !name) return Swal.fire("Error", "Details fill karein", "error");
+  const number = document.getElementById('payNumber').value;
+  const name = document.getElementById('payName').value;
+  if(!number || !name) return alert("Fill all fields");
   
   await set(ref(db, 'admin/payment_info'), { type, number, name });
-  Swal.fire("Saved!", "Info Update Ho Gayi", "success");
+  Swal.fire("Success", "Payment Info Updated!", "success");
 };
 
-window.toggleSafe = async (v) => {
-  await set(ref(db, 'admin/safe_mode'), !!v); // !!v ensures it's true/false boolean
-  Swal.fire("Done!", `Safe Mode ${v ? 'ON' : 'OFF'}`, "success");
-};
-
-window.setNextResult = async () => {
-  const v = document.getElementById('nextResult').value;
-  if (!v) return Swal.fire("Error", "Result daalo", "error");
-  await set(ref(db, 'admin/next_result'), parseFloat(v));
-  document.getElementById('nextResult').value = '';
-  Swal.fire("Set!", "Result fixed for next round", "success");
-};
-
-window.approveReq = async (key, amount, uid, type) => {
-  try {
-    if (type === 'deposit') {
-      const snap = await get(ref(db, `users/${uid}/balance`));
-      const bal = snap.val() || 0;
-      await update(ref(db, `users/${uid}`), { balance: bal + amount });
-    }
-    await update(ref(db, `requests/${key}`), { status: 'approved' });
-    Swal.fire("Approved!", "Balance added to user account", "success");
-  } catch (e) {
-    Swal.fire("Error", e.message, "error");
-  }
-};
-
-window.rejectReq = async (key) => {
-  await update(ref(db, `requests/${key}`), { status: 'rejected' });
-  Swal.fire("Rejected!", "Request declined", "info");
+window.toggleSafe = async (val) => {
+  await set(ref(db, 'admin/safe_mode'), val);
+  Swal.fire("Updated", `Safe Mode is now ${val ? 'ON' : 'OFF'}`, "info");
 };
 </script>
 </body>
-  </html>
-  
+</html>
