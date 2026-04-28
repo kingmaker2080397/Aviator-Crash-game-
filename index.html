@@ -1,154 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Moon Aviator - Real Money</title>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-    /* ... Saara Purana CSS Same Rahega ... */
-    :root{--moon:#8bb9ff;--moon2:#e0f7ff;--bg:#060913;--bg2:#0b0f1e;--glass:rgba(139,185,255,0.08);--border:rgba(139,185,255,0.2);--green:#00ff88;--red:#ff3b3b;--orange:#ff9500}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:radial-gradient(ellipse at 50% 0%,#1a2040 0%,var(--bg) 60%);color:#fff;font-family:'Outfit',sans-serif;min-height:100vh;padding:10px;overflow-x:hidden}
-    .header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px}
-    .logo{font-size:1.8rem;font-weight:900;color:var(--moon);text-shadow:0 0 20px var(--moon)}
-    .balance{font-weight:800;color:var(--green);font-size:1.1rem}
-    .graph-wrap{background:radial-gradient(ellipse at center,rgba(11,15,30,0.95),var(--bg2));border-radius:16px;position:relative;height:300px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
-    #graph{width:100%;height:100%}
-    .plane{position:absolute;width:50px;height:50px;z-index:5;transition:transform 0.1s linear;pointer-events:none}
-    .multiplier-box{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center}
-    .multiplier{font-size:4rem;font-weight:900;color:#fff}
-    
-    /* New Wallet Tabs CSS */
-    .wallet-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .w-btn { background: var(--glass); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-    .w-btn:hover { background: var(--moon); color: black; }
-    
-    .btn-bet{width:100%;background:linear-gradient(135deg,var(--green),#00cc6a);border:0;padding:15px;border-radius:14px;color:#fff;font-weight:900;font-size:1.1rem;cursor:pointer}
-    .btn-bet.cashout{background:linear-gradient(135deg,#ffd700,#ff9500)}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JustCraze.pk - Tadakta Bhadakta Store 🔥</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    .header { background: #FF3D00; color: white; padding: 15px; text-align: center; position: sticky; top: 0; }
+    .header h1 { margin: 0; }
+    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
+    .card { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px #ccc; }
+    .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; }
+    .btn { background: #FF3D00; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px; }
+    .btn:hover { background: #D32F2F; }
+  </style>
 </head>
 <body>
+  <div class="header">
+    <h1>JustCraze.pk 🔥</h1>
+    <button id="loginBtn" class="btn">Login with Google</button>
+    <span id="userEmail"></span>
+  </div>
 
-<div class="header">
-    <div class="logo">MoonAviator</div>
-    <div class="balance">Rs. <span id="userBal">0.00</span></div>
-</div>
+  <div id="products" class="products"><p>Loading products...</p></div>
 
-<div class="wallet-tabs">
-    <button class="w-btn" onclick="showDeposit()">💰 DEPOSIT</button>
-    <button class="w-btn" onclick="showWithdraw()">💸 WITHDRAW</button>
-</div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<div class="graph-wrap">
-    <canvas id="graph"></canvas>
-    <div class="plane" id="plane">✈️</div>
-    <div class="multiplier-box">
-        <div class="multiplier" id="mult">1.00x</div>
-    </div>
-</div>
-
-<div class="bet-panel" style="background:var(--glass); padding:15px; border-radius:15px;">
-    <input type="number" id="betAmt" value="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid var(--moon); padding:10px; border-radius:10px; margin-bottom:10px; text-align:center; font-weight:bold;">
-    <button class="btn-bet" id="betBtn" onclick="handleBet()">BET</button>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, onValue, update, get, set, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    // --- Firebase Config ---
+    // TUMHARI FIREBASE CONFIG ADD KAR DI HAI
     const firebaseConfig = {
-        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-        authDomain: "kingmaker-crash.firebaseapp.com",
-        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-        projectId: "kingmaker-crash",
-        storageBucket: "kingmaker-crash.firebasestorage.app",
-        messagingSenderId: "327400668393",
-        appId: "1:327400668393:web:0d02a340b9f5603f524478"
+      apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+      authDomain: "kingmaker-crash.firebaseapp.com",
+      databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+      projectId: "kingmaker-crash",
+      storageBucket: "kingmaker-crash.firebasestorage.app",
+      messagingSenderId: "327400668393",
+      appId: "1:327400668393:web:0d02a340b9f5603f524478",
+      measurementId: "G-LVVD55RDQV"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-    let currentBal = 0, isFlying = false, mult = 1.00, betPlaced = false, hasCashed = false, lastBet = 0;
-    const balEl = document.getElementById("userBal");
-    const multEl = document.getElementById("mult");
-    const betBtn = document.getElementById("betBtn");
+    document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
 
-    // Load User Data
-    onAuthStateChanged(auth, user => {
-        if(user) {
-            onValue(ref(db, `users/${user.uid}/balance`), s => {
-                currentBal = s.val() || 0;
-                balEl.innerText = currentBal.toFixed(2);
-            });
-        } else {
-            // Redirect to Login if not logged in
-            window.location.href = "login.html"; 
-        }
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('userEmail').innerText = `Hi, ${user.displayName}`;
+      }
     });
 
-    // Wallet Functions
-    window.showDeposit = async () => {
-        const snap = await get(ref(db, 'admin/payment_info'));
-        const num = snap.val() || "Admin No. Not Set";
-        Swal.fire({
-            title: 'Deposit Money',
-            html: `EasyPaisa/JazzCash: <b>${num}</b><br><br>Payment kar ke Screenshot Admin ko WhatsApp karein.`,
-            icon: 'info'
-        });
-    };
-
-    window.showWithdraw = () => {
-        Swal.fire({
-            title: 'Withdraw',
-            input: 'number',
-            inputLabel: 'Amount likhein',
-            showCancelButton: true
-        }).then(result => {
-            if(result.value > currentBal) Swal.fire("Error", "Balance kam hai!", "error");
-            else if(result.value >= 500) {
-                push(ref(db, 'requests'), { uid: auth.currentUser.uid, email: auth.currentUser.email, amount: result.value, type: 'Withdraw', status: 'pending' });
-                Swal.fire("Request Sent", "Admin approval ka intezar karein.", "success");
-            } else {
-                Swal.fire("Error", "Minimum Rs. 500 withdraw hota hai.", "warning");
-            }
-        });
-    };
-
-    // Aviator Core Logic with Real Balance
-    async function handleBet() {
-        const amt = parseFloat(document.getElementById("betAmt").value);
-        
-        if (!isFlying && !betPlaced) {
-            if (currentBal < amt) return Swal.fire("Error", "Balance kam hai!", "error");
-            
-            // Deduct from Real Database
-            await update(ref(db, `users/${auth.currentUser.uid}`), { balance: currentBal - amt });
-            lastBet = amt;
-            betPlaced = true;
-            betBtn.innerText = "WAITING...";
-            betBtn.disabled = true;
-        } else if (isFlying && betPlaced && !hasCashed) {
-            // Cashout
-            hasCashed = true;
-            let win = lastBet * mult;
-            await update(ref(db, `users/${auth.currentUser.uid}`), { balance: currentBal + win });
-            
-            betBtn.innerText = "WON Rs." + win.toFixed(2);
-            betBtn.classList.remove("cashout");
-            
-            Swal.fire({ title: `+${win.toFixed(2)}`, timer: 1000, showConfirmButton: false, background: '#00ff88', position: 'top' });
-        }
+    async function loadProducts() {
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const productsDiv = document.getElementById('products');
+      productsDiv.innerHTML = '';
+      if (querySnapshot.empty) {
+        productsDiv.innerHTML = '<p>Abhi koi product nahi hai. Admin se add karwao.</p>';
+        return;
+      }
+      querySnapshot.forEach((doc) => {
+        const p = doc.data();
+        productsDiv.innerHTML += `
+          <div class="card">
+            <img src="${p.imageUrl}" alt="${p.title}">
+            <h3>${p.title}</h3>
+            <p>Rs. ${p.price}</p>
+            <button class="btn" onclick="alert('Added: ${p.title}')">Add to Cart</button>
+          </div>
+        `;
+      });
     }
-    window.handleBet = handleBet;
-
-    // ... Plane Animation & Crash Logic (Same as before but with startRound call) ...
-    // Note: Use the genCrash and setInterval logic from your professional version here
-</script>
+    loadProducts();
+  </script>
 </body>
 </html>
