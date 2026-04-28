@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Order - JustCraze.pk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { background: #0f0f1a; color: white; padding: 20px; }
+    .container { max-width: 600px; margin: 50px auto; }
+    .glass {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+      border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px;
+    }
+    h2 { text-align: center; margin-bottom: 20px; background: linear-gradient(45deg, #FF3D00, #FF9100); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    input { width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: white; margin: 10px 0; }
+    .btn { width: 100%; padding: 12px; background: linear-gradient(45deg, #FF3D00, #FF9100); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; }
+    .order { background: rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; margin: 15px 0; }
+    .status { padding: 6px 12px; border-radius: 20px; font-size: 12px; display: inline-block; margin: 8px 0; }
+    .pending { background: #FF9800; } .packed { background: #2196F3; } 
+    .shipped { background: #9C27B0; } .delivered { background: #4CAF50; }
+    .back { text-align: center; margin-top: 20px; }
+    .back a { color: #FF6E40; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="glass">
+      <h2>Track Your Order 📦</h2>
+      <input type="text" id="phone" placeholder="Apna Phone Number: 03XX-XXXXXXX">
+      <button class="btn" onclick="trackOrder()">Track Karo</button>
+      <div id="result"></div>
+      <div class="back"><a href="index.html"><i class="fas fa-arrow-left"></i> Back to Store</a></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+      authDomain: "kingmaker-crash.firebaseapp.com",
+      projectId: "kingmaker-crash",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.trackOrder = async () => {
+      const phone = document.getElementById('phone').value.trim();
+      if(!phone) return alert("Phone number daalo");
+      
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '<p style="text-align:center;margin-top:20px;">Searching...</p>';
+      
+      const q = query(collection(db, "orders"), where("customerPhone", "==", phone));
+      const querySnapshot = await getDocs(q);
+      
+      if(querySnapshot.empty) {
+        resultDiv.innerHTML = '<p style="text-align:center;margin-top:20px;">❌ Koi order nahi mila is number pe</p>';
+        return;
+      }
+      
+      resultDiv.innerHTML = '<h3 style="margin-top:20px;">Tumhare Orders:</h3>';
+      querySnapshot.forEach((doc) => {
+        const o = doc.data();
+        let statusClass = 'pending';
+        if(o.status.includes('Packed')) statusClass = 'packed';
+        if(o.status.includes('Shipped')) statusClass = 'shipped';
+        if(o.status.includes('Delivered')) statusClass = 'delivered';
+        
+        resultDiv.innerHTML += `
+          <div class="order">
+            <b>${o.products[0].productTitle}</b><br>
+            Rs. ${o.totalAmount} | ${o.paymentMethod || 'COD'}<br>
+            <span class="status ${statusClass}">${o.status}</span><br>
+            <small>📍 ${o.customerAddress}</small>
+          </div>
+        `;
+      });
+    };
+  </script>
+</body>
+</html>
