@@ -3,94 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Moon Crash Pro - Demo</title>
+<title>Moon Aviator</title>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--moon-glow:#e0f7ff;--moon-blue:#8bb9ff;--glass:rgba(200,220,255,0.07);--glass-border:rgba(200,220,255,0.18);--dark-space:#060913;--green:#00ff88;--red:#ff3b3b}
+:root{--moon:#8bb9ff;--moon2:#e0f7ff;--bg:#060913;--bg2:#0b0f1e;--glass:rgba(139,185,255,0.08);--border:rgba(139,185,255,0.2);--green:#00ff88;--red:#ff3b3b;--orange:#ff9500}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:radial-gradient(ellipse at 20% 20%,#1a2040 0%,var(--dark-space) 40%,#000 100%);color:#fff;font-family:'Outfit',sans-serif;min-height:100vh;display:grid;place-items:center;padding:15px;overflow-x:hidden}
-body::before,body::after{content:'';position:fixed;width:2px;height:2px;background:#fff;box-shadow:0 0 10px #fff,100px 200px #fff,200px 100px #fff,300px 300px #fff,400px 50px #8bb9ff,50px 400px #8bb9ff,450px 350px #fff,150px 450px #fff;animation:twinkle 3s infinite;z-index:0}
-body::after{left:200px;animation-delay:1.5s}
-@keyframes twinkle{0%,100%{opacity:.3}50%{opacity:1}}
-.container{position:relative;z-index:1;width:100%;max-width:420px}
-h2{font-size:2.4rem;font-weight:900;text-shadow:0 0 40px var(--moon-glow),0 0 80px var(--moon-blue);margin-bottom:8px;letter-spacing:3px;text-align:center}
-.demo-badge{background:linear-gradient(135deg,rgba(139,185,255,0.2),rgba(224,247,255,0.1));border:1px solid var(--moon-blue);padding:7px 18px;border-radius:20px;font-size:.7rem;margin:0 auto 18px;display:block;width:fit-content;backdrop-filter:blur(15px);color:var(--moon-glow);font-weight:700;letter-spacing:1px}
-.game-body{background:var(--glass);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:1px solid var(--glass-border);border-radius:32px;padding:22px;box-shadow:0 10px 50px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.15),0 0 80px rgba(139,185,255,0.15)}
-.stats{background:rgba(6,9,19,0.7);padding:15px 20px;border-radius:20px;margin-bottom:18px;border:1px solid var(--glass-border);display:flex;justify-content:space-between;font-weight:700;font-size:.95rem}
-.stats b{color:var(--moon-glow);text-shadow:0 0 12px var(--moon-blue)}
-.graph-container{background:radial-gradient(ellipse at center,rgba(11,15,30,0.9),rgba(6,9,19,0.95));border-radius:24px;margin-bottom:18px;border:1px solid var(--glass-border);height:320px;position:relative;overflow:hidden;box-shadow:inset 0 3px 20px rgba(0,0,0,0.8)}
-#graph{width:100%;height:100%}
-.plane{position:absolute;font-size:2.5rem;filter:drop-shadow(0 0 15px var(--moon-blue));transition:all.05s linear;z-index:5;transform-origin:center}
-.plane.flying{animation:planeFloat.6s ease-in-out infinite}
-.plane.crashed{animation:crashSpin.5s ease-out forwards;filter:drop-shadow(0 0 20px var(--red))}
-@keyframes planeFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-3px) rotate(-5deg)}}
-@keyframes crashSpin{to{transform:translateY(100px) rotate(720deg) scale(0.5);opacity:0}}
-.multiplier-display{position:absolute;top:20px;left:50%;transform:translateX(-50%);text-align:center;z-index:10;background:rgba(6,9,19,0.6);padding:12px 25px;border-radius:18px;border:1px solid var(--glass-border);backdrop-filter:blur(10px)}
-.multiplier{font-size:3.5rem;font-weight:900;color:var(--moon-glow);text-shadow:0 0 25px var(--moon-blue),0 0 50px rgba(139,185,255,0.6);line-height:1}
-.multiplier.flying{animation:pulseGlow.4s ease-in-out infinite alternate}
-.multiplier.crashed{color:var(--red);text-shadow:0 0 25px var(--red);animation:shakeText.4s}
-@keyframes pulseGlow{from{text-shadow:0 0 25px var(--moon-blue),0 0 50px rgba(139,185,255,0.6)}to{text-shadow:0 0 35px var(--moon-blue),0 0 70px rgba(139,185,255,0.8)}}
-@keyframes shakeText{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-.status-text{font-size:.85rem;color:var(--moon-blue);margin-top:6px;font-weight:700;letter-spacing:1px}
-.bet-section{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-input{background:rgba(6,9,19,0.7);border:1px solid var(--glass-border);border-radius:16px;padding:15px;color:#fff;font-family:'Outfit';font-size:1rem;font-weight:700;text-align:center}
-input:focus{outline:0;border-color:var(--moon-blue);box-shadow:0 0 0 3px rgba(139,185,255,0.25)}
-.btn{border:0;padding:17px;font-size:1.05rem;font-weight:800;border-radius:16px;cursor:pointer;transition:all.25s ease;font-family:'Outfit';letter-spacing:1px;text-transform:uppercase}
-.btn-bet{background:linear-gradient(135deg,var(--moon-glow),var(--moon-blue));color:var(--dark-space);box-shadow:0 5px 25px rgba(139,185,255,0.5)}
-.btn-cashout{background:linear-gradient(135deg,var(--green),#00cc6a);color:#fff;box-shadow:0 5px 25px rgba(0,255,136,0.5);animation:cashoutPulse 1s ease-in-out infinite}
-@keyframes cashoutPulse{0%,100%{box-shadow:0 5px 25px rgba(0,255,136,0.5)}50%{box-shadow:0 5px 35px rgba(0,255,136,0.8)}}
-.btn:disabled{opacity:.25;cursor:not-allowed;filter:grayscale(1);animation:none}
-.btn:active:not(:disabled){transform:scale(0.97)}
-.history{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:16px}
-.history-item{background:rgba(6,9,19,0.7);border:1px solid var(--glass-border);padding:7px 13px;border-radius:12px;font-size:.8rem;font-weight:700}
-.history-item.win{color:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(0,255,136,0.3)}
-.history-item.lose{color:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(255,59,59,0.3)}
+body{background:radial-gradient(ellipse at 50% 0%,#1a2040 0%,var(--bg) 60%);color:#fff;font-family:'Outfit',sans-serif;min-height:100vh;padding:10px}
+.header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;margin-bottom:8px}
+.logo{font-size:1.8rem;font-weight:900;color:var(--moon);text-shadow:0 0 20px var(--moon)}
+.balance{font-weight:800;color:var(--green);font-size:1.1rem}
+.history-bar{display:flex;gap:6px;overflow-x:auto;padding:8px 15px;margin-bottom:8px;scrollbar-width:none}
+.history-bar::-webkit-scrollbar{display:none}
+.hist-item{background:rgba(6,9,19,0.6);padding:5px 12px;border-radius:8px;font-size:.75rem;font-weight:700;white-space:nowrap;border:1px solid var(--border)}
+.hist-item.purple{color:#b47cff}.hist-item.blue{color:var(--moon)}.hist-item.red{color:var(--red)}
+.fun-banner{background:linear-gradient(135deg,var(--orange),#ff6b00);text-align:center;padding:10px;border-radius:12px 12px 0 0;font-weight:800;font-size:.9rem;letter-spacing:1px}
+.graph-wrap{background:radial-gradient(ellipse at center,rgba(11,15,30,0.95),var(--bg2));border-radius:0 0 16px 16px;position:relative;height:300px;overflow:hidden;border:1px solid var(--border);border-top:none;margin-bottom:12px}
+.graph-bg{position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 50%,rgba(139,185,255,0.03) 0deg 10deg,transparent 10deg 20deg)}
+#graph{width:100%;height:100%;position:relative;z-index:2}
+.plane{position:absolute;font-size:2.2rem;filter:drop-shadow(0 0 15px var(--moon));z-index:5;transition:all.05s linear}
+.plane.flying{animation:float.5s ease-in-out infinite}
+.plane.crashed{animation:crash.6s ease-out forwards;filter:drop-shadow(0 0 20px var(--red))}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-4px) rotate(-8deg)}}
+@keyframes crash{to{transform:translateY(80px) rotate(360deg) scale(0.3);opacity:0}}
+.multiplier-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center}
+.multiplier{font-size:4rem;font-weight:900;color:#fff;text-shadow:0 0 30px var(--moon),0 0 60px rgba(139,185,255,0.5);line-height:1}
+.multiplier.flying{animation:glow.4s ease-in-out infinite alternate}
+.multiplier.crashed{color:var(--red);text-shadow:0 0 30px var(--red);animation:shake.3s}
+@keyframes glow{from{text-shadow:0 0 30px var(--moon),0 0 60px rgba(139,185,255,0.5)}to{text-shadow:0 0 40px var(--moon),0 0 80px rgba(139,185,255,0.8)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.players{position:absolute;bottom:15px;right:15px;display:flex;align-items:center;gap:6px;background:rgba(6,9,19,0.7);padding:6px 12px;border-radius:20px;border:1px solid var(--border);backdrop-filter:blur(10px);font-size:.8rem;font-weight:700}
+.bet-panel{background:var(--glass);backdrop-filter:blur(25px);border:1px solid var(--border);border-radius:20px;padding:15px;margin-bottom:10px}
+.tabs{display:flex;background:rgba(6,9,19,0.6);border-radius:12px;padding:4px;margin-bottom:12px}
+.tab{flex:1;text-align:center;padding:8px;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s}
+.tab.active{background:rgba(139,185,255,0.2);color:var(--moon)}
+.bet-controls{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.amt-controls{display:flex;align-items:center;gap:8px;background:rgba(6,9,19,0.6);padding:8px;border-radius:12px;border:1px solid var(--border)}
+.btn-icon{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:rgba(139,185,255,0.1);color:#fff;font-size:1.2rem;cursor:pointer;font-weight:700}
+.amt-input{width:80px;text-align:center;background:transparent;border:0;color:#fff;font-size:1.1rem;font-weight:800;font-family:'Outfit'}
+.amt-input:focus{outline:0}
+.quick-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.quick-btn{background:rgba(6,9,19,0.6);border:1px solid var(--border);padding:8px;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;font-size:.85rem}
+.btn-bet{flex:1;background:linear-gradient(135deg,var(--green),#00cc6a);border:0;padding:16px;border-radius:14px;color:#fff;font-weight:900;font-size:1rem;cursor:pointer;box-shadow:0 4px 20px rgba(0,255,136,0.4);font-family:'Outfit'}
+.btn-bet:disabled{opacity:.3;filter:grayscale(1)}
+.btn-bet.cancel{background:linear-gradient(135deg,var(--red),#cc0000)}
+.stats-panel{background:var(--glass);backdrop-filter:blur(25px);border:1px solid var(--border);border-radius:20px;padding:15px}
+.stats-tabs{display:flex;gap:15px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:10px}
+.stat-tab{font-weight:700;font-size:.85rem;color:#888;cursor:pointer}
+.stat-tab.active{color:var(--moon)}
+.stat-row{display:flex;justify-content:space-between;align-items:center;font-size:.9rem}
+.progress{width:100%;height:4px;background:rgba(6,9,19,0.6);border-radius:10px;margin-top:8px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--moon));width:69%;border-radius:10px}
 </style>
 </head>
 <body>
-<div class="container">
-<div class="demo-badge">✈️ MOON CRASH PRO DEMO</div>
-<h2>MOON CRASH</h2>
-<div class="game-body">
-<div class="stats"><div>COINS: <b id="balance">1000</b></div><div>WIN: <b id="lastWin">0</b></div></div>
-<div class="graph-container">
+<div class="header">
+<div class="logo">MoonAviator</div>
+<div class="balance"><span id="bal">3,000.00</span> COINS</div>
+</div>
+
+<div class="history-bar" id="history"></div>
+
+<div class="fun-banner">FUN MODE - DEMO ONLY</div>
+
+<div class="graph-wrap">
+<div class="graph-bg"></div>
 <canvas id="graph"></canvas>
 <div class="plane" id="plane">✈️</div>
-<div class="multiplier-display">
-<div class="multiplier" id="multiplier">1.00x</div>
-<div class="status-text" id="status">PLACE YOUR BET</div>
+<div class="multiplier-box">
+<div class="multiplier" id="mult">1.00x</div>
+</div>
+<div class="players">👥 <span id="pcount">205</span></div>
+</div>
+
+<div class="bet-panel">
+<div class="tabs">
+<div class="tab active">Bet</div>
+<div class="tab">Auto</div>
+</div>
+<div class="bet-controls">
+<div style="flex:1">
+<div class="amt-controls">
+<button class="btn-icon" onclick="changeAmt(-1)">−</button>
+<input type="number" class="amt-input" id="amt" value="1.00" step="0.5">
+<button class="btn-icon" onclick="changeAmt(1)">+</button>
+</div>
+<div class="quick-btns">
+<button class="quick-btn" onclick="setAmt(1)">1</button>
+<button class="quick-btn" onclick="setAmt(2)">2</button>
+<button class="quick-btn" onclick="setAmt(5)">5</button>
+<button class="quick-btn" onclick="setAmt(10)">10</button>
+</div>
+<button class="btn-bet" id="betBtn" onclick="placeBet()">Bet<br><span id="betAmt">1.00 COINS</span></button>
 </div>
 </div>
-<div class="bet-section">
-<input type="number" id="betAmount" placeholder="Bet" value="50" min="10" max="500">
-<input type="number" id="autoCashout" placeholder="Auto" value="2.00" min="1.01" step="0.01">
+
+<div class="bet-panel">
+<div class="tabs">
+<div class="tab active">Bet</div>
+<div class="tab">Auto</div>
 </div>
-<button class="btn btn-bet" id="betBtn">PLACE BET</button>
-<button class="btn btn-cashout" id="cashoutBtn" disabled>CASH OUT</button>
-<div class="history" id="history"></div>
+<div class="bet-controls">
+<div style="flex:1">
+<div class="amt-controls">
+<button class="btn-icon" onclick="changeAmt2(-1)">−</button>
+<input type="number" class="amt-input" id="amt2" value="1.00" step="0.5">
+<button class="btn-icon" onclick="changeAmt2(1)">+</button>
+</div>
+<div class="quick-btns">
+<button class="quick-btn" onclick="setAmt2(1)">1</button>
+<button class="quick-btn" onclick="setAmt2(2)">2</button>
+<button class="quick-btn" onclick="setAmt2(5)">5</button>
+<button class="quick-btn" onclick="setAmt2(10)">10</button>
+</div>
+<button class="btn-bet" id="betBtn2" onclick="placeBet2()">Bet<br><span id="betAmt2">1.00 COINS</span></button>
 </div>
 </div>
+
+<div class="stats-panel">
+<div class="stats-tabs">
+<div class="stat-tab active">All Bets</div>
+<div class="stat-tab">Previous</div>
+<div class="stat-tab">Top</div>
+</div>
+<div class="stat-row">
+<div><b id="betCount">299</b>/430 Bets</div>
+<div><b id="totalWin">2,365.98</b> Total win</div>
+<div class="progress"><div class="progress-fill"></div></div>
+</div>
+
 <script>
-let coins=1000,currentBet=0,isPlaying=!1,isCrashed=!1,currentMultiplier=1,gameInterval,crashPoint=0,hasCashedOut=!1;
-const balanceEl=document.getElementById("balance"),lastWinEl=document.getElementById("lastWin"),multiplierEl=document.getElementById("multiplier"),statusEl=document.getElementById("status"),betBtn=document.getElementById("betBtn"),cashoutBtn=document.getElementById("cashoutBtn"),betAmountEl=document.getElementById("betAmount"),autoCashoutEl=document.getElementById("autoCashout"),historyEl=document.getElementById("history"),canvas=document.getElementById("graph"),ctx=canvas.getContext("2d"),planeEl=document.getElementById("plane");
-function resizeCanvas(){canvas.width=2*canvas.offsetWidth,canvas.height=2*canvas.offsetHeight,ctx.scale(2,2)}
-resizeCanvas(),window.addEventListener("resize",resizeCanvas);
-const audioCtx=new(window.AudioContext||window.webkitAudioContext);let engineSound;
-function startEngineSound(){engineSound=audioCtx.createOscillator();const e=audioCtx.createGain(),t=audioCtx.createBiquadFilter();engineSound.connect(t),t.connect(e),e.connect(audioCtx.destination),engineSound.type="sawtooth",engineSound.frequency.value=80,t.type="lowpass",t.frequency.value=400,e.gain.setValueAtTime(.03,audioCtx.currentTime),engineSound.start()}
-function updateEngineSound(){engineSound&&engineSound.frequency.exponentialRampToValueAtTime(80+20*currentMultiplier,audioCtx.currentTime+.1)}
-function stopEngineSound(){engineSound&&(engineSound.stop(),engineSound=null)}
-function playCrashSound(){const e=audioCtx.sampleRate*.5,t=audioCtx.createBuffer(1,e,audioCtx.sampleRate),o=t.getChannelData(0);for(let n=0;n<e;n++)o[n]=2*Math.random()-1*Math.pow(1-n/e,2);const n=audioCtx.createBufferSource();n.buffer=t;const a=audioCtx.createBiquadFilter();a.type="lowpass",a.frequency.value=800;const s=audioCtx.createGain();s.gain.setValueAtTime(.4,audioCtx.currentTime),s.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.5),n.connect(a),a.connect(s),s.connect(audioCtx.destination),n.start()}
-function playCashoutSound(){[1046,1318,1568].forEach((e,t)=>{const o=audioCtx.createOscillator(),n=audioCtx.createGain();o.connect(n),n.connect(audioCtx.destination),o.type="triangle",o.frequency.value=e,n.gain.setValueAtTime(0,audioCtx.currentTime+.08*t),n.gain.linearRampToValueAtTime(.25,audioCtx.currentTime+.08*t+.03),n.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.08*t+.25),o.start(audioCtx.currentTime+.08*t),o.stop(audioCtx.currentTime+.08*t+.25)})}
-let pathPoints=[];
-function drawGraph(){const e=canvas.offsetWidth,t=canvas.offsetHeight;ctx.clearRect(0,0,e,t),ctx.strokeStyle="rgba(139,185,255,0.08)",ctx.lineWidth=1;for(let o=0;o<e;o+=40)ctx.beginPath(),ctx.moveTo(o,0),ctx.lineTo(o,t),ctx.stroke();for(let o=0;o<t;o+=40)ctx.beginPath(),ctx.moveTo(0,o),ctx.lineTo(e,o),ctx.stroke();if(pathPoints.length>1){const o=ctx.createLinearGradient(0,0,e,0);o.addColorStop(0,"rgba(139,185,255,0.2)"),o.addColorStop(1,isCrashed?"#ff3b3b":"#8bb9ff"),ctx.strokeStyle=o,ctx.lineWidth=4,ctx.shadowBlur=20,ctx.shadowColor=isCrashed?"#ff3b3b":"#8bb9ff",ctx.lineCap="round",ctx.lineJoin="round",ctx.beginPath(),ctx.moveTo(pathPoints[0].x,pathPoints[0].y);for(let e=1;e<pathPoints.length;e++){const t=(pathPoints[e].x+pathPoints[e-1].x)/2,o=(pathPoints[e].y+pathPoints[e-1].y)/2;ctx.quadraticCurveTo(pathPoints[e-1].x,pathPoints[e-1].y,t,o)}ctx.stroke(),ctx.shadowBlur=0}}
-function updatePlane(){const e=canvas.offsetWidth;if(pathPoints.length>0){const t=pathPoints[pathPoints.length-1];planeEl.style.left=t.x-20+"px",planeEl.style.top=t.y-20+"px";if(pathPoints.length>1){const e=pathPoints[pathPoints.length-2],o=Math.atan2(t.y-e.y,t.x-e.x);planeEl.style.transform=`rotate(${o}rad)`}}}
-function generateCrashPoint(){const e=Math.random();return e<.02?1:e<.1?1.01+.5*Math.random():Math.max(1,.99/(1-e)*.99)}
-function startGame(){const e=parseInt(betAmountEl.value);if(e<10||e>coins)return void Swal.fire({title:"Invalid Bet",text:`Min 10, Max ${coins}`,icon:"error",background:"#0b0f1e",color:"#e0f7ff",confirmButtonColor:"#8bb9ff"});audioCtx.state==="suspended"&&audioCtx.resume(),coins-=e,currentBet=e,balanceEl.innerText=coins,isPlaying=!0,isCrashed=!1,hasCashedOut=!1,currentMultiplier=1,crashPoint=generateCrashPoint(),pathPoints=[{x:0,y:canvas.offsetHeight-20}],betBtn.disabled=!0,cashoutBtn.disabled=!1,betAmountEl.disabled=!0,autoCashoutEl.disabled=!0,multiplierEl.classList.add("flying"),multiplierEl.classList.remove("crashed"),planeEl.classList.add("flying"),planeEl.classList.remove("crashed"),statusEl.innerText="TAKING OFF...",statusEl.style.color="#8bb9ff",startEngineSound();let t=Date.now();gameInterval=setInterval(()=>{const o=(Date.now()-t)/1e3;currentMultiplier=1+.12*Math.pow(o,1.85);const n=Math.min(70*o,canvas.offsetWidth-30),a=canvas.offsetHeight-20-80*Math.pow(currentMultiplier-1,.7);pathPoints.push({x:n,y:a}),drawGraph(),updatePlane(),updateEngineSound(),multiplierEl.innerText=currentMultiplier.toFixed(2)+"x";const s=parseFloat(autoCashoutEl.value);!hasCashedOut&&s>=1.01&&currentMultiplier>=s&&cashOut(),currentMultiplier>=crashPoint&&crash()},50)}
-function cashOut(){if(isPlaying&&!hasCashedOut&&!isCrashed){hasCashedOut=!0;const e=Math.floor(currentBet*currentMultiplier);coins+=e,balanceEl.innerText=coins,lastWinEl.innerText=e,playCashoutSound(),statusEl.innerText=`CASHED OUT ${currentMultiplier.toFixed(2)}x!`,statusEl.style.color="#00ff88",cashoutBtn.disabled=!0,planeEl.classList.remove("flying"),addHistory(currentMultiplier,!0)}}
-function crash(){clearInterval(gameInterval),stopEngineSound(),isPlaying=!1,isCrashed=!0,playCrashSound(),multiplierEl.classList.remove("flying"),multiplierEl.classList.add("crashed"),planeEl.classList.remove("flying"),planeEl.classList.add("crashed"),statusEl.innerText=`CRASHED AT ${crashPoint.toFixed(2)}x`,statusEl.style.color="#ff3b3b",betBtn.disabled=!1,cashoutBtn.disabled=!0,betAmountEl.disabled=!1,autoCashoutEl.disabled=!1,hasCashedOut||(lastWinEl.innerText=0,addHistory(crashPoint,!1)),setTimeout(()=>{statusEl.innerText="PLACE YOUR BET",statusEl.style.color="#8bb9ff",multiplierEl.classList.remove("crashed"),planeEl.classList.remove("crashed"),planeEl.style.left="0px",planeEl.style.top=canvas.offsetHeight-20+"px",planeEl.style.transform="rotate(0deg)",pathPoints=[],drawGraph()},3500)}
-function addHistory(e,t){const o=document.createElement("div");o.className=`history-item ${t?"win":"lose"}`,o.innerText=e.toFixed(2)+"x",historyEl.insertBefore(o,historyEl.firstChild),historyEl.children.length>10&&historyEl.removeChild(historyEl.lastChild)}
-betBtn.onclick=startGame,cashoutBtn.onclick=cashOut,planeEl.style.left="0px",planeEl.style.top=canvas.offsetHeight-20+"px",drawGraph();
+let coins=3000,bet1=0,bet2=0,isFlying=!1,isCrashed=!1,mult=1,crashPt=0,hasCashed1=!1,hasCashed2=!1,betPlaced1=!1,betPlaced2=!1;
+const balEl=document.getElementById("bal"),multEl=document.getElementById("mult"),planeEl=document.getElementById("plane"),historyEl=document.getElementById("history"),canvas=document.getElementById("graph"),ctx=canvas.getContext("2d"),betBtn=document.getElementById("betBtn"),betBtn2=document.getElementById("betBtn2"),amtEl=document.getElementById("amt"),amtEl2=document.getElementById("amt2");
+function resize(){canvas.width=2*canvas.offsetWidth,canvas.height=2*canvas.offsetHeight,ctx.scale(2,2)}
+resize(),window.addEventListener("resize",resize);
+const audioCtx=new(window.AudioContext||window.webkitAudioContext);let engineSnd;
+function startEngine(){engineSnd=audioCtx.createOscillator();const e=audioCtx.createGain(),t=audioCtx.createBiquadFilter();engineSnd.connect(t),t.connect(e),e.connect(audioCtx.destination),engineSnd.type="sawtooth",engineSnd.frequency.value=80,t.type="lowpass",t.frequency.value=400,e.gain.setValueAtTime(.04,audioCtx.currentTime),engineSnd.start()}
+function updateEngine(){engineSnd&&engineSnd.frequency.exponentialRampToValueAtTime(80+25*mult,audioCtx.currentTime+.1)}
+function stopEngine(){engineSnd&&(engineSnd.stop(),engineSnd=null)}
+function playCrash(){const e=audioCtx.sampleRate*.6,t=audioCtx.createBuffer(1,e,audioCtx.sampleRate),o=t.getChannelData(0);for(let n=0;n<e;n++)o[n]=2*Math.random()-1*Math.pow(1-n/e,2);const n=audioCtx.createBufferSource();n.buffer=t;const a=audioCtx.createBiquadFilter();a.type="lowpass",a.frequency.value=600;const s=audioCtx.createGain();s.gain.setValueAtTime(.5,audioCtx.currentTime),s.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.6),n.connect(a),a.connect(s),s.connect(audioCtx.destination),n.start()}
+function playCash(){[1046,1318,1568,2093].forEach((e,t)=>{const o=audioCtx.createOscillator(),n=audioCtx.createGain();o.connect(n),n.connect(audioCtx.destination),o.type="triangle",o.frequency.value=e,n.gain.setValueAtTime(0,audioCtx.currentTime+.06*t),n.gain.linearRampToValueAtTime(.3,audioCtx.currentTime+.06*t+.02),n.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.06*t+.2),o.start(audioCtx.currentTime+.06*t),o.stop(audioCtx.currentTime+.06*t+.2)})}
+let pathPts=[];
+function draw(){const e=canvas.offsetWidth,t=canvas.offsetHeight;ctx.clearRect(0,0,e,t);if(pathPts.length>1){const o=ctx.createLinearGradient(0,t,e,0);o.addColorStop(0,"rgba(139,185,255,0.3)"),o.addColorStop(1,isCrashed?"#ff3b3b":"#8bb9ff"),ctx.strokeStyle=o,ctx.lineWidth=5,ctx.shadowBlur=25,ctx.shadowColor=isCrashed?"#ff3b3b":"#8bb9ff",ctx.lineCap="round",ctx.lineJoin="round",ctx.beginPath(),ctx.moveTo(pathPts[0].x,pathPts[0].y);for(let e=1;e<pathPts.length;e++){const t=(pathPts[e].x+pathPts[e-1].x)/2,o=(pathPoints[e].y+pathPts[e-1].y)/2;ctx.quadraticCurveTo(pathPts[e-1].x,pathPts[e-1].y,t,o)}ctx.stroke(),ctx.shadowBlur=0}}
+function updatePlane(){if(pathPts.length>0){const e=pathPts[pathPts.length-1];planeEl.style.left=e.x-22+"px",planeEl.style.top=e.y-22+"px";if(pathPts.length>1){const t=pathPts[pathPts.length-2],o=Math.atan2(e.y-t.y,e.x-t.x);planeEl.style.transform=`rotate(${o}rad)`}}}
+function genCrash(){const e=Math.random();return e<.03?1:e<.15?1+1.5*Math.random():Math.max(1,.98/(1-e)*.99)}
+function startRound(){if(isFlying)return;isFlying=!0,isCrashed=!1,mult=1,crashPt=genCrash(),pathPts=[{x:0,y:canvas.offsetHeight-30}],hasCashed1=!1,hasCashed2=!1,multEl.classList.add("flying"),multEl.classList.remove("crashed"),planeEl.classList.add("flying"),planeEl.classList.remove("crashed"),audioCtx.state==="suspended"&&audioCtx.resume(),startEngine();let e=Date.now();let interval=setInterval(()=>{if(!isFlying){clearInterval(interval);return}const t=(Date.now()-e)/1e3;mult=1+.15*Math.pow(t,1.9);const o=Math.min(80*t,canvas.offsetWidth-40),n=canvas.offsetHeight-30-90*Math.pow(mult-1,.75);pathPts.push({x:o,y:n}),draw(),updatePlane(),updateEngine(),multEl.innerText=mult.toFixed(2)+"x",mult>=crashPt&&doCrash()},50)}
+function doCrash(){isFlying=!1,isCrashed=!0,stopEngine(),playCrash(),multEl.classList.remove("flying"),multEl.classList.add("crashed"),planeEl.classList.remove("flying"),planeEl.classList.add("crashed"),addHist(crashPt),betPlaced1&&(betBtn.innerText="Bet",betBtn.classList.remove("cancel"),betPlaced1=!1),betPlaced2&&(betBtn2.innerText="Bet",betBtn2.classList.remove("cancel"),betPlaced2=!1),setTimeout(()=>{multEl.classList.remove("crashed"),planeEl.classList.remove("crashed"),planeEl.style.left="0px",planeEl.style.top=canvas.offsetHeight-30+"px",planeEl.style.transform="rotate(0deg)",pathPts=[],draw(),setTimeout(startRound,2000)},3000)}
+function placeBet(){if(!betPlaced1){const e=parseFloat(amtEl.value);if(e>coins)return Swal.fire({title:"No Coins",icon:"error",background:"#0b0f1e",color:"#e0f7ff"});coins-=e,bet1=e,balEl.innerText=coins.toFixed(2),betPlaced1=!0,betBtn.innerText="Cash Out",betBtn.classList.add("cancel"),isFlying||startRound()}else if(isFlying&&!hasCashed1){hasCashed1=!0;const e=bet1*mult;coins+=e,balEl.innerText=coins.toFixed(2),playCash(),betBtn.innerText="Bet",betBtn.classList.remove("cancel"),betPlaced1=!1,Swal.fire({title:`Won ${e.toFixed(2)} COINS!`,text:`${mult.toFixed(2)}x`,icon:"success",background:"#0b0f1e",color:"#00ff88",timer:1500,showConfirmButton:!1})}}
+function placeBet2(){if(!betPlaced2){const e=parseFloat(amtEl2.value);if(e>coins)return Swal.fire({title:"No Coins",icon:"error",background:"#0b0f1e",color:"#e0f7ff"});coins-=e,bet2=e,balEl.innerText=coins.toFixed(2),betPlaced2=!0,betBtn2.innerText="Cash Out",betBtn2.classList.add("cancel"),isFlying||startRound()}else if(isFlying&&!hasCashed2){hasCashed2=!0;const e=bet2*mult;coins+=e,balEl.innerText=coins.toFixed(2),playCash(),betBtn2.innerText="Bet",betBtn2.classList.remove("cancel"),betPlaced2=!1,Swal.fire({title:`Won ${e.toFixed(2)} COINS!`,text:`${mult.toFixed(2)}x`,icon:"success",background:"#0b0f1e",color:"#00ff88",timer:1500,showConfirmButton:!1})}}
+function addHist(e){const t=document.createElement("div");t.className="hist-item "+(e>=2?"purple":e>=1.2?"blue":"red"),t.innerText=e.toFixed(2)+"x",historyEl.insertBefore(t,historyEl.firstChild),historyEl.children.length>15&&historyEl.removeChild(historyEl.lastChild)}
+function changeAmt(e){amtEl.value=Math.max(.5,parseFloat(amtEl.value)+e).toFixed(2),document.getElementById("betAmt").innerText=amtEl.value+" COINS"}
+function setAmt(e){amtEl.value=e.toFixed(2),document.getElementById("betAmt").innerText=amtEl.value+" COINS"}
+function changeAmt2(e){amtEl2.value=Math.max(.5,parseFloat(amtEl2.value)+e).toFixed(2),document.getElementById("betAmt2").innerText=amtEl2.value+" COINS"}
+function setAmt2(e){amtEl2.value=e.toFixed(2),document.getElementById("betAmt2").innerText=amtEl2.value+" COINS"}
+planeEl.style.left="0px",planeEl.style.top=canvas.offsetHeight-30+"px",draw(),[1.2,1.15,1.96,2.2,1.25,1.05,4.74,11.59].forEach(e=>addHist(e)),setTimeout(startRound,1000);
 </script>
 </body>
 </html>
