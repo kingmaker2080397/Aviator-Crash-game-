@@ -7,12 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { 
+    body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh; padding: 20px; 
+      min-height: 100vh; padding: 20px;
     }
-    .container { max-width: 1200px; margin: auto; }
-    .glass {
+   .container { max-width: 1200px; margin: auto; }
+   .glass {
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 20px;
@@ -23,39 +23,39 @@
     h2, h3 { color: white; margin-bottom: 15px; font-weight: 600; }
     h2 { font-size: 28px; text-align: center; }
     input, textarea {
-      width: 100%; padding: 12px 15px; margin: 8px 0; 
+      width: 100%; padding: 12px 15px; margin: 8px 0;
       background: rgba(255, 255, 255, 0.2); border: none; border-radius: 10px;
       color: white; font-size: 14px; outline: none;
     }
     input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.7); }
-    .btn {
-      background: rgba(255, 61, 0, 0.8); color: white; border: none; 
-      padding: 12px 25px; border-radius: 10px; cursor: pointer; 
+   .btn {
+      background: rgba(255, 61, 0, 0.8); color: white; border: none;
+      padding: 12px 25px; border-radius: 10px; cursor: pointer;
       font-weight: 500; transition: 0.3s;
     }
-    .btn:hover { background: rgba(255, 61, 0, 1); transform: translateY(-2px); }
-    .btn-delete { background: rgba(211, 47, 47, 0.8); }
-    .btn-delivered { background: rgba(76, 175, 80, 0.8); }
+   .btn:hover { background: rgba(255, 61, 0, 1); transform: translateY(-2px); }
+   .btn-delete { background: rgba(211, 47, 47, 0.8); }
+   .btn-delivered { background: rgba(76, 175, 80, 0.8); }
     #status { margin: 15px 0; font-weight: 500; color: #fff; }
-    .item { 
-      background: rgba(255, 255, 255, 0.15); padding: 15px; margin: 10px 0; 
+   .item {
+      background: rgba(255, 255, 255, 0.15); padding: 15px; margin: 10px 0;
       border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
       color: white;
     }
-    .item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
-    .order-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .order-details { font-size: 13px; opacity: 0.9; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-    .tab-btn { 
+   .item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
+   .order-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+   .order-details { font-size: 13px; opacity: 0.9; }
+   .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+   .tab-btn {
       background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
       color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer;
     }
-    .tab-btn.active { background: rgba(255, 255, 255, 0.3); }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-    .badge-pending { background: #FF9800; }
-    .badge-delivered { background: #4CAF50; }
+   .tab-btn.active { background: rgba(255, 255, 255, 0.3); }
+   .tab-content { display: none; }
+   .tab-content.active { display: block; }
+   .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+   .badge-pending { background: #FF9800; }.badge-packed { background: #2196F3; }
+   .badge-shipped { background: #9C27B0; }.badge-delivered { background: #4CAF50; }
   </style>
 </head>
 <body>
@@ -76,6 +76,7 @@
           <h3>Add New Product</h3>
           <input type="text" id="title" placeholder="Product Title">
           <input type="number" id="price" placeholder="Price Rs.">
+          <input type="number" id="stock" placeholder="Stock Quantity - Kitne piece hain">
           <input type="text" id="imageUrl" placeholder="Image URL">
           <textarea id="desc" rows="2" placeholder="Description"></textarea>
           <button class="btn" onclick="addProduct()">Add Product to Store</button>
@@ -134,20 +135,22 @@
     window.addProduct = async () => {
       const title = document.getElementById('title').value;
       const price = Number(document.getElementById('price').value);
+      const stock = Number(document.getElementById('stock').value) || 0;
       const imageUrl = document.getElementById('imageUrl').value;
       const desc = document.getElementById('desc').value;
       const statusEl = document.getElementById('status');
 
-      if (!title || !price || !imageUrl) {
+      if (!title ||!price ||!imageUrl) {
         statusEl.innerText = "Title, Price aur Image URL zaroori hai!";
         return;
       }
 
       try {
-        await addDoc(collection(db, "products"), { title, price, imageUrl, desc, createdAt: serverTimestamp() });
+        await addDoc(collection(db, "products"), { title, price, stock, imageUrl, desc, createdAt: serverTimestamp() });
         statusEl.innerText = "Product added successfully! ✅";
         document.getElementById('title').value = '';
         document.getElementById('price').value = '';
+        document.getElementById('stock').value = '';
         document.getElementById('imageUrl').value = '';
         document.getElementById('desc').value = '';
         loadProducts();
@@ -170,7 +173,7 @@
           <div class="item">
             <div style="display:flex; align-items:center;">
               <img src="${p.imageUrl}" alt="${p.title}">
-              <div><b>${p.title}</b><br>Rs. ${p.price}</div>
+              <div><b>${p.title}</b><br>Rs. ${p.price} | Stock: ${p.stock || 0}</div>
             </div>
             <button class="btn btn-delete" onclick="deleteProduct('${docSnap.id}')">Delete</button>
           </div>
@@ -197,10 +200,13 @@
       }
       querySnapshot.forEach((docSnap) => {
         const o = docSnap.data();
-        const date = o.orderedAt ? new Date(o.orderedAt.seconds * 1000).toLocaleString() : 'N/A';
+        const date = o.orderedAt? new Date(o.orderedAt.seconds * 1000).toLocaleString() : 'N/A';
         const products = o.products.map(p => `${p.productTitle} x${p.qty || 1}`).join(', ');
-        const statusClass = o.status.includes('Delivered') ? 'badge-delivered' : 'badge-pending';
-        
+        let statusClass = 'badge-pending';
+        if(o.status.includes('Packed')) statusClass = 'badge-packed';
+        if(o.status.includes('Shipped')) statusClass = 'badge-shipped';
+        if(o.status.includes('Delivered')) statusClass = 'badge-delivered';
+
         listDiv.innerHTML += `
           <div class="item order-item">
             <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
@@ -208,8 +214,14 @@
                 <b>${o.customerName}</b> - Rs. ${o.totalAmount}
                 <span class="badge ${statusClass}">${o.status}</span>
               </div>
-              ${!o.status.includes('Delivered') ? `<button class="btn btn-delivered" onclick="markDelivered('${docSnap.id}')">Mark Delivered</button>` : ''}
-            </div>
+              <div>
+                <select onchange="updateStatus('${docSnap.id}', this.value)" style="padding:5px;border-radius:5px;">
+                  <option value="Pending">Pending</option>
+                  <option value="Packed">Packed</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered">Delivered</option>
+                </select>
+              </div>
             <div class="order-details">
               📱 ${o.customerPhone} | 💳 ${o.paymentMethod || 'COD'}<br>
               📍 ${o.customerAddress}<br>
@@ -221,10 +233,10 @@
       });
     }
 
-    window.markDelivered = async (id) => {
-      await updateDoc(doc(db, "orders", id), { status: "Delivered" });
+    window.updateStatus = async (id, status) => {
+      await updateDoc(doc(db, "orders", id), { status: status });
       loadOrders();
     };
   </script>
 </body>
-                                                                   </html>
+  </html>
