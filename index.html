@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golden Scatter - Realtime</title>
+    <title>Demo Golden Scatter</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -31,7 +31,7 @@
             text-shadow: 0 0 20px var(--gold-glow);
             margin-bottom: 20px;
         }
-       .machine-body {
+      .machine-body {
             background: var(--glass);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -42,7 +42,7 @@
             padding: 25px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.37), inset 0 1px 0 rgba(255,255,255,0.1);
         }
-       .stats {
+      .stats {
             background: rgba(0,0,0,0.3);
             padding: 15px;
             border-radius: 16px;
@@ -52,7 +52,7 @@
             justify-content: space-between;
             font-weight: 600;
         }
-       .screen {
+      .screen {
             background: rgba(0,0,0,0.4);
             display: flex;
             justify-content: space-around;
@@ -62,7 +62,7 @@
             border: 1px solid var(--glass-border);
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
         }
-       .slot {
+      .slot {
             font-size: 3.5rem;
             font-weight: 700;
             color: #fff;
@@ -71,18 +71,26 @@
             line-height: 95px;
             background: rgba(255,255,255,0.05);
             border-radius: 12px;
-            transition: 0.2s;
             border: 1px solid rgba(255,255,255,0.1);
             text-shadow: 0 0 15px rgba(255,255,255,0.5);
+            transition: transform 0.1s ease;
         }
-       .slot.win {
+      .slot.spinning {
+            animation: spinBlur 0.1s linear infinite;
+        }
+        @keyframes spinBlur {
+            0% { transform: translateY(-5px); filter: blur(2px); }
+            50% { transform: translateY(5px); filter: blur(2px); }
+            100% { transform: translateY(-5px); filter: blur(2px); }
+        }
+      .slot.win {
             animation: glow 0.8s ease-in-out infinite alternate;
         }
         @keyframes glow {
-            from { box-shadow: 0 0 10px var(--gold); }
-            to { box-shadow: 0 0 25px var(--gold), 0 0 40px var(--gold-glow); }
+            from { box-shadow: 0 0 10px var(--gold); transform: scale(1); }
+            to { box-shadow: 0 0 25px var(--gold), 0 0 40px var(--gold-glow); transform: scale(1.05); }
         }
-       .btn-spin {
+      .btn-spin {
             background: linear-gradient(135deg, #ffd700, #ffae00);
             border: none;
             padding: 16px 50px;
@@ -95,25 +103,34 @@
             color: #000;
             transition: all 0.2s ease;
         }
-       .btn-spin:active:not(:disabled) {
+      .btn-spin:active:not(:disabled) {
             transform: translateY(2px);
             box-shadow: 0 2px 10px rgba(255, 174, 0, 0.4);
         }
-       .btn-spin:disabled {
+      .btn-spin:disabled {
             opacity: 0.4;
             cursor: not-allowed;
             filter: grayscale(1);
         }
+      .demo-badge {
+            background: rgba(255,0,0,0.3);
+            border: 1px solid red;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
-
     <div>
+        <div class="demo-badge">DEMO MODE - NO REAL MONEY</div>
         <h2>🎰 GOLDEN SCATTER 🎰</h2>
 
         <div class="machine-body">
             <div class="stats">
-                <div>Balance: <b id="balance">0</b> PKR</div>
+                <div>Coins: <b id="balance">1000</b></div>
                 <div style="color: var(--gold);">Win: <span id="last-win">0</span></div>
             </div>
 
@@ -123,85 +140,97 @@
                 <div id="s3" class="slot">❓</div>
             </div>
 
-            <button class="btn-spin" id="spinBtn">SPIN (50 PKR)</button>
+            <button class="btn-spin" id="spinBtn">SPIN (50 Coins)</button>
         </div>
     </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, onValue, get, update, set, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-        authDomain: "kingmaker-crash.firebaseapp.com",
-        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-        projectId: "kingmaker-crash",
-        storageBucket: "kingmaker-crash.firebasestorage.app",
-        messagingSenderId: "327400668393",
-        appId: "1:327400668393:web:0d02a340b9f5603f524478"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    let currentBal = 0;
+<script>
+    let coins = 1000;
     const slots = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+    const spinBtn = document.getElementById('spinBtn');
+    const balanceEl = document.getElementById('balance');
+    const lastWinEl = document.getElementById('last-win');
 
-    onAuthStateChanged(auth, user => {
-        if(user) {
-            onValue(ref(db, `users/${user.uid}/balance`), s => {
-                currentBal = s.val() || 0;
-                document.getElementById('balance').innerText = currentBal;
-            });
-        } else {
-            Swal.fire("Login Required", "Please login to play", "warning");
-        }
-    });
+    // Sound effects using Web Audio API - no external files needed
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    document.getElementById('spinBtn').onclick = async function() {
-        if (!auth.currentUser) return Swal.fire("Error", "Pehle login karo!", "error");
-        if (currentBal < 50) return Swal.fire("Error", "Paisa khatam!", "error");
+    function playTick() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 800;
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
 
+    function playWin() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C5
+        osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1); // E5
+        osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.2); // G5
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.5);
+    }
+
+    spinBtn.onclick = function() {
+        if (coins < 50) return Swal.fire("Oops", "Coins khatam ho gaye! Page refresh karo.", "error");
+
+        coins -= 50;
+        balanceEl.innerText = coins;
         this.disabled = true;
         this.innerText = "SPINNING...";
-        slots.forEach(s => s.classList.remove('win'));
+        slots.forEach(s => {
+            s.classList.remove('win');
+            s.classList.add('spinning');
+        });
 
-        const nextResultSnap = await get(ref(db, 'admin/slot_result'));
-        let finalIcons;
-
-        if(nextResultSnap.exists() && nextResultSnap.val() === "WIN") {
-            finalIcons = ["7", "7", "7"];
-            await set(ref(db, 'admin/slot_result'), null);
-        } else {
-            finalIcons = [Math.floor(Math.random()*9), Math.floor(Math.random()*9), Math.floor(Math.random()*9)];
-            if(finalIcons[0] == finalIcons[1] && finalIcons[1] == finalIcons[2]) finalIcons[2] = (finalIcons[2] + 1) % 9;
-        }
-
-        await update(ref(db, `users/${auth.currentUser.uid}`), { balance: currentBal - 50 });
-
+        // Spinning sound + animation
+        let ticks = 0;
         let timer = setInterval(() => {
-            slots.forEach(s => s.innerText = Math.floor(Math.random()*9));
+            slots.forEach(s => s.innerText = Math.floor(Math.random()*10));
+            playTick();
+            ticks++;
+            if(ticks > 25) clearInterval(timer);
         }, 80);
 
-        setTimeout(async () => {
+        setTimeout(() => {
             clearInterval(timer);
+            slots.forEach(s => s.classList.remove('spinning'));
+
+            // Random result - no rigging
+            const finalIcons = [
+                Math.floor(Math.random()*10),
+                Math.floor(Math.random()*10),
+                Math.floor(Math.random()*10)
+            ];
+
             slots[0].innerText = finalIcons[0];
             slots[1].innerText = finalIcons[1];
             slots[2].innerText = finalIcons[2];
 
             if(finalIcons[0] == finalIcons[1] && finalIcons[1] == finalIcons[2]) {
                 let winAmt = 500;
+                coins += winAmt;
+                balanceEl.innerText = coins;
+                lastWinEl.innerText = winAmt;
                 slots.forEach(s => s.classList.add('win'));
-                document.getElementById('last-win').innerText = winAmt;
-                Swal.fire("JACKPOT!", `Aap Rs.${winAmt} Jeet Gaye!`, "success");
-                push(ref(db, 'requests'), { uid: auth.currentUser.uid, email: auth.currentUser.email, amount: winAmt, status: 'pending', type: 'Slot Win' });
+                playWin();
+                Swal.fire("JACKPOT!", `You won ${winAmt} coins!`, "success");
             } else {
-                document.getElementById('last-win').innerText = "0";
+                lastWinEl.innerText = "0";
             }
-            this.disabled = false;
-            this.innerText = "SPIN (50 PKR)";
+
+            spinBtn.disabled = false;
+            spinBtn.innerText = "SPIN (50 Coins)";
         }, 2500);
     };
 </script>
