@@ -3,144 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo Golden Scatter</title>
+    <title>Glass Moon Scatter - Demo</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold: #ffd700;
-            --gold-glow: rgba(255, 215, 0, 0.4);
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.18);
+            --moon-glow: #e0f7ff;
+            --moon-blue: #8bb9ff;
+            --glass: rgba(200, 220, 255, 0.06);
+            --glass-border: rgba(200, 220, 255, 0.15);
+            --dark-space: #0b0f1e;
         }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: #0a0e1a url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070') center/cover fixed;
+            background: radial-gradient(ellipse at top, #1a2040 0%, var(--dark-space) 50%, #000 100%),
+                        url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071') center/cover fixed;
             color: white;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Outfit', sans-serif;
             text-align: center;
-            margin: 0;
-            padding: 20px;
             min-height: 100vh;
             display: grid;
             place-items: center;
+            padding: 20px;
+            overflow: hidden;
         }
+
+        /* Moon glow effect in background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 185, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+        }
+
+       .container {
+            position: relative;
+            z-index: 1;
+        }
+
         h2 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
-            text-shadow: 0 0 20px var(--gold-glow);
-            margin-bottom: 20px;
+            text-shadow: 0 0 30px var(--moon-glow), 0 0 60px var(--moon-blue);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
         }
-      .machine-body {
+
+       .demo-badge {
+            background: rgba(139, 185, 255, 0.15);
+            border: 1px solid var(--moon-blue);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            color: var(--moon-glow);
+        }
+
+     .machine-body {
             background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            width: 340px;
+            border-radius: 28px;
+            width: 350px;
             margin: 0 auto;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.37), inset 0 1px 0 rgba(255,255,255,0.1);
+            padding: 30px 25px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.5),
+                        inset 0 1px 0 rgba(255,255,255,0.1),
+                        0 0 60px rgba(139, 185, 255, 0.1);
         }
-      .stats {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 16px;
-            margin-bottom: 20px;
+     .stats {
+            background: rgba(11, 15, 30, 0.6);
+            padding: 16px 20px;
+            border-radius: 18px;
+            margin-bottom: 24px;
             border: 1px solid var(--glass-border);
             display: flex;
             justify-content: space-between;
             font-weight: 600;
+            font-size: 0.95rem;
         }
-      .screen {
-            background: rgba(0,0,0,0.4);
+     .stats b { color: var(--moon-glow); text-shadow: 0 0 10px var(--moon-blue); }
+
+     .screen {
+            background: rgba(11, 15, 30, 0.7);
             display: flex;
             justify-content: space-around;
-            padding: 25px 15px;
-            border-radius: 16px;
-            margin-bottom: 25px;
+            padding: 28px 18px;
+            border-radius: 20px;
+            margin-bottom: 28px;
             border: 1px solid var(--glass-border);
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+            box-shadow: inset 0 2px 15px rgba(0,0,0,0.6);
+            position: relative;
         }
-      .slot {
-            font-size: 3.5rem;
+
+        /* Moon ring around screen */
+       .screen::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 20px;
+            padding: 2px;
+            background: linear-gradient(135deg, transparent, var(--moon-blue), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.3;
+        }
+
+     .slot {
+            font-size: 3.8rem;
             font-weight: 700;
-            color: #fff;
-            width: 75px;
-            height: 95px;
-            line-height: 95px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            text-shadow: 0 0 15px rgba(255,255,255,0.5);
+            color: var(--moon-glow);
+            width: 78px;
+            height: 100px;
+            line-height: 100px;
+            background: rgba(200, 220, 255, 0.04);
+            border-radius: 14px;
+            border: 1px solid rgba(139, 185, 255, 0.2);
+            text-shadow: 0 0 20px var(--moon-blue), 0 0 40px rgba(139, 185, 255, 0.4);
             transition: transform 0.1s ease;
         }
-      .slot.spinning {
-            animation: spinBlur 0.1s linear infinite;
+     .slot.spinning {
+            animation: moonSpin 0.08s linear infinite;
         }
-        @keyframes spinBlur {
-            0% { transform: translateY(-5px); filter: blur(2px); }
-            50% { transform: translateY(5px); filter: blur(2px); }
-            100% { transform: translateY(-5px); filter: blur(2px); }
+        @keyframes moonSpin {
+            0% { transform: translateY(-8px) rotateX(20deg); filter: blur(3px); }
+            50% { transform: translateY(8px) rotateX(-20deg); filter: blur(3px); }
+            100% { transform: translateY(-8px) rotateX(20deg); filter: blur(3px); }
         }
-      .slot.win {
-            animation: glow 0.8s ease-in-out infinite alternate;
+     .slot.win {
+            animation: moonGlow 0.7s ease-in-out infinite alternate;
         }
-        @keyframes glow {
-            from { box-shadow: 0 0 10px var(--gold); transform: scale(1); }
-            to { box-shadow: 0 0 25px var(--gold), 0 0 40px var(--gold-glow); transform: scale(1.05); }
+        @keyframes moonGlow {
+            from {
+                box-shadow: 0 0 15px var(--moon-blue), inset 0 0 15px rgba(139, 185, 255, 0.2);
+                transform: scale(1);
+            }
+            to {
+                box-shadow: 0 0 35px var(--moon-blue), 0 0 60px var(--moon-glow), inset 0 0 25px rgba(139, 185, 255, 0.3);
+                transform: scale(1.08);
+            }
         }
-      .btn-spin {
-            background: linear-gradient(135deg, #ffd700, #ffae00);
+     .btn-spin {
+            background: linear-gradient(135deg, var(--moon-glow), var(--moon-blue));
             border: none;
-            padding: 16px 50px;
-            font-size: 1.1rem;
+            padding: 18px 50px;
+            font-size: 1.05rem;
             font-weight: 700;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(255, 174, 0, 0.4);
+            box-shadow: 0 5px 25px rgba(139, 185, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
             width: 100%;
-            color: #000;
-            transition: all 0.2s ease;
+            color: var(--dark-space);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
         }
-      .btn-spin:active:not(:disabled) {
-            transform: translateY(2px);
-            box-shadow: 0 2px 10px rgba(255, 174, 0, 0.4);
+     .btn-spin:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(139, 185, 255, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
         }
-      .btn-spin:disabled {
-            opacity: 0.4;
+     .btn-spin:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+     .btn-spin:disabled {
+            opacity: 0.3;
             cursor: not-allowed;
-            filter: grayscale(1);
-        }
-      .demo-badge {
-            background: rgba(255,0,0,0.3);
-            border: 1px solid red;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-bottom: 15px;
-            display: inline-block;
+            filter: grayscale(0.8);
         }
     </style>
 </head>
 <body>
-    <div>
-        <div class="demo-badge">DEMO MODE - NO REAL MONEY</div>
-        <h2>🎰 GOLDEN SCATTER 🎰</h2>
+    <div class="container">
+        <div class="demo-badge">🌙 GLASS MOON DEMO</div>
+        <h2>MOON SCATTER</h2>
 
         <div class="machine-body">
             <div class="stats">
                 <div>Coins: <b id="balance">1000</b></div>
-                <div style="color: var(--gold);">Win: <span id="last-win">0</span></div>
+                <div>Win: <b id="last-win">0</b></div>
             </div>
 
             <div class="screen">
-                <div id="s1" class="slot">❓</div>
-                <div id="s2" class="slot">❓</div>
-                <div id="s3" class="slot">❓</div>
+                <div id="s1" class="slot">🌙</div>
+                <div id="s2" class="slot">🌙</div>
+                <div id="s3" class="slot">🌙</div>
             </div>
 
-            <button class="btn-spin" id="spinBtn">SPIN (50 Coins)</button>
+            <button class="btn-spin" id="spinBtn">SPIN (50 COINS)</button>
         </div>
     </div>
 
@@ -150,8 +208,8 @@
     const spinBtn = document.getElementById('spinBtn');
     const balanceEl = document.getElementById('balance');
     const lastWinEl = document.getElementById('last-win');
+    const symbols = ['🌙', '⭐', '💎', '✨', '🌟', '🔮', '💫'];
 
-    // Sound effects using Web Audio API - no external files needed
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function playTick() {
@@ -159,30 +217,39 @@
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.frequency.value = 800;
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.frequency.value = 600;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
         osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.1);
+        osc.stop(audioCtx.currentTime + 0.08);
     }
 
     function playWin() {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C5
-        osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1); // E5
-        osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.2); // G5
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.5);
+        [659, 784, 988].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.15);
+            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + i * 0.15 + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.15 + 0.4);
+            osc.start(audioCtx.currentTime + i * 0.15);
+            osc.stop(audioCtx.currentTime + i * 0.15 + 0.4);
+        });
     }
 
     spinBtn.onclick = function() {
-        if (coins < 50) return Swal.fire("Oops", "Coins khatam ho gaye! Page refresh karo.", "error");
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (coins < 50) return Swal.fire({
+            title: "Coins Khatam",
+            text: "Refresh karo page",
+            icon: "error",
+            background: "#1a2040",
+            color: "#e0f7ff"
+        });
 
         coins -= 50;
         balanceEl.innerText = coins;
@@ -193,24 +260,22 @@
             s.classList.add('spinning');
         });
 
-        // Spinning sound + animation
         let ticks = 0;
         let timer = setInterval(() => {
-            slots.forEach(s => s.innerText = Math.floor(Math.random()*10));
+            slots.forEach(s => s.innerText = symbols[Math.floor(Math.random() * symbols.length)]);
             playTick();
             ticks++;
-            if(ticks > 25) clearInterval(timer);
-        }, 80);
+            if(ticks > 30) clearInterval(timer);
+        }, 70);
 
         setTimeout(() => {
             clearInterval(timer);
             slots.forEach(s => s.classList.remove('spinning'));
 
-            // Random result - no rigging
             const finalIcons = [
-                Math.floor(Math.random()*10),
-                Math.floor(Math.random()*10),
-                Math.floor(Math.random()*10)
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
             ];
 
             slots[0].innerText = finalIcons[0];
@@ -224,15 +289,22 @@
                 lastWinEl.innerText = winAmt;
                 slots.forEach(s => s.classList.add('win'));
                 playWin();
-                Swal.fire("JACKPOT!", `You won ${winAmt} coins!`, "success");
+                Swal.fire({
+                    title: "🌙 MOON JACKPOT!",
+                    text: `You won ${winAmt} coins!`,
+                    icon: "success",
+                    background: "#1a2040",
+                    color: "#e0f7ff",
+                    confirmButtonColor: "#8bb9ff"
+                });
             } else {
                 lastWinEl.innerText = "0";
             }
 
             spinBtn.disabled = false;
-            spinBtn.innerText = "SPIN (50 Coins)";
-        }, 2500);
+            spinBtn.innerText = "SPIN (50 COINS)";
+        }, 2800);
     };
 </script>
 </body>
-</html>
+    </html>
