@@ -5,36 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JustCraze Admin Panel</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #fafafa; }
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #fafafa; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-    .btn { background: #0D47A1; color: white; border: none; padding: 12px 15px; cursor: pointer; border-radius: 4px; width: 100%; }
-    .btn:hover { background: #0a3a82; }
-    #status { margin-top: 15px; font-weight: bold; }
+    .btn { background: #0D47A1; color: white; border: none; padding: 12px 15px; cursor: pointer; border-radius: 4px; }
+    .btn-delete { background: #D32F2F; margin-left: 10px; }
+    .btn:hover { opacity: 0.9; }
+    #status { margin: 15px 0; font-weight: bold; }
+    .product-item { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px #ccc; display: flex; justify-content: space-between; align-items: center; }
+    .product-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 15px; }
   </style>
 </head>
 <body>
   <h2>JustCraze.pk - Admin Panel 🔐</h2>
   <div id="loginDiv">
-    <p>Products add karne ke liye login karo:</p>
     <button id="adminLoginBtn" class="btn">Login with Google</button>
   </div>
 
   <div id="adminDiv" style="display:none;">
     <h3>Add New Product</h3>
-    <input type="text" id="title" placeholder="Product Title - Jaise: Tadakta T-Shirt">
-    <input type="number" id="price" placeholder="Price Rs. - Jaise: 999">
-    <input type="text" id="imageUrl" placeholder="Image URL - Imgur ya koi direct link">
-    <textarea id="desc" rows="3" placeholder="Description"></textarea>
+    <input type="text" id="title" placeholder="Product Title">
+    <input type="number" id="price" placeholder="Price Rs.">
+    <input type="text" id="imageUrl" placeholder="Image URL">
+    <textarea id="desc" rows="2" placeholder="Description"></textarea>
     <button class="btn" onclick="addProduct()">Add Product to Store</button>
     <p id="status"></p>
+
+    <h3>All Products - Delete Karo</h3>
+    <div id="productList"><p>Loading...</p></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // TUMHARI FIREBASE CONFIG ADD KAR DI HAI
     const firebaseConfig = {
       apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
       authDomain: "kingmaker-crash.firebaseapp.com",
@@ -57,6 +61,7 @@
       if (user) {
         document.getElementById('loginDiv').style.display = 'none';
         document.getElementById('adminDiv').style.display = 'block';
+        loadProducts(); // Login ke baad products load karo
       }
     });
 
@@ -74,19 +79,48 @@
       }
 
       try {
-        await addDoc(collection(db, "products"), {
-          title, price, imageUrl, desc,
-          createdAt: serverTimestamp()
-        });
-        statusEl.innerText = "Product added successfully! ✅ Ab index.html pe check karo.";
+        await addDoc(collection(db, "products"), { title, price, imageUrl, desc, createdAt: serverTimestamp() });
+        statusEl.innerText = "Product added successfully! ✅";
         statusEl.style.color = 'green';
         document.getElementById('title').value = '';
         document.getElementById('price').value = '';
         document.getElementById('imageUrl').value = '';
         document.getElementById('desc').value = '';
+        loadProducts(); // List refresh karo
       } catch (e) {
         statusEl.innerText = "Error: " + e.message;
         statusEl.style.color = 'red';
+      }
+    };
+
+    // Products load + Delete button
+    async function loadProducts() {
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const listDiv = document.getElementById('productList');
+      listDiv.innerHTML = '';
+      if (querySnapshot.empty) {
+        listDiv.innerHTML = '<p>Koi product nahi hai abhi.</p>';
+        return;
+      }
+      querySnapshot.forEach((docSnap) => {
+        const p = docSnap.data();
+        listDiv.innerHTML += `
+          <div class="product-item">
+            <div style="display:flex; align-items:center;">
+              <img src="${p.imageUrl}" alt="${p.title}">
+              <div><b>${p.title}</b><br>Rs. ${p.price}</div>
+            </div>
+            <button class="btn btn-delete" onclick="deleteProduct('${docSnap.id}')">Delete</button>
+          </div>
+        `;
+      });
+    }
+
+    window.deleteProduct = async (id) => {
+      if (confirm("Pakka delete karna hai?")) {
+        await deleteDoc(doc(db, "products", id));
+        document.getElementById('status').innerText = "Product deleted! 🗑️";
+        loadProducts(); // List refresh
       }
     };
   </script>
