@@ -5,31 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JustCraze.pk - Tadakta Bhadakta Store 🔥</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
-    .header { background: #FF3D00; color: white; padding: 15px; text-align: center; position: sticky; top: 0; }
-    .header h1 { margin: 0; }
-    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
-    .card { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 2px 5px #ccc; }
-    .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; }
-    .btn { background: #FF3D00; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 5px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; }
+    .header { background: #FF3D00; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; }
+    .header h1 { margin: 0; font-size: 24px; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 10px auto 0; }
+    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; padding: 20px; max-width: 1200px; margin: auto; }
+    .card { background: white; border-radius: 8px; padding: 12px; box-shadow: 0 2px 5px #ccc; display: flex; flex-direction: column; }
+    .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 6px; }
+    .card h3 { margin: 10px 0 5px; font-size: 16px; }
+    .card p { margin: 0 0 10px; color: #D32F2F; font-weight: bold; font-size: 18px; }
+    .btn { background: #FF3D00; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; width: 100%; font-size: 14px; }
     .btn:hover { background: #D32F2F; }
+    .btn-cod { background: #4CAF50; }
+    .btn-cod:hover { background: #388E3C; }
+    .cart-btn { position: fixed; bottom: 20px; right: 20px; background: #0D47A1; color: white; padding: 15px 20px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold; }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>JustCraze.pk 🔥</h1>
-    <button id="loginBtn" class="btn">Login with Google</button>
-    <span id="userEmail"></span>
+    <div class="header-row">
+      <span id="userEmail">Login karo</span>
+      <button id="loginBtn" class="btn" style="width:auto; padding:8px 15px;">Login with Google</button>
+    </div>
   </div>
 
   <div id="products" class="products"><p>Loading products...</p></div>
+  
+  <div class="cart-btn" onclick="viewCart()">🛒 Cart: <span id="cartCount">0</span></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // TUMHARI FIREBASE CONFIG ADD KAR DI HAI
+    // TUMHARI FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
       authDomain: "kingmaker-crash.firebaseapp.com",
@@ -46,12 +57,14 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
+    let cart = [];
+
     document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
         document.getElementById('loginBtn').style.display = 'none';
-        document.getElementById('userEmail').innerText = `Hi, ${user.displayName}`;
+        document.getElementById('userEmail').innerText = `Hi, ${user.displayName || user.email}`;
       }
     });
 
@@ -70,12 +83,91 @@
             <img src="${p.imageUrl}" alt="${p.title}">
             <h3>${p.title}</h3>
             <p>Rs. ${p.price}</p>
-            <button class="btn" onclick="alert('Added: ${p.title}')">Add to Cart</button>
+            <button class="btn" onclick="addToCart('${doc.id}', '${p.title}', ${p.price}, '${p.imageUrl}')">Add to Cart</button>
+            <button class="btn btn-cod" onclick="orderNow('${doc.id}', '${p.title}', ${p.price})">Order Now - COD</button>
           </div>
         `;
       });
     }
     loadProducts();
+
+    window.addToCart = (id, title, price, imageUrl) => {
+      cart.push({ id, title, price, imageUrl });
+      document.getElementById('cartCount').innerText = cart.length;
+      alert(`${title} cart mein add ho gaya!`);
+    };
+
+    window.viewCart = () => {
+      if (cart.length === 0) {
+        alert("Cart khali hai!");
+        return;
+      }
+      let list = "Tumhara Cart:\n\n";
+      let total = 0;
+      cart.forEach((item, i) => {
+        list += `${i+1}. ${item.title} - Rs. ${item.price}\n`;
+        total += item.price;
+      });
+      list += `\nTotal: Rs. ${total}\n\nOrder karna hai?`;
+      if (confirm(list)) {
+        checkoutCOD();
+      }
+    };
+
+    window.orderNow = async (id, title, price) => {
+      const name = prompt("Apna naam likho:");
+      if (!name) return;
+      const phone = prompt("Phone number: 03XX-XXXXXXX");
+      if (!phone) return;
+      const address = prompt("Complete address likho:");
+      if (!address) return;
+
+      try {
+        await addDoc(collection(db, "orders"), {
+          products: [{ productId: id, productTitle: title, price, qty: 1 }],
+          totalAmount: price,
+          customerName: name, 
+          customerPhone: phone, 
+          customerAddress: address,
+          status: "Pending - COD",
+          userId: auth.currentUser ? auth.currentUser.uid : "guest",
+          orderedAt: serverTimestamp()
+        });
+        alert("Order placed! ✅ Hum 24 hours mein call karenge. Shukriya ❤️");
+      } catch (e) {
+        alert("Error: " + e.message);
+      }
+    };
+
+    window.checkoutCOD = async () => {
+      if (cart.length === 0) return;
+      const name = prompt("Apna naam likho:");
+      if (!name) return;
+      const phone = prompt("Phone number: 03XX-XXXXXXX");
+      if (!phone) return;
+      const address = prompt("Complete address likho:");
+      if (!address) return;
+
+      let total = cart.reduce((sum, item) => sum + item.price, 0);
+      
+      try {
+        await addDoc(collection(db, "orders"), {
+          products: cart,
+          totalAmount: total,
+          customerName: name, 
+          customerPhone: phone, 
+          customerAddress: address,
+          status: "Pending - COD",
+          userId: auth.currentUser ? auth.currentUser.uid : "guest",
+          orderedAt: serverTimestamp()
+        });
+        alert(`Order placed! Total: Rs. ${total} ✅ Hum call karenge.`);
+        cart = [];
+        document.getElementById('cartCount').innerText = 0;
+      } catch (e) {
+        alert("Error: " + e.message);
+      }
+    };
   </script>
 </body>
 </html>
