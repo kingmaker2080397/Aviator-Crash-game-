@@ -1,252 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Owner Dashboard - Kingmaker Control</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --gold: #ffd700;
-            --gold-glow: rgba(255, 215, 0, 0.3);
-            --glass: rgba(26, 31, 46, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --green: #2ecc71;
-            --red: #e74c3c;
-        }
-        * { box-sizing: border-box; }
-        body {
-            background: #0a0e1a url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071') center/cover fixed;
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
-        }
-       .container { max-width: 650px; margin: auto; }
-        h1 {
-            color: var(--gold);
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-weight: 700;
-            text-shadow: 0 0 20px var(--gold-glow);
-            margin-bottom: 30px;
-        }
-
-       .box {
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.37);
-        }
-        h3 {
-            margin-top: 0;
-            color: var(--gold);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
-        p { font-size: 14px; color: #bbb; margin: 5px 0 15px; }
-
-        select, input {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: 1px solid var(--glass-border);
-            font-size: 15px;
-            background: rgba(0,0,0,0.3);
-            color: white;
-            font-family: 'Poppins';
-        }
-        select:focus, input:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px var(--gold-glow);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: 'Poppins';
-        }
-        button:active { transform: scale(0.98); }
-
-       .btn-gold {
-            background: linear-gradient(135deg, #ffd700, #ffae00);
-            color: #000;
-            box-shadow: 0 4px 15px rgba(255, 174, 0, 0.3);
-        }
-       .btn-gold:hover { filter: brightness(1.1); }
-
-       .btn-win { background: var(--green); color: white; }
-       .btn-loss { background: var(--red); color: white; }
-
-       .req-item {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--glass-border);
-            border-left: 4px solid var(--gold);
-        }
-       .req-info b { color: var(--gold); font-size: 18px; display: block; }
-       .approve-btn {
-            background: var(--green);
-            color: white;
-            width: auto;
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin: 0;
-        }
-       .status-tag {
-            font-size: 11px;
-            background: rgba(255,255,255,0.1);
-            padding: 3px 8px;
-            border-radius: 6px;
-            color: #ddd;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JustCraze Admin Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background: #fafafa; }
+    input, textarea { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
+    .btn { background: #0D47A1; color: white; border: none; padding: 12px 15px; cursor: pointer; border-radius: 4px; width: 100%; }
+    .btn:hover { background: #0a3a82; }
+    #status { margin-top: 15px; font-weight: bold; }
+  </style>
 </head>
 <body>
+  <h2>JustCraze.pk - Admin Panel 🔐</h2>
+  <div id="loginDiv">
+    <p>Products add karne ke liye login karo:</p>
+    <button id="adminLoginBtn" class="btn">Login with Google</button>
+  </div>
 
-<div class="container">
-    <h1>👑 OWNER CONTROL</h1>
+  <div id="adminDiv" style="display:none;">
+    <h3>Add New Product</h3>
+    <input type="text" id="title" placeholder="Product Title - Jaise: Tadakta T-Shirt">
+    <input type="number" id="price" placeholder="Price Rs. - Jaise: 999">
+    <input type="text" id="imageUrl" placeholder="Image URL - Imgur ya koi direct link">
+    <textarea id="desc" rows="3" placeholder="Description"></textarea>
+    <button class="btn" onclick="addProduct()">Add Product to Store</button>
+    <p id="status"></p>
+  </div>
 
-    <div class="box">
-        <h3>🎯 Spin Wheel Control</h3>
-        <p>Agla user kya jeetega? Select karein:</p>
-        <select id="wheelTarget">
-            <option value="2">Rs. 2 (Safe)</option>
-            <option value="5">Rs. 5 (Safe)</option>
-            <option value="20">Rs. 20</option>
-            <option value="100">Rs. 100</option>
-            <option value="1000">Rs. 1000</option>
-            <option value="5000">Rs. 5000</option>
-        </select>
-        <button class="btn-gold" onclick="setWheelRes()">LOCK WHEEL RESULT</button>
-    </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <div class="box">
-        <h3>🎰 Slot Machine Control</h3>
-        <p>Jackpot kab dena hai?</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button class="btn-win" onclick="setSlotRes('WIN')">FORCE WIN (777)</button>
-            <button class="btn-loss" onclick="setSlotRes('LOSS')">FORCE LOSS</button>
-        </div>
-    </div>
-
-    <div class="box">
-        <h3>💳 Payment Methods</h3>
-        <input type="text" id="payNum" placeholder="EasyPaisa/JazzCash Number">
-        <button class="btn-gold" onclick="updatePayment()">UPDATE DEPOSIT NUMBER</button>
-    </div>
-
-    <div class="box">
-        <h3>📩 Pending Approvals</h3>
-        <div id="requestList">
-            <p style="text-align: center; color: #666;">Checking for new requests...</p>
-        </div>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
+    // TUMHARI FIREBASE CONFIG ADD KAR DI HAI
     const firebaseConfig = {
-        apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-        authDomain: "kingmaker-crash.firebaseapp.com",
-        databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-        projectId: "kingmaker-crash",
-        storageBucket: "kingmaker-crash.firebasestorage.app",
-        messagingSenderId: "327400668393",
-        appId: "1:327400668393:web:0d02a340b9f5603f524478"
+      apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
+      authDomain: "kingmaker-crash.firebaseapp.com",
+      databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
+      projectId: "kingmaker-crash",
+      storageBucket: "kingmaker-crash.firebasestorage.app",
+      messagingSenderId: "327400668393",
+      appId: "1:327400668393:web:0d02a340b9f5603f524478",
+      measurementId: "G-LVVD55RDQV"
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-    window.setWheelRes = () => {
-        const val = document.getElementById('wheelTarget').value;
-        set(ref(db, 'admin/next_result'), val)
-           .then(() => Swal.fire("Locked!", "Wheel par agla result Rs." + val + " aayega.", "success"));
-    };
+    document.getElementById('adminLoginBtn').onclick = () => signInWithPopup(auth, provider);
 
-    window.setSlotRes = (status) => {
-        set(ref(db, 'admin/slot_result'), status)
-           .then(() => Swal.fire("Slot Updated", "Status: " + status, "info"));
-    };
-
-    window.updatePayment = () => {
-        const num = document.getElementById('payNum').value;
-        if(!num) return Swal.fire("Error", "Number likho!", "error");
-        set(ref(db, 'admin/payment_info'), num)
-           .then(() => Swal.fire("Updated", "Payment number change ho gaya.", "success"));
-    };
-
-    onValue(ref(db, 'requests'), snap => {
-        const container = document.getElementById("requestList");
-        container.innerHTML = "";
-
-        if(!snap.exists()) {
-            container.innerHTML = "<p style='text-align:center; color:#666;'>Koi pending request nahi hai.</p>";
-            return;
-        }
-
-        let hasPending = false;
-        snap.forEach(child => {
-            const data = child.val();
-            if(data.status === 'pending') {
-                hasPending = true;
-                const item = document.createElement("div");
-                item.className = "req-item";
-                item.innerHTML = `
-                    <div class="req-info">
-                        <div>${data.email}</div>
-                        <b>Rs. ${data.amount}</b> <span class="status-tag">${data.type}</span>
-                    </div>
-                    <button class="approve-btn" onclick="approveRequest('${child.key}', '${data.uid}', ${data.amount})">APPROVE</button>
-                `;
-                container.appendChild(item);
-            }
-        });
-
-        if(!hasPending) container.innerHTML = "<p style='text-align:center; color:#666;'>Koi pending request nahi hai.</p>";
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById('loginDiv').style.display = 'none';
+        document.getElementById('adminDiv').style.display = 'block';
+      }
     });
 
-    window.approveRequest = async (id, uid, amt) => {
-        try {
-            const userRef = ref(db, `users/${uid}`);
-            const snap = await get(userRef);
-            const oldBal = snap.exists()? (snap.val().balance || 0) : 0;
+    window.addProduct = async () => {
+      const title = document.getElementById('title').value;
+      const price = Number(document.getElementById('price').value);
+      const imageUrl = document.getElementById('imageUrl').value;
+      const desc = document.getElementById('desc').value;
+      const statusEl = document.getElementById('status');
 
-            await update(ref(db, `users/${uid}`), { balance: parseFloat(oldBal) + parseFloat(amt) });
-            await update(ref(db, `requests/${id}`), { status: 'approved' });
+      if (!title || !price || !imageUrl) {
+        statusEl.innerText = "Title, Price aur Image URL zaroori hai!";
+        statusEl.style.color = 'red';
+        return;
+      }
 
-            Swal.fire("Approved!", "User ke account mein Rs." + amt + " add ho gaye.", "success");
-        } catch (e) {
-            Swal.fire("Error", e.message, "error");
-        }
+      try {
+        await addDoc(collection(db, "products"), {
+          title, price, imageUrl, desc,
+          createdAt: serverTimestamp()
+        });
+        statusEl.innerText = "Product added successfully! ✅ Ab index.html pe check karo.";
+        statusEl.style.color = 'green';
+        document.getElementById('title').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('imageUrl').value = '';
+        document.getElementById('desc').value = '';
+      } catch (e) {
+        statusEl.innerText = "Error: " + e.message;
+        statusEl.style.color = 'red';
+      }
     };
-</script>
+  </script>
 </body>
-                </html>
+</html>
