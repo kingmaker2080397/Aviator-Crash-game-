@@ -3,41 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JustCraze Admin Panel</title>
+  <title>JustCraze Admin - Pro Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #fafafa; }
-    input, textarea { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-    .btn { background: #0D47A1; color: white; border: none; padding: 12px 15px; cursor: pointer; border-radius: 4px; }
-    .btn-delete { background: #D32F2F; margin-left: 10px; }
-    .btn:hover { opacity: 0.9; }
-    #status { margin: 15px 0; font-weight: bold; }
-    .product-item { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px #ccc; display: flex; justify-content: space-between; align-items: center; }
-    .product-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; margin-right: 15px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; padding: 20px; 
+    }
+    .container { max-width: 1200px; margin: auto; }
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 25px; margin-bottom: 20px;
+    }
+    h2, h3 { color: white; margin-bottom: 15px; font-weight: 600; }
+    h2 { font-size: 28px; text-align: center; }
+    input, textarea {
+      width: 100%; padding: 12px 15px; margin: 8px 0; 
+      background: rgba(255, 255, 255, 0.2); border: none; border-radius: 10px;
+      color: white; font-size: 14px; outline: none;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.7); }
+    .btn {
+      background: rgba(255, 61, 0, 0.8); color: white; border: none; 
+      padding: 12px 25px; border-radius: 10px; cursor: pointer; 
+      font-weight: 500; transition: 0.3s;
+    }
+    .btn:hover { background: rgba(255, 61, 0, 1); transform: translateY(-2px); }
+    .btn-delete { background: rgba(211, 47, 47, 0.8); }
+    .btn-delivered { background: rgba(76, 175, 80, 0.8); }
+    #status { margin: 15px 0; font-weight: 500; color: #fff; }
+    .item { 
+      background: rgba(255, 255, 255, 0.15); padding: 15px; margin: 10px 0; 
+      border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+      color: white;
+    }
+    .item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
+    .order-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .order-details { font-size: 13px; opacity: 0.9; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn { 
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer;
+    }
+    .tab-btn.active { background: rgba(255, 255, 255, 0.3); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+    .badge-pending { background: #FF9800; }
+    .badge-delivered { background: #4CAF50; }
   </style>
 </head>
 <body>
-  <h2>JustCraze.pk - Admin Panel 🔐</h2>
-  <div id="loginDiv">
-    <button id="adminLoginBtn" class="btn">Login with Google</button>
-  </div>
+  <div class="container">
+    <div class="glass">
+      <h2>JustCraze.pk Admin Pro 🔐</h2>
+      <div id="loginDiv">
+        <button id="adminLoginBtn" class="btn">Login with Google</button>
+      </div>
 
-  <div id="adminDiv" style="display:none;">
-    <h3>Add New Product</h3>
-    <input type="text" id="title" placeholder="Product Title">
-    <input type="number" id="price" placeholder="Price Rs.">
-    <input type="text" id="imageUrl" placeholder="Image URL">
-    <textarea id="desc" rows="2" placeholder="Description"></textarea>
-    <button class="btn" onclick="addProduct()">Add Product to Store</button>
-    <p id="status"></p>
+      <div id="adminDiv" style="display:none;">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="showTab('products')">Products</button>
+          <button class="tab-btn" onclick="showTab('orders')">Orders</button>
+        </div>
 
-    <h3>All Products - Delete Karo</h3>
-    <div id="productList"><p>Loading...</p></div>
+        <div id="productsTab" class="tab-content active">
+          <h3>Add New Product</h3>
+          <input type="text" id="title" placeholder="Product Title">
+          <input type="number" id="price" placeholder="Price Rs.">
+          <input type="text" id="imageUrl" placeholder="Image URL">
+          <textarea id="desc" rows="2" placeholder="Description"></textarea>
+          <button class="btn" onclick="addProduct()">Add Product to Store</button>
+          <p id="status"></p>
+          <h3>All Products</h3>
+          <div id="productList"><p>Loading...</p></div>
+        </div>
+
+        <div id="ordersTab" class="tab-content">
+          <h3>Customer Orders</h3>
+          <div id="orderList"><p>Loading orders...</p></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
@@ -61,9 +119,17 @@
       if (user) {
         document.getElementById('loginDiv').style.display = 'none';
         document.getElementById('adminDiv').style.display = 'block';
-        loadProducts(); // Login ke baad products load karo
+        loadProducts();
+        loadOrders();
       }
     });
+
+    window.showTab = (tab) => {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tab + 'Tab').classList.add('active');
+      event.target.classList.add('active');
+    };
 
     window.addProduct = async () => {
       const title = document.getElementById('title').value;
@@ -74,38 +140,34 @@
 
       if (!title || !price || !imageUrl) {
         statusEl.innerText = "Title, Price aur Image URL zaroori hai!";
-        statusEl.style.color = 'red';
         return;
       }
 
       try {
         await addDoc(collection(db, "products"), { title, price, imageUrl, desc, createdAt: serverTimestamp() });
         statusEl.innerText = "Product added successfully! ✅";
-        statusEl.style.color = 'green';
         document.getElementById('title').value = '';
         document.getElementById('price').value = '';
         document.getElementById('imageUrl').value = '';
         document.getElementById('desc').value = '';
-        loadProducts(); // List refresh karo
+        loadProducts();
       } catch (e) {
         statusEl.innerText = "Error: " + e.message;
-        statusEl.style.color = 'red';
       }
     };
 
-    // Products load + Delete button
     async function loadProducts() {
       const querySnapshot = await getDocs(collection(db, "products"));
       const listDiv = document.getElementById('productList');
       listDiv.innerHTML = '';
       if (querySnapshot.empty) {
-        listDiv.innerHTML = '<p>Koi product nahi hai abhi.</p>';
+        listDiv.innerHTML = '<p style="color:white;">Koi product nahi hai abhi.</p>';
         return;
       }
       querySnapshot.forEach((docSnap) => {
         const p = docSnap.data();
         listDiv.innerHTML += `
-          <div class="product-item">
+          <div class="item">
             <div style="display:flex; align-items:center;">
               <img src="${p.imageUrl}" alt="${p.title}">
               <div><b>${p.title}</b><br>Rs. ${p.price}</div>
@@ -120,9 +182,49 @@
       if (confirm("Pakka delete karna hai?")) {
         await deleteDoc(doc(db, "products", id));
         document.getElementById('status').innerText = "Product deleted! 🗑️";
-        loadProducts(); // List refresh
+        loadProducts();
       }
+    };
+
+    async function loadOrders() {
+      const q = query(collection(db, "orders"), orderBy("orderedAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      const listDiv = document.getElementById('orderList');
+      listDiv.innerHTML = '';
+      if (querySnapshot.empty) {
+        listDiv.innerHTML = '<p style="color:white;">Abhi koi order nahi aya.</p>';
+        return;
+      }
+      querySnapshot.forEach((docSnap) => {
+        const o = docSnap.data();
+        const date = o.orderedAt ? new Date(o.orderedAt.seconds * 1000).toLocaleString() : 'N/A';
+        const products = o.products.map(p => `${p.productTitle} x${p.qty || 1}`).join(', ');
+        const statusClass = o.status.includes('Delivered') ? 'badge-delivered' : 'badge-pending';
+        
+        listDiv.innerHTML += `
+          <div class="item order-item">
+            <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <b>${o.customerName}</b> - Rs. ${o.totalAmount}
+                <span class="badge ${statusClass}">${o.status}</span>
+              </div>
+              ${!o.status.includes('Delivered') ? `<button class="btn btn-delivered" onclick="markDelivered('${docSnap.id}')">Mark Delivered</button>` : ''}
+            </div>
+            <div class="order-details">
+              📱 ${o.customerPhone} | 💳 ${o.paymentMethod || 'COD'}<br>
+              📍 ${o.customerAddress}<br>
+              📦 ${products}<br>
+              🕒 ${date}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    window.markDelivered = async (id) => {
+      await updateDoc(doc(db, "orders", id), { status: "Delivered" });
+      loadOrders();
     };
   </script>
 </body>
-</html>
+                                                                   </html>
