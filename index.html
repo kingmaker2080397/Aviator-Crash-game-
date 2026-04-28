@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glass Moon Scatter - Demo</title>
+    <title>Moon Crash - Demo</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --moon-glow: #e0f7ff;
@@ -13,6 +13,8 @@
             --glass: rgba(200, 220, 255, 0.06);
             --glass-border: rgba(200, 220, 255, 0.15);
             --dark-space: #0b0f1e;
+            --green: #2ecc71;
+            --red: #e74c3c;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -20,15 +22,13 @@
                         url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071') center/cover fixed;
             color: white;
             font-family: 'Outfit', sans-serif;
-            text-align: center;
             min-height: 100vh;
             display: grid;
             place-items: center;
             padding: 20px;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
-        /* Moon glow effect in background */
         body::before {
             content: '';
             position: fixed;
@@ -42,269 +42,476 @@
             z-index: 0;
         }
 
-       .container {
+      .container {
             position: relative;
             z-index: 1;
+            width: 100%;
+            max-width: 400px;
         }
 
         h2 {
             font-size: 2.2rem;
-            font-weight: 700;
+            font-weight: 800;
             text-shadow: 0 0 30px var(--moon-glow), 0 0 60px var(--moon-blue);
             margin-bottom: 10px;
             letter-spacing: 2px;
+            text-align: center;
         }
 
-       .demo-badge {
+      .demo-badge {
             background: rgba(139, 185, 255, 0.15);
             border: 1px solid var(--moon-blue);
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 0.75rem;
-            margin-bottom: 20px;
-            display: inline-block;
+            margin: 0 auto 20px;
+            display: block;
+            width: fit-content;
             backdrop-filter: blur(10px);
             color: var(--moon-glow);
         }
 
-     .machine-body {
+    .game-body {
             background: var(--glass);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
             border-radius: 28px;
-            width: 350px;
-            margin: 0 auto;
-            padding: 30px 25px;
+            padding: 25px;
             box-shadow: 0 8px 40px rgba(0,0,0,0.5),
                         inset 0 1px 0 rgba(255,255,255,0.1),
                         0 0 60px rgba(139, 185, 255, 0.1);
         }
-     .stats {
+
+    .stats {
             background: rgba(11, 15, 30, 0.6);
-            padding: 16px 20px;
+            padding: 14px 18px;
             border-radius: 18px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             border: 1px solid var(--glass-border);
             display: flex;
             justify-content: space-between;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
-     .stats b { color: var(--moon-glow); text-shadow: 0 0 10px var(--moon-blue); }
+    .stats b { color: var(--moon-glow); text-shadow: 0 0 10px var(--moon-blue); }
 
-     .screen {
+    .graph-container {
             background: rgba(11, 15, 30, 0.7);
-            display: flex;
-            justify-content: space-around;
-            padding: 28px 18px;
             border-radius: 20px;
-            margin-bottom: 28px;
+            margin-bottom: 20px;
             border: 1px solid var(--glass-border);
-            box-shadow: inset 0 2px 15px rgba(0,0,0,0.6);
+            height: 280px;
             position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 15px rgba(0,0,0,0.6);
         }
 
-        /* Moon ring around screen */
-       .screen::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 20px;
-            padding: 2px;
-            background: linear-gradient(135deg, transparent, var(--moon-blue), transparent);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0.3;
-        }
-
-     .slot {
-            font-size: 3.8rem;
-            font-weight: 700;
-            color: var(--moon-glow);
-            width: 78px;
-            height: 100px;
-            line-height: 100px;
-            background: rgba(200, 220, 255, 0.04);
-            border-radius: 14px;
-            border: 1px solid rgba(139, 185, 255, 0.2);
-            text-shadow: 0 0 20px var(--moon-blue), 0 0 40px rgba(139, 185, 255, 0.4);
-            transition: transform 0.1s ease;
-        }
-     .slot.spinning {
-            animation: moonSpin 0.08s linear infinite;
-        }
-        @keyframes moonSpin {
-            0% { transform: translateY(-8px) rotateX(20deg); filter: blur(3px); }
-            50% { transform: translateY(8px) rotateX(-20deg); filter: blur(3px); }
-            100% { transform: translateY(-8px) rotateX(20deg); filter: blur(3px); }
-        }
-     .slot.win {
-            animation: moonGlow 0.7s ease-in-out infinite alternate;
-        }
-        @keyframes moonGlow {
-            from {
-                box-shadow: 0 0 15px var(--moon-blue), inset 0 0 15px rgba(139, 185, 255, 0.2);
-                transform: scale(1);
-            }
-            to {
-                box-shadow: 0 0 35px var(--moon-blue), 0 0 60px var(--moon-glow), inset 0 0 25px rgba(139, 185, 255, 0.3);
-                transform: scale(1.08);
-            }
-        }
-     .btn-spin {
-            background: linear-gradient(135deg, var(--moon-glow), var(--moon-blue));
-            border: none;
-            padding: 18px 50px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 5px 25px rgba(139, 185, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+        #graph {
             width: 100%;
-            color: var(--dark-space);
+            height: 100%;
+        }
+
+    .multiplier-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+    .multiplier {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--moon-glow);
+            text-shadow: 0 0 30px var(--moon-blue), 0 0 60px rgba(139, 185, 255, 0.5);
+            line-height: 1;
+        }
+
+    .multiplier.flying {
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+    .multiplier.crashed {
+            color: var(--red);
+            text-shadow: 0 0 30px var(--red);
+            animation: shake 0.3s;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+    .status-text {
+            font-size: 0.9rem;
+            color: var(--moon-blue);
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+    .bet-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            background: rgba(11, 15, 30, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px;
+            color: white;
+            font-family: 'Outfit';
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--moon-blue);
+            box-shadow: 0 0 0 3px rgba(139, 185, 255, 0.2);
+        }
+
+    .btn {
+            border: none;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
             transition: all 0.3s ease;
-            letter-spacing: 1px;
+            font-family: 'Outfit';
+            letter-spacing: 0.5px;
         }
-     .btn-spin:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 35px rgba(139, 185, 255, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+
+    .btn-bet {
+            background: linear-gradient(135deg, var(--moon-glow), var(--moon-blue));
+            color: var(--dark-space);
+            box-shadow: 0 4px 20px rgba(139, 185, 255, 0.4);
         }
-     .btn-spin:active:not(:disabled) {
-            transform: translateY(1px);
+
+    .btn-cashout {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4);
         }
-     .btn-spin:disabled {
+
+    .btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
             filter: grayscale(0.8);
         }
+
+    .btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+    .history {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+    .history-item {
+            background: rgba(11, 15, 30, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+    .history-item.win { color: var(--green); border-color: var(--green); }
+    .history-item.lose { color: var(--red); border-color: var(--red); }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="demo-badge">🌙 GLASS MOON DEMO</div>
-        <h2>MOON SCATTER</h2>
+        <div class="demo-badge">🌙 MOON CRASH DEMO</div>
+        <h2>MOON CRASH</h2>
 
-        <div class="machine-body">
+        <div class="game-body">
             <div class="stats">
                 <div>Coins: <b id="balance">1000</b></div>
-                <div>Win: <b id="last-win">0</b></div>
+                <div>Win: <b id="lastWin">0</b></div>
             </div>
 
-            <div class="screen">
-                <div id="s1" class="slot">🌙</div>
-                <div id="s2" class="slot">🌙</div>
-                <div id="s3" class="slot">🌙</div>
+            <div class="graph-container">
+                <canvas id="graph"></canvas>
+                <div class="multiplier-display">
+                    <div class="multiplier" id="multiplier">1.00x</div>
+                    <div class="status-text" id="status">Place your bet</div>
+                </div>
             </div>
 
-            <button class="btn-spin" id="spinBtn">SPIN (50 COINS)</button>
+            <div class="bet-section">
+                <input type="number" id="betAmount" placeholder="Bet Amount" value="50" min="10" max="500">
+                <input type="number" id="autoCashout" placeholder="Auto Cashout" value="2.00" min="1.01" step="0.01">
+            </div>
+
+            <button class="btn btn-bet" id="betBtn">PLACE BET</button>
+            <button class="btn btn-cashout" id="cashoutBtn" disabled>CASH OUT</button>
+
+            <div class="history" id="history"></div>
         </div>
     </div>
 
 <script>
     let coins = 1000;
-    const slots = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
-    const spinBtn = document.getElementById('spinBtn');
-    const balanceEl = document.getElementById('balance');
-    const lastWinEl = document.getElementById('last-win');
-    const symbols = ['🌙', '⭐', '💎', '✨', '🌟', '🔮', '💫'];
+    let currentBet = 0;
+    let isPlaying = false;
+    let isCrashed = false;
+    let currentMultiplier = 1.00;
+    let gameInterval;
+    let crashPoint = 0;
+    let hasCashedOut = false;
 
+    const balanceEl = document.getElementById('balance');
+    const lastWinEl = document.getElementById('lastWin');
+    const multiplierEl = document.getElementById('multiplier');
+    const statusEl = document.getElementById('status');
+    const betBtn = document.getElementById('betBtn');
+    const cashoutBtn = document.getElementById('cashoutBtn');
+    const betAmountEl = document.getElementById('betAmount');
+    const autoCashoutEl = document.getElementById('autoCashout');
+    const historyEl = document.getElementById('history');
+    const canvas = document.getElementById('graph');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size
+    function resizeCanvas() {
+        canvas.width = canvas.offsetWidth * 2;
+        canvas.height = canvas.offsetHeight * 2;
+        ctx.scale(2, 2);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Audio
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function playTick() {
+    function playFlySound() {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.frequency.value = 600;
         osc.type = 'sine';
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-        osc.start(audioCtx.currentTime);
-        osc.stop(audioCtx.currentTime + 0.08);
+        osc.frequency.value = 200 + (currentMultiplier * 50);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
     }
 
-    function playWin() {
-        [659, 784, 988].forEach((freq, i) => {
+    function playCrashSound() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function playCashoutSound() {
+        [523, 659, 784].forEach((freq, i) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.type = 'sine';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.15);
-            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + i * 0.15 + 0.05);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.15 + 0.4);
-            osc.start(audioCtx.currentTime + i * 0.15);
-            osc.stop(audioCtx.currentTime + i * 0.15 + 0.4);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.1);
+            gain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + i * 0.1 + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.1 + 0.3);
+            osc.start(audioCtx.currentTime + i * 0.1);
+            osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
         });
     }
 
-    spinBtn.onclick = function() {
+    // Draw graph
+    let pathPoints = [];
+    function drawGraph() {
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        // Grid
+        ctx.strokeStyle = 'rgba(139, 185, 255, 0.1)';
+        ctx.lineWidth = 1;
+        for(let i = 0; i < w; i += 40) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, h);
+            ctx.stroke();
+        }
+        for(let i = 0; i < h; i += 40) {
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(w, i);
+            ctx.stroke();
+        }
+
+        // Flight path
+        if(pathPoints.length > 1) {
+            ctx.strokeStyle = isCrashed? '#e74c3c' : '#8bb9ff';
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = isCrashed? '#e74c3c' : '#8bb9ff';
+            ctx.beginPath();
+            ctx.moveTo(pathPoints[0].x, pathPoints[0].y);
+            for(let i = 1; i < pathPoints.length; i++) {
+                ctx.lineTo(pathPoints[i].x, pathPoints[i].y);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    function generateCrashPoint() {
+        // Aviator logic: 99% RTP, exponential distribution
+        const r = Math.random();
+        if(r < 0.01) return 1.00; // Instant crash 1%
+        return Math.max(1.00, (0.99 / (1 - r)) * 0.99);
+    }
+
+    function startGame() {
+        const bet = parseInt(betAmountEl.value);
+        if(bet < 10 || bet > coins) {
+            Swal.fire({
+                title: "Invalid Bet",
+                text: "Min 10, Max " + coins,
+                icon: "error",
+                background: "#1a2040",
+                color: "#e0f7ff"
+            });
+            return;
+        }
+
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        if (coins < 50) return Swal.fire({
-            title: "Coins Khatam",
-            text: "Refresh karo page",
-            icon: "error",
-            background: "#1a2040",
-            color: "#e0f7ff"
-        });
 
-        coins -= 50;
+        coins -= bet;
+        currentBet = bet;
         balanceEl.innerText = coins;
-        this.disabled = true;
-        this.innerText = "SPINNING...";
-        slots.forEach(s => {
-            s.classList.remove('win');
-            s.classList.add('spinning');
-        });
+        isPlaying = true;
+        isCrashed = false;
+        hasCashedOut = false;
+        currentMultiplier = 1.00;
+        crashPoint = generateCrashPoint();
+        pathPoints = [{x: 0, y: canvas.offsetHeight}];
 
-        let ticks = 0;
-        let timer = setInterval(() => {
-            slots.forEach(s => s.innerText = symbols[Math.floor(Math.random() * symbols.length)]);
-            playTick();
-            ticks++;
-            if(ticks > 30) clearInterval(timer);
-        }, 70);
+        betBtn.disabled = true;
+        cashoutBtn.disabled = false;
+        betAmountEl.disabled = true;
+        autoCashoutEl.disabled = true;
+        multiplierEl.classList.add('flying');
+        multiplierEl.classList.remove('crashed');
+        statusEl.innerText = 'Flying...';
 
-        setTimeout(() => {
-            clearInterval(timer);
-            slots.forEach(s => s.classList.remove('spinning'));
+        let startTime = Date.now();
+        gameInterval = setInterval(() => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            currentMultiplier = 1 + Math.pow(elapsed, 1.8) * 0.1;
 
-            const finalIcons = [
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)],
-                symbols[Math.floor(Math.random() * symbols.length)]
-            ];
+            // Update graph
+            const x = Math.min(elapsed * 60, canvas.offsetWidth - 10);
+            const y = canvas.offsetHeight - (currentMultiplier * 30);
+            pathPoints.push({x, y});
+            drawGraph();
 
-            slots[0].innerText = finalIcons[0];
-            slots[1].innerText = finalIcons[1];
-            slots[2].innerText = finalIcons[2];
+            multiplierEl.innerText = currentMultiplier.toFixed(2) + 'x';
 
-            if(finalIcons[0] == finalIcons[1] && finalIcons[1] == finalIcons[2]) {
-                let winAmt = 500;
-                coins += winAmt;
-                balanceEl.innerText = coins;
-                lastWinEl.innerText = winAmt;
-                slots.forEach(s => s.classList.add('win'));
-                playWin();
-                Swal.fire({
-                    title: "🌙 MOON JACKPOT!",
-                    text: `You won ${winAmt} coins!`,
-                    icon: "success",
-                    background: "#1a2040",
-                    color: "#e0f7ff",
-                    confirmButtonColor: "#8bb9ff"
-                });
-            } else {
-                lastWinEl.innerText = "0";
+            if(elapsed % 0.2 < 0.1) playFlySound();
+
+            // Auto cashout
+            const autoCash = parseFloat(autoCashoutEl.value);
+            if(!hasCashedOut && autoCash >= 1.01 && currentMultiplier >= autoCash) {
+                cashOut();
             }
 
-            spinBtn.disabled = false;
-            spinBtn.innerText = "SPIN (50 COINS)";
-        }, 2800);
-    };
+            // Crash check
+            if(currentMultiplier >= crashPoint) {
+                crash();
+            }
+        }, 50);
+    }
+
+    function cashOut() {
+        if(!isPlaying || hasCashedOut || isCrashed) return;
+
+        hasCashedOut = true;
+        const winAmount = Math.floor(currentBet * currentMultiplier);
+        coins += winAmount;
+        balanceEl.innerText = coins;
+        lastWinEl.innerText = winAmount;
+
+        playCashoutSound();
+        statusEl.innerText = `Cashed out at ${currentMultiplier.toFixed(2)}x!`;
+        statusEl.style.color = '#2ecc71';
+        cashoutBtn.disabled = true;
+
+        addHistory(currentMultiplier, true);
+    }
+
+    function crash() {
+        clearInterval(gameInterval);
+        isPlaying = false;
+        isCrashed = true;
+
+        playCrashSound();
+        multiplierEl.classList.remove('flying');
+        multiplierEl.classList.add('crashed');
+        statusEl.innerText = `CRASHED at ${crashPoint.toFixed(2)}x`;
+        statusEl.style.color = '#e74c3c';
+
+        betBtn.disabled = false;
+        cashoutBtn.disabled = true;
+        betAmountEl.disabled = false;
+        autoCashoutEl.disabled = false;
+
+        if(!hasCashedOut) {
+            lastWinEl.innerText = 0;
+            addHistory(crashPoint, false);
+        }
+
+        setTimeout(() => {
+            statusEl.innerText = 'Place your bet';
+            statusEl.style.color = '#8bb9ff';
+            multiplierEl.classList.remove('crashed');
+            pathPoints = [];
+            drawGraph();
+        }, 3000);
+    }
+
+    function addHistory(multi, won) {
+        const item = document.createElement('div');
+        item.className = `history-item ${won? 'win' : 'lose'}`;
+        item.innerText = multi.toFixed(2) + 'x';
+        historyEl.insertBefore(item, historyEl.firstChild);
+        if(historyEl.children.length > 8) historyEl.removeChild(historyEl.lastChild);
+    }
+
+    betBtn.onclick = startGame;
+    cashoutBtn.onclick = cashOut;
+
+    // Initial draw
+    drawGraph();
 </script>
 </body>
-    </html>
+                </html>
