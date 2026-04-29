@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JustCraze Admin - ImgBB Upload</title>
+  <title>JustCraze Admin - Orders Wala</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
     body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
@@ -12,41 +13,66 @@
 .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); padding: 25px; margin-bottom: 20px; }
     h2, h3 { color: white; margin-bottom: 15px; font-weight: 600; }
     h2 { font-size: 28px; text-align: center; }
-    input, textarea { width: 100%; padding: 12px 15px; margin: 8px 0; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 10px; color: white; font-size: 14px; outline: none; }
+    input, textarea, select { width: 100%; padding: 12px 15px; margin: 8px 0; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 10px; color: white; font-size: 14px; outline: none; }
     input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.7); }
     input[type="file"] { background: rgba(255,255,255,0.1); padding: 10px; cursor: pointer; }
+    select option { background: #333; color: white; }
 .btn { background: rgba(255, 61, 0, 0.8); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 500; transition: 0.3s; }
 .btn:hover { background: rgba(255, 61, 0, 1); transform: translateY(-2px); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-delete { background: rgba(211, 47, 47, 0.8); }
 .preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin: 10px 0; display: none; }
     #status { margin: 15px 0; font-weight: 500; color: #fff; }
-.item { background: rgba(255, 255, 255, 0.15); padding: 15px; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; color: white; }
+.item { background: rgba(255, 255, 255, 0.15); padding: 15px; margin: 10px 0; border-radius: 12px; color: white; }
 .item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
+.order-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+.order-details { font-size: 13px; opacity: 0.9; margin-top: 8px; }
+.order-header { width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.tab-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
+.tab-btn.active { background: rgba(255, 255, 255, 0.3); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.badge-pending { background: #FF9800; }.badge-packed { background: #2196F3; }
+.badge-shipped { background: #9C27B0; }.badge-delivered { background: #4CAF50; }
+.badge-cancelled { background: #D32F2F; }
+.status-select { padding: 6px 10px; border-radius: 8px; border: none; font-weight: 500; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="glass">
-      <h2>JustCraze.pk Admin - Photo Upload 🔐</h2>
+      <h2>JustCraze.pk Admin Pro 🔐</h2>
       <div id="loginDiv">
         <button id="adminLoginBtn" class="btn">Login with Google</button>
       </div>
 
       <div id="adminDiv" style="display:none;">
-        <h3>Add New Product</h3>
-        <input type="text" id="title" placeholder="Product Title">
-        <input type="number" id="price" placeholder="Price Rs.">
-        <input type="number" id="stock" placeholder="Stock Quantity">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="showTab('products')">Products</button>
+          <button class="tab-btn" onclick="showTab('orders')">Orders</button>
+        </div>
 
-        <label style="color:white;display:block;margin-top:10px;">Photo Choose Karo:</label>
-        <input type="file" id="imageFile" accept="image/*" onchange="previewImage()">
-        <img id="preview" class="preview">
+        <div id="productsTab" class="tab-content active">
+          <h3>Add New Product</h3>
+          <input type="text" id="title" placeholder="Product Title">
+          <input type="number" id="price" placeholder="Price Rs.">
+          <input type="number" id="stock" placeholder="Stock Quantity">
+          <label style="color:white;display:block;margin-top:10px;">Photo Choose Karo:</label>
+          <input type="file" id="imageFile" accept="image/*" onchange="previewImage()">
+          <img id="preview" class="preview">
+          <textarea id="desc" rows="2" placeholder="Description"></textarea>
+          <button class="btn" onclick="addProduct()" id="addBtn">Add Product to Store</button>
+          <p id="status"></p>
+          <h3>All Products</h3>
+          <div id="productList"><p>Loading...</p></div>
+        </div>
 
-        <textarea id="desc" rows="2" placeholder="Description"></textarea>
-        <button class="btn" onclick="addProduct()" id="addBtn">Add Product to Store</button>
-        <p id="status"></p>
-        <h3>All Products</h3>
-        <div id="productList"><p>Loading...</p></div>
+        <div id="ordersTab" class="tab-content">
+          <h3>Customer Orders</h3>
+          <div id="orderList"><p>Loading orders...</p></div>
+        </div>
       </div>
     </div>
   </div>
@@ -54,12 +80,17 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
       authDomain: "kingmaker-crash.firebaseapp.com",
+      databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
       projectId: "kingmaker-crash",
+      storageBucket: "kingmaker-crash.firebasestorage.app",
+      messagingSenderId: "327400668393",
+      appId: "1:327400668393:web:0d02a340b9f5603f524478",
+      measurementId: "G-LVVD55RDQV"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -77,8 +108,16 @@
         document.getElementById('loginDiv').style.display = 'none';
         document.getElementById('adminDiv').style.display = 'block';
         loadProducts();
+        loadOrders();
       }
     });
+
+    window.showTab = (tab) => {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tab + 'Tab').classList.add('active');
+      event.target.classList.add('active');
+    };
 
     window.previewImage = () => {
       const file = document.getElementById('imageFile').files[0];
@@ -108,7 +147,7 @@
 
       addBtn.disabled = true;
       addBtn.innerText = "Uploading...";
-      statusEl.innerText = "Photo tumhare ImgBB pe upload ho rahi hai...";
+      statusEl.innerText = "Photo upload ho rahi hai...";
 
       try {
         const base64 = await toBase64(file);
@@ -129,7 +168,7 @@
           title, price, stock, imageUrl, desc, createdAt: serverTimestamp()
         });
 
-        statusEl.innerText = "Product added! ✅ Photo ImgBB pe save ho gayi";
+        statusEl.innerText = "Product added! ✅";
         document.getElementById('title').value = '';
         document.getElementById('price').value = '';
         document.getElementById('stock').value = '';
@@ -165,12 +204,12 @@
       querySnapshot.forEach((docSnap) => {
         const p = docSnap.data();
         listDiv.innerHTML += `
-          <div class="item">
+          <div class="item" style="display:flex;justify-content:space-between;align-items:center;">
             <div style="display:flex; align-items:center;">
               <img src="${p.imageUrl}" alt="${p.title}">
               <div><b>${p.title}</b><br>Rs. ${p.price} | Stock: ${p.stock || 0}</div>
             </div>
-            <button class="btn" style="background:rgba(211,47,47,0.8)" onclick="deleteProduct('${docSnap.id}')">Delete</button>
+            <button class="btn btn-delete" onclick="deleteProduct('${docSnap.id}')">Delete</button>
           </div>
         `;
       });
@@ -183,6 +222,60 @@
         loadProducts();
       }
     };
+
+    async function loadOrders() {
+      const q = query(collection(db, "orders"), orderBy("orderedAt", "desc"));
+      const querySnapshot = await getDocs(q);
+      const listDiv = document.getElementById('orderList');
+      listDiv.innerHTML = '';
+      if (querySnapshot.empty) {
+        listDiv.innerHTML = '<p style="color:white;">Abhi koi order nahi aya.</p>';
+        return;
+      }
+      querySnapshot.forEach((docSnap) => {
+        const o = docSnap.data();
+        const date = o.orderedAt? new Date(o.orderedAt.seconds * 1000).toLocaleString() : 'N/A';
+        const products = o.products.map(p => `${p.productTitle} x${p.qty || 1}`).join(', ');
+        let statusClass = 'badge-pending';
+        if(o.status.includes('Packed')) statusClass = 'badge-packed';
+        if(o.status.includes('Shipped')) statusClass = 'badge-shipped';
+        if(o.status.includes('Delivered')) statusClass = 'badge-delivered';
+        if(o.status.includes('Cancelled')) statusClass = 'badge-cancelled';
+
+        listDiv.innerHTML += `
+          <div class="item order-item">
+            <div class="order-header">
+              <div>
+                <b>${o.customerName}</b> - Rs. ${o.totalAmount}
+                <span class="badge ${statusClass}">${o.status}</span>
+              </div>
+              <div>
+                <select class="status-select" onchange="updateStatus('${docSnap.id}', this.value)">
+                  <option value="Pending" ${o.status === 'Pending'? 'selected' : ''}>Pending</option>
+                  <option value="Packed" ${o.status === 'Packed'? 'selected' : ''}>Packed</option>
+                  <option value="Shipped" ${o.status === 'Shipped'? 'selected' : ''}>Shipped</option>
+                  <option value="Delivered" ${o.status === 'Delivered'? 'selected' : ''}>Delivered</option>
+                  <option value="Cancelled" ${o.status === 'Cancelled'? 'selected' : ''}>Cancelled</option>
+                </select>
+              </div>
+            </div>
+            <div class="order-details">
+              📱 ${o.customerPhone} | 💳 ${o.paymentMethod || 'COD'}<br>
+              📍 ${o.customerAddress}<br>
+              📦 ${products}<br>
+              🕒 ${date}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    window.updateStatus = async (id, status) => {
+      await updateDoc(doc(db, "orders", id), { status: status });
+      document.getElementById('status').innerText = `Status updated: ${status} ✅`;
+      loadOrders();
+      setTimeout(() => { document.getElementById('status').innerText = ''; }, 2000);
+    };
   </script>
 </body>
-  </html>
+            </html>
