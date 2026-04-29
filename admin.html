@@ -3,92 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JustCraze Admin - Pro Panel</title>
+  <title>JustCraze Admin - ImgBB Upload</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh; padding: 20px;
-    }
-   .container { max-width: 1200px; margin: auto; }
-   .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      padding: 25px; margin-bottom: 20px;
-    }
+    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+.container { max-width: 1200px; margin: auto; }
+.glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); padding: 25px; margin-bottom: 20px; }
     h2, h3 { color: white; margin-bottom: 15px; font-weight: 600; }
     h2 { font-size: 28px; text-align: center; }
-    input, textarea {
-      width: 100%; padding: 12px 15px; margin: 8px 0;
-      background: rgba(255, 255, 255, 0.2); border: none; border-radius: 10px;
-      color: white; font-size: 14px; outline: none;
-    }
+    input, textarea { width: 100%; padding: 12px 15px; margin: 8px 0; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 10px; color: white; font-size: 14px; outline: none; }
     input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.7); }
-   .btn {
-      background: rgba(255, 61, 0, 0.8); color: white; border: none;
-      padding: 12px 25px; border-radius: 10px; cursor: pointer;
-      font-weight: 500; transition: 0.3s;
-    }
-   .btn:hover { background: rgba(255, 61, 0, 1); transform: translateY(-2px); }
-   .btn-delete { background: rgba(211, 47, 47, 0.8); }
-   .btn-delivered { background: rgba(76, 175, 80, 0.8); }
+    input[type="file"] { background: rgba(255,255,255,0.1); padding: 10px; cursor: pointer; }
+.btn { background: rgba(255, 61, 0, 0.8); color: white; border: none; padding: 12px 25px; border-radius: 10px; cursor: pointer; font-weight: 500; transition: 0.3s; }
+.btn:hover { background: rgba(255, 61, 0, 1); transform: translateY(-2px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.preview { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin: 10px 0; display: none; }
     #status { margin: 15px 0; font-weight: 500; color: #fff; }
-   .item {
-      background: rgba(255, 255, 255, 0.15); padding: 15px; margin: 10px 0;
-      border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
-      color: white;
-    }
-   .item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
-   .order-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-   .order-details { font-size: 13px; opacity: 0.9; }
-   .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-   .tab-btn {
-      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer;
-    }
-   .tab-btn.active { background: rgba(255, 255, 255, 0.3); }
-   .tab-content { display: none; }
-   .tab-content.active { display: block; }
-   .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-   .badge-pending { background: #FF9800; }.badge-packed { background: #2196F3; }
-   .badge-shipped { background: #9C27B0; }.badge-delivered { background: #4CAF50; }
+.item { background: rgba(255, 255, 255, 0.15); padding: 15px; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; color: white; }
+.item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 15px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="glass">
-      <h2>JustCraze.pk Admin Pro 🔐</h2>
+      <h2>JustCraze.pk Admin - Photo Upload 🔐</h2>
       <div id="loginDiv">
         <button id="adminLoginBtn" class="btn">Login with Google</button>
       </div>
 
       <div id="adminDiv" style="display:none;">
-        <div class="tabs">
-          <button class="tab-btn active" onclick="showTab('products')">Products</button>
-          <button class="tab-btn" onclick="showTab('orders')">Orders</button>
-        </div>
+        <h3>Add New Product</h3>
+        <input type="text" id="title" placeholder="Product Title">
+        <input type="number" id="price" placeholder="Price Rs.">
+        <input type="number" id="stock" placeholder="Stock Quantity">
 
-        <div id="productsTab" class="tab-content active">
-          <h3>Add New Product</h3>
-          <input type="text" id="title" placeholder="Product Title">
-          <input type="number" id="price" placeholder="Price Rs.">
-          <input type="number" id="stock" placeholder="Stock Quantity - Kitne piece hain">
-          <input type="text" id="imageUrl" placeholder="Image URL">
-          <textarea id="desc" rows="2" placeholder="Description"></textarea>
-          <button class="btn" onclick="addProduct()">Add Product to Store</button>
-          <p id="status"></p>
-          <h3>All Products</h3>
-          <div id="productList"><p>Loading...</p></div>
-        </div>
+        <label style="color:white;display:block;margin-top:10px;">Photo Choose Karo:</label>
+        <input type="file" id="imageFile" accept="image/*" onchange="previewImage()">
+        <img id="preview" class="preview">
 
-        <div id="ordersTab" class="tab-content">
-          <h3>Customer Orders</h3>
-          <div id="orderList"><p>Loading orders...</p></div>
-        </div>
+        <textarea id="desc" rows="2" placeholder="Description"></textarea>
+        <button class="btn" onclick="addProduct()" id="addBtn">Add Product to Store</button>
+        <p id="status"></p>
+        <h3>All Products</h3>
+        <div id="productList"><p>Loading...</p></div>
       </div>
     </div>
   </div>
@@ -96,23 +54,21 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
       authDomain: "kingmaker-crash.firebaseapp.com",
-      databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
       projectId: "kingmaker-crash",
-      storageBucket: "kingmaker-crash.firebasestorage.app",
-      messagingSenderId: "327400668393",
-      appId: "1:327400668393:web:0d02a340b9f5603f524478",
-      measurementId: "G-LVVD55RDQV"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
+
+    // TUMHARI IMGBB API KEY
+    const IMGBB_API_KEY = "a25b5bea8eb38a1ecf4f04154d85a4bf";
 
     document.getElementById('adminLoginBtn').onclick = () => signInWithPopup(auth, provider);
 
@@ -121,43 +77,82 @@
         document.getElementById('loginDiv').style.display = 'none';
         document.getElementById('adminDiv').style.display = 'block';
         loadProducts();
-        loadOrders();
       }
     });
 
-    window.showTab = (tab) => {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(tab + 'Tab').classList.add('active');
-      event.target.classList.add('active');
+    window.previewImage = () => {
+      const file = document.getElementById('imageFile').files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('preview').src = e.target.result;
+          document.getElementById('preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
     };
 
     window.addProduct = async () => {
       const title = document.getElementById('title').value;
       const price = Number(document.getElementById('price').value);
       const stock = Number(document.getElementById('stock').value) || 0;
-      const imageUrl = document.getElementById('imageUrl').value;
       const desc = document.getElementById('desc').value;
+      const file = document.getElementById('imageFile').files[0];
       const statusEl = document.getElementById('status');
+      const addBtn = document.getElementById('addBtn');
 
-      if (!title ||!price ||!imageUrl) {
-        statusEl.innerText = "Title, Price aur Image URL zaroori hai!";
+      if (!title ||!price ||!file) {
+        statusEl.innerText = "Title, Price aur Photo zaroori hai!";
         return;
       }
 
+      addBtn.disabled = true;
+      addBtn.innerText = "Uploading...";
+      statusEl.innerText = "Photo tumhare ImgBB pe upload ho rahi hai...";
+
       try {
-        await addDoc(collection(db, "products"), { title, price, stock, imageUrl, desc, createdAt: serverTimestamp() });
-        statusEl.innerText = "Product added successfully! ✅";
+        const base64 = await toBase64(file);
+        const formData = new FormData();
+        formData.append('image', base64.split(',')[1]);
+
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error("Upload failed");
+
+        const imageUrl = data.data.url;
+
+        await addDoc(collection(db, "products"), {
+          title, price, stock, imageUrl, desc, createdAt: serverTimestamp()
+        });
+
+        statusEl.innerText = "Product added! ✅ Photo ImgBB pe save ho gayi";
         document.getElementById('title').value = '';
         document.getElementById('price').value = '';
         document.getElementById('stock').value = '';
-        document.getElementById('imageUrl').value = '';
         document.getElementById('desc').value = '';
+        document.getElementById('imageFile').value = '';
+        document.getElementById('preview').style.display = 'none';
+        addBtn.disabled = false;
+        addBtn.innerText = "Add Product to Store";
         loadProducts();
+
       } catch (e) {
         statusEl.innerText = "Error: " + e.message;
+        addBtn.disabled = false;
+        addBtn.innerText = "Add Product to Store";
       }
     };
+
+    const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
 
     async function loadProducts() {
       const querySnapshot = await getDocs(collection(db, "products"));
@@ -175,7 +170,7 @@
               <img src="${p.imageUrl}" alt="${p.title}">
               <div><b>${p.title}</b><br>Rs. ${p.price} | Stock: ${p.stock || 0}</div>
             </div>
-            <button class="btn btn-delete" onclick="deleteProduct('${docSnap.id}')">Delete</button>
+            <button class="btn" style="background:rgba(211,47,47,0.8)" onclick="deleteProduct('${docSnap.id}')">Delete</button>
           </div>
         `;
       });
@@ -188,55 +183,6 @@
         loadProducts();
       }
     };
-
-    async function loadOrders() {
-      const q = query(collection(db, "orders"), orderBy("orderedAt", "desc"));
-      const querySnapshot = await getDocs(q);
-      const listDiv = document.getElementById('orderList');
-      listDiv.innerHTML = '';
-      if (querySnapshot.empty) {
-        listDiv.innerHTML = '<p style="color:white;">Abhi koi order nahi aya.</p>';
-        return;
-      }
-      querySnapshot.forEach((docSnap) => {
-        const o = docSnap.data();
-        const date = o.orderedAt? new Date(o.orderedAt.seconds * 1000).toLocaleString() : 'N/A';
-        const products = o.products.map(p => `${p.productTitle} x${p.qty || 1}`).join(', ');
-        let statusClass = 'badge-pending';
-        if(o.status.includes('Packed')) statusClass = 'badge-packed';
-        if(o.status.includes('Shipped')) statusClass = 'badge-shipped';
-        if(o.status.includes('Delivered')) statusClass = 'badge-delivered';
-
-        listDiv.innerHTML += `
-          <div class="item order-item">
-            <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <b>${o.customerName}</b> - Rs. ${o.totalAmount}
-                <span class="badge ${statusClass}">${o.status}</span>
-              </div>
-              <div>
-                <select onchange="updateStatus('${docSnap.id}', this.value)" style="padding:5px;border-radius:5px;">
-                  <option value="Pending">Pending</option>
-                  <option value="Packed">Packed</option>
-                  <option value="Shipped">Shipped</option>
-                  <option value="Delivered">Delivered</option>
-                </select>
-              </div>
-            <div class="order-details">
-              📱 ${o.customerPhone} | 💳 ${o.paymentMethod || 'COD'}<br>
-              📍 ${o.customerAddress}<br>
-              📦 ${products}<br>
-              🕒 ${date}
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    window.updateStatus = async (id, status) => {
-      await updateDoc(doc(db, "orders", id), { status: status });
-      loadOrders();
-    };
   </script>
 </body>
-  </html>
+</html>
