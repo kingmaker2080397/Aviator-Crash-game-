@@ -3,253 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JustCraze.pk - Tadakta Bhadakta Store 🔥</title>
+  <title>JustCraze.pk - Premium Fashion</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
-    body { background: #0f0f1a; color: white; }
-  .header {
-      background: rgba(255, 61, 0, 0.15); backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 15px 20px; position: sticky; top: 0; z-index: 100;
-    }
-  .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 1300px; margin: auto; }
-  .logo { font-size: 26px; font-weight: 700; background: linear-gradient(45deg, #FF3D00, #FF9100); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .search-bar {
-      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 25px; padding: 8px 15px; width: 40%; display: flex; align-items: center;
-    }
-  .search-bar input { background: none; border: none; outline: none; color: white; width: 100%; margin-left: 8px; }
-  .search-bar input::placeholder { color: rgba(255, 255, 255, 0.6); }
-  .user-btn {
-      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 500;
-    }
-  .nav-links { display: flex; gap: 20px; align-items: center; }
-  .nav-links a { color: white; text-decoration: none; font-size: 14px; }
-  .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; padding: 20px; max-width: 1300px; margin: auto; }
-  .card {
-      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;
-      padding: 12px; transition: 0.3s; position: relative; overflow: hidden;
-    }
-  .card:hover { transform: translateY(-8px); background: rgba(255, 255, 255, 0.08); }
-  .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; }
-  .card h3 { margin: 10px 0 4px; font-size: 15px; font-weight: 500; height: 40px; overflow: hidden; }
-  .price { color: #FF6E40; font-weight: 700; font-size: 18px; margin-bottom: 5px; }
-  .stock { font-size: 12px; margin-bottom: 10px; }
-  .in-stock { color: #4CAF50; }.out-stock { color: #D32F2F; }
-  .btn {
-      background: linear-gradient(45deg, #FF3D00, #FF9100); color: white; border: none;
-      padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: 600;
-      margin-top: 5px; transition: 0.3s;
-    }
-  .btn:hover { opacity: 0.9; transform: scale(1.02); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-outline { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); }
-  .cart-btn {
-      position: fixed; bottom: 25px; right: 25px;
-      background: linear-gradient(45deg, #0D47A1, #1976D2); color: white;
-      padding: 15px 22px; border-radius: 50px; cursor: pointer; font-weight: 600;
-      box-shadow: 0 8px 25px rgba(13, 71, 161, 0.5); z-index: 50;
-      display: flex; align-items: center; gap: 8px;
-    }
-  .loading,.empty { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.6); grid-column: 1/-1; }
-  .loading i { font-size: 40px; animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    @media (max-width: 768px) {
-    .search-bar { display: none; }
-    .products { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 15px; }
-    .card img { height: 160px; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="header">
-    <div class="header-top">
-      <div class="logo">JustCraze.pk 🔥</div>
-      <div class="search-bar">
-        <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Products search karo..." onkeyup="searchProducts()">
+  <header class="glass">
+    <nav class="container">
+      <div class="logo">JustCraze.pk</div>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#track">Track</a></li>
+      </ul>
+      <button class="cart-btn" onclick="toggleCart()">
+        <i class="fa-solid fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero glass" id="home">
+      <h1>Premium Fashion Collection</h1>
+      <p>Discover trending styles at JustCraze.pk. Quality meets affordability.</p>
+    </section>
+
+    <section id="products">
+      <h2 class="section-title">Our Products</h2>
+      <div class="category-filters" id="categoryFilters">
+        <button class="filter-btn active" onclick="filterProducts('All')">All</button>
       </div>
-      <div class="nav-links">
-        <a href="track.html"><i class="fas fa-truck"></i> Track Order</a>
-        <button id="loginBtn" class="user-btn"><i class="fas fa-user"></i> <span id="userText">Login</span></button>
+      <div class="product-grid" id="product-grid">
+        <p style="text-align:center; grid-column:1/-1;">Loading products...</p>
       </div>
+    </section>
+
+    <section class="track-section glass" id="track">
+      <h2 class="section-title">Track Your Order</h2>
+      <p>Enter your order ID to check status</p>
+      <div class="track-input">
+        <input type="text" id="trackId" placeholder="Order ID: ABC123XYZ">
+        <button class="track-btn" onclick="trackOrder()">Track</button>
+      </div>
+      <div class="order-status" id="orderStatus"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 JustCraze.pk - All Rights Reserved</p>
+  </footer>
+
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="close-cart" onclick="toggleCart()">&times;</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="cart-total">
+      <div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.2rem;">
+        <span>Total:</span><span id="cartTotal">Rs. 0</span>
+      </div>
+      <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout</button>
     </div>
   </div>
 
-  <div id="products" class="products">
-    <div class="loading"><i class="fas fa-spinner"></i><br>Products load ho rahe hain...</div>
-  </div>
-
-  <div class="cart-btn" onclick="viewCart()">
-    <i class="fas fa-shopping-cart"></i> Cart: <span id="cartCount">0</span>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBBperRVYyxnUITX92tuS8MSU5A-JKqCsM",
-      authDomain: "kingmaker-crash.firebaseapp.com",
-      databaseURL: "https://kingmaker-crash-default-rtdb.firebaseio.com",
-      projectId: "kingmaker-crash",
-      storageBucket: "kingmaker-crash.firebasestorage.app",
-      messagingSenderId: "327400668393",
-      appId: "1:327400668393:web:0d02a340b9f5603f524478",
-      measurementId: "G-LVVD55RDQV"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
-
-    let cart = [];
-    let allProducts = [];
-
-    document.getElementById('loginBtn').onclick = () => signInWithPopup(auth, provider);
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById('userText').innerText = user.displayName?.split(' ')[0] || 'User';
-      }
-    });
-
-    async function loadProducts() {
-      try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        const productsDiv = document.getElementById('products');
-
-        if (querySnapshot.empty) {
-          productsDiv.innerHTML = '<div class="empty"><i class="fas fa-box-open" style="font-size:50px;"></i><br><br>Abhi koi product nahi hai<br>Admin se add karwao</div>';
-          return;
-        }
-
-        allProducts = [];
-        querySnapshot.forEach((doc) => {
-          allProducts.push({ id: doc.id,...doc.data() });
-        });
-        displayProducts(allProducts);
-
-      } catch (error) {
-        console.error("Error:", error);
-        document.getElementById('products').innerHTML = `<div class="empty">Error: ${error.message}<br>Firebase Rules check karo</div>`;
-      }
-    }
-
-    function displayProducts(products) {
-      const productsDiv = document.getElementById('products');
-      productsDiv.innerHTML = '';
-      products.forEach((p) => {
-        const stock = p.stock || 0;
-        productsDiv.innerHTML += `
-          <div class="card">
-            <img src="${p.imageUrl}" alt="${p.title}">
-            <h3>${p.title}</h3>
-            <div class="price">Rs. ${p.price.toLocaleString()}</div>
-            <div class="stock ${stock > 0? 'in-stock' : 'out-stock'}">
-              ${stock > 0? `Stock: ${stock}` : 'Out of Stock'}
-            </div>
-            <button class="btn btn-outline" onclick="addToCart('${p.id}', '${p.title}', ${p.price}, '${p.imageUrl}', ${stock})" ${stock <= 0? 'disabled' : ''}>
-              <i class="fas fa-cart-plus"></i> Cart
-            </button>
-            <button class="btn" onclick="orderNow('${p.id}', '${p.title}', ${p.price})" ${stock <= 0? 'disabled' : ''}>
-              <i class="fas fa-bolt"></i> Order Now
-            </button>
+  <div class="modal" id="checkoutModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Checkout</h3>
+        <button class="close-modal" onclick="closeCheckout()">&times;</button>
+      </div>
+      <form id="checkoutForm">
+        <div class="form-group"><input type="text" id="customerName" placeholder="Full Name" required></div>
+        <div class="form-group"><input type="tel" id="customerPhone" placeholder="Phone 03XX-XXXXXXX" required></div>
+        <div class="form-group"><input type="text" id="customerAddress" placeholder="Delivery Address" required></div>
+        <div class="form-group"><input type="text" id="customerCity" placeholder="City" required></div>
+        <div class="form-group">
+          <select id="paymentMethod">
+            <option value="COD">Cash on Delivery</option>
+            <option value="JazzCash">JazzCash</option>
+            <option value="EasyPaisa">EasyPaisa</option>
+          </select>
+        </div>
+        <div class="cart-total">
+          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.2rem;">
+            <span>Total Amount:</span><span id="checkoutTotal">Rs. 0</span>
           </div>
-        `;
-      });
-    }
+        </div>
+        <button type="submit" class="checkout-btn">Place Order</button>
+      </form>
+    </div>
+  </div>
 
-    window.searchProducts = () => {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = allProducts.filter(p => p.title.toLowerCase().includes(query));
-      displayProducts(filtered);
-    };
+  <a href="https://wa.me/923000000000" class="whatsapp-float" target="_blank">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
 
-    loadProducts();
-
-    window.addToCart = (id, title, price, imageUrl, stock) => {
-      if(stock <= 0) return alert("Out of Stock!");
-      cart.push({ id, title, price, imageUrl });
-      document.getElementById('cartCount').innerText = cart.length;
-      event.target.innerHTML = '<i class="fas fa-check"></i> Added';
-      setTimeout(() => { event.target.innerHTML = '<i class="fas fa-cart-plus"></i> Cart'; }, 1000);
-    };
-
-    window.viewCart = () => {
-      if (cart.length === 0) return alert("Cart khali hai!");
-      let total = cart.reduce((sum, item) => sum + item.price, 0);
-      if (confirm(`Total: Rs. ${total.toLocaleString()}\n\nCheckout karna hai?`)) checkoutCOD();
-    };
-
-    window.orderNow = async (id, title, price) => {
-      const name = prompt("Apna naam:");
-      if (!name) return;
-      const phone = prompt("Phone: 03XX-XXXXXXX");
-      if (!phone) return;
-      const address = prompt("Complete address:");
-      if (!address) return;
-      const payment = prompt("Payment:\n1. COD\n2. Easypaisa\n3. JazzCash\n\nNumber likho:");
-      let paymentMethod = payment == "2"? "Easypaisa" : payment == "3"? "JazzCash" : "COD";
-
-      try {
-        await addDoc(collection(db, "orders"), {
-          products: [{ productId: id, productTitle: title, price, qty: 1 }],
-          totalAmount: price, customerName: name, customerPhone: phone,
-          customerAddress: address, paymentMethod: paymentMethod,
-          status: "Pending",
-          userId: auth.currentUser? auth.currentUser.uid : "guest",
-          orderedAt: serverTimestamp()
-        });
-
-        await updateDoc(doc(db, "products", id), { stock: increment(-1) });
-
-        alert(paymentMethod == "COD"? "Order placed! ✅ Hum call karenge." : `Order placed! ✅ ${paymentMethod}: 03001234567 pe payment bhejein`);
-
-        const whatsappMsg = `*New Order - JustCraze.pk*%0A%0A*Name:* ${name}%0A*Phone:* ${phone}%0A*Address:* ${address}%0A*Product:* ${title}%0A*Price:* Rs. ${price}%0A*Payment:* ${paymentMethod}%0A%0APlease confirm my order ✅`;
-        window.open(`https://wa.me/923001234567?text=${whatsappMsg}`, '_blank');
-
-        loadProducts();
-      } catch (e) {
-        alert("Error: " + e.message);
-      }
-    };
-
-    window.checkoutCOD = async () => {
-      const name = prompt("Apna naam:");
-      if (!name) return;
-      const phone = prompt("Phone: 03XX-XXXXXXX");
-      if (!phone) return;
-      const address = prompt("Complete address:");
-      if (!address) return;
-      let total = cart.reduce((sum, item) => sum + item.price, 0);
-
-      try {
-        await addDoc(collection(db, "orders"), {
-          products: cart, totalAmount: total, customerName: name,
-          customerPhone: phone, customerAddress: address, paymentMethod: "COD",
-          status: "Pending", userId: auth.currentUser? auth.currentUser.uid : "guest",
-          orderedAt: serverTimestamp()
-        });
-
-        for(let item of cart) {
-          await updateDoc(doc(db, "products", item.id), { stock: increment(-1) });
-        }
-
-        alert(`Order placed! Total: Rs. ${total.toLocaleString()} ✅`);
-        cart = [];
-        document.getElementById('cartCount').innerText = 0;
-        loadProducts();
-      } catch (e) {
-        alert("Error: " + e.message);
-      }
-    };
-  </script>
+  <script type="module" src="app.js"></script>
 </body>
-  </html>
+        </html>
